@@ -6,8 +6,6 @@
 trigger:
 - master
 
-
-
 stages:
 - stage: 'Build'
   displayName: 'Build OpenTissue Tests and Demos'
@@ -26,6 +24,13 @@ stages:
       name: pyTools
 
     - bash: |
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+          brew cask install xquartz
+          brew install freeglut
+        elif [[ "$OSTYPE" == "linux"* ]]; then
+          sudo apt-get install -y freeglut3-dev
+        fi    
         python --version
         python -m pip install --upgrade pip
         python -m pip install --upgrade jinja2
@@ -47,13 +52,15 @@ stages:
       displayName: 'Resolve Dependencies'
 
     - bash: |
-        cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=ON -S ${PWD} -B ${PWD}/build
+        cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=ON -S ${PWD} -B ${PWD}/build || exit 1
         cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
       displayName: 'Build Unit Tests'
 
     - bash: |
-        cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -DOPENTISSUE_ENABLE_DEMOS=ON -S ${PWD} -B ${PWD}/build
-        cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
+        if [[ ${OSTYPE} != "msys" ]]; then
+          cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=OFF -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -DOPENTISSUE_ENABLE_DEMOS=ON -S ${PWD} -B ${PWD}/build || exit 1
+          cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
+        fi
       displayName: 'Build Demos'
       
     strategy:
