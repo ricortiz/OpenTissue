@@ -5,6 +5,7 @@ add_executable(benchmark_svd src/benchmark_svd.cpp)
 target_link_libraries(benchmark_svd
   PRIVATE
     OpenTissue
+    Boost::headers
 )
 
 install(

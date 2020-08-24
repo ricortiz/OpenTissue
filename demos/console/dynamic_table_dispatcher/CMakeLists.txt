@@ -3,6 +3,7 @@ add_executable(dynamic_table_dispatcher src/dynamic_table_dispatcher.cpp)
 target_link_libraries(dynamic_table_dispatcher
   PRIVATE
     OpenTissue
+    Boost::headers
 )
 
 install(

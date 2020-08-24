@@ -5,6 +5,7 @@ add_executable(benchmark_gjk src/benchmark_gjk.cpp)
 target_link_libraries(benchmark_gjk
   PRIVATE
     OpenTissue
+    Boost::headers
 )
 
 install(

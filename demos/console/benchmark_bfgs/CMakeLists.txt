@@ -5,6 +5,7 @@ add_executable(benchmark_bfgs src/benchmark_bfgs.cpp)
 target_link_libraries(benchmark_bfgs
   PRIVATE
     OpenTissue
+    Boost::headers
 )
 
 install(
