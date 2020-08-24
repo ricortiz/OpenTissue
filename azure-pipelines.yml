@@ -60,7 +60,7 @@ steps:
   displayName: 'Build and Run Unit Tests'
 
 - bash: |
-    cmake -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
+    cmake -DCPACK_GENERATOR="ZIP" -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
     cmake --build ${PWD}/build --target package
   displayName: 'Package'
 
