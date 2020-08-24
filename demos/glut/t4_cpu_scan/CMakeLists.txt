@@ -8,6 +8,7 @@ target_link_libraries(t4_cpu_scan
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

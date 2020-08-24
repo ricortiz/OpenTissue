@@ -9,6 +9,7 @@ target_link_libraries(hybrid_bounding_volume_hierarchy
     DevIL::DevIL
     Qhull::libqhull
     OpenTissue
+    Boost::headers
 )
 
 install(

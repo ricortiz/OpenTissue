@@ -9,6 +9,7 @@ target_link_libraries(volume_fitting
     DevIL::DevIL
     Qhull::libqhull
     OpenTissue
+    Boost::headers
 )
 
 install(

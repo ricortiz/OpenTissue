@@ -8,6 +8,7 @@ target_link_libraries(vertex_mean_curvature
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

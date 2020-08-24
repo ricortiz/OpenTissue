@@ -8,6 +8,7 @@ target_link_libraries(gui_template
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

@@ -9,6 +9,7 @@ target_link_libraries(character_animation
     DevIL::DevIL
     TinyXML
     OpenTissue
+    Boost::headers
 )
 
 target_include_directories(character_animation

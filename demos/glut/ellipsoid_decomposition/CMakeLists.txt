@@ -9,6 +9,7 @@ target_link_libraries(ellipsoid_decomposition
     DevIL::DevIL
     Qhull::libqhull
     OpenTissue
+    Boost::headers
 )
 
 install(

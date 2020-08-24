@@ -9,6 +9,7 @@ target_link_libraries(finite_element_method
     DevIL::DevIL
     TinyXML
     OpenTissue
+    Boost::headers
 )
 
 target_include_directories(finite_element_method

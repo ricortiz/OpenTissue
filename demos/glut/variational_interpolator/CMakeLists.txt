@@ -8,6 +8,7 @@ target_link_libraries(variational_interpolator
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 install(
   TARGETS variational_interpolator

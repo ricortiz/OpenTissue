@@ -9,6 +9,7 @@ target_link_libraries(obb_tree
     DevIL::DevIL
     Qhull::libqhull
     OpenTissue
+    Boost::headers
 )
 
 install(

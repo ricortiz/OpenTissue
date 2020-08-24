@@ -8,6 +8,7 @@ target_link_libraries(smoothed_particle_hydrodynamics
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

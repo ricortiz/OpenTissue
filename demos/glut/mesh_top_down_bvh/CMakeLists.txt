@@ -8,6 +8,7 @@ target_link_libraries(mesh_top_down_bvh
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

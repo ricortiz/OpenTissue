@@ -8,6 +8,7 @@ target_link_libraries(particle_system
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

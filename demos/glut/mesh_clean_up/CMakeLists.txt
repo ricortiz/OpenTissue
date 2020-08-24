@@ -8,6 +8,7 @@ target_link_libraries(mesh_clean_up
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

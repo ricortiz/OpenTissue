@@ -8,6 +8,7 @@ target_link_libraries(chanvese_segmentation
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

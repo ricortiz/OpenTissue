@@ -8,6 +8,7 @@ target_link_libraries(signed_distance_field_collision_detection
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

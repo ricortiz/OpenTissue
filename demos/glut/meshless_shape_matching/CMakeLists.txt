@@ -8,6 +8,7 @@ target_link_libraries(meshless_shape_matching
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

@@ -9,6 +9,7 @@ target_link_libraries(t4mesh_delaunay_tesselator
     DevIL::DevIL
     Qhull::libqhull
     OpenTissue
+    Boost::headers
 )
 
 install(

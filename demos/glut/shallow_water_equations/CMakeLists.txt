@@ -8,6 +8,7 @@ target_link_libraries(shallow_water_equations
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

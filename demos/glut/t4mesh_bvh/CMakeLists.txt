@@ -10,6 +10,7 @@ target_link_libraries(t4mesh_bvh
     Qhull::libqhull
     TinyXML
     OpenTissue
+    Boost::headers
 )
 
 target_include_directories(t4mesh_bvh

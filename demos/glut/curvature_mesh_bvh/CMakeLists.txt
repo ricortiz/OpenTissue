@@ -8,6 +8,7 @@ target_link_libraries(curvature_mesh_bvh
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

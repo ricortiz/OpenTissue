@@ -9,6 +9,7 @@ target_link_libraries(versatile
     DevIL::DevIL
     TinyXML
     OpenTissue
+    Boost::headers
 )
 
 target_include_directories(versatile

@@ -8,6 +8,7 @@ target_link_libraries(multibody_cows
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(

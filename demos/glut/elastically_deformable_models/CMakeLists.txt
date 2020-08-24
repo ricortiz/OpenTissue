@@ -8,6 +8,7 @@ target_link_libraries(elastically_deformable_models
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
 )
 
 install(
