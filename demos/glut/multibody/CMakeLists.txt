@@ -33,6 +33,7 @@ target_link_libraries(multibody
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

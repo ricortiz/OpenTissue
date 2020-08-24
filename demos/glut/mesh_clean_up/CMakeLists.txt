@@ -9,6 +9,7 @@ target_link_libraries(mesh_clean_up
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

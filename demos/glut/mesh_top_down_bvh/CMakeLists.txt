@@ -9,6 +9,7 @@ target_link_libraries(mesh_top_down_bvh
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

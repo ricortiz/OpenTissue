@@ -9,6 +9,7 @@ target_link_libraries(t4_cpu_scan
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

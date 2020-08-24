@@ -9,6 +9,7 @@ target_link_libraries(multibody_cows
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

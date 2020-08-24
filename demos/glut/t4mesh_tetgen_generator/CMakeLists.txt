@@ -11,6 +11,7 @@ target_link_libraries(t4mesh_tetgen_generator
     TinyXML
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 target_include_directories(t4mesh_tetgen_generator

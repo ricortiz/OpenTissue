@@ -9,6 +9,7 @@ target_link_libraries(meshless_shape_matching
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

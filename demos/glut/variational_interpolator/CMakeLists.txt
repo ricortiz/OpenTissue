@@ -9,6 +9,7 @@ target_link_libraries(variational_interpolator
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 install(
   TARGETS variational_interpolator

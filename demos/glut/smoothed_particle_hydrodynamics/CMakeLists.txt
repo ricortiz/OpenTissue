@@ -9,6 +9,7 @@ target_link_libraries(smoothed_particle_hydrodynamics
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

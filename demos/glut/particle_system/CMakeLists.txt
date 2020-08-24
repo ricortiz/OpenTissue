@@ -9,6 +9,7 @@ target_link_libraries(particle_system
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

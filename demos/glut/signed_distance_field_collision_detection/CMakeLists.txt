@@ -9,6 +9,7 @@ target_link_libraries(signed_distance_field_collision_detection
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

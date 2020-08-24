@@ -9,6 +9,7 @@ target_link_libraries(vertex_mean_curvature
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(

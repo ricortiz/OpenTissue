@@ -9,6 +9,7 @@ target_link_libraries(t4mesh_coupling
     DevIL::DevIL
     OpenTissue
     Boost::headers
+    Qhull::libqhull
 )
 
 install(
