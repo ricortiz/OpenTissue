@@ -39,7 +39,7 @@ stages:
         python -m pip install --upgrade conan
         python -m pip install --upgrade gcovr
         conan --version
-      displayName: 'Install Python Modules'
+      displayName: 'Install Python Modules and OS Dependencies'
 
     - bash: |
         mkdir build
@@ -99,7 +99,7 @@ stages:
         python -m pip install --upgrade conan
         python -m pip install --upgrade gcovr
         conan --version
-      displayName: 'Install Python Modules'
+      displayName: 'Install Python Modules and OS Dependencies'
 
     - bash: |
         mkdir build
@@ -189,7 +189,7 @@ stages:
       displayName: 'Resolve Dependencies'
 
     - bash: |
-        cmake -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
+        cmake -DCPACK_GENERATOR="ZIP" -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
         cmake --build ${PWD}/build --target package
       displayName: 'Package'
 
