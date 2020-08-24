@@ -17,72 +17,168 @@ strategy:
 
   maxParallel: 3
 
-pool:
-  vmImage: '$(imageName)'
+stages:
+- stage: 'Build'
+  displayName: 'Build OpenTissue Tests and Demos'
 
-steps:
-- task: UsePythonVersion@0
-  displayName: Get Python for Python tools.
-  inputs:
-    versionSpec: '3.7'
-  name: pyTools
+  jobs:
+  - job: 'Build'
+  displayName: 'Download tools and dependencies'
+  pool: 
+    vmImage: '$(imageName)'
+    
+  steps:
+  - task: UsePythonVersion@0
+    displayName: Get Python for Python tools.
+    inputs:
+      versionSpec: '3.7'
+    name: pyTools
 
-- bash: |
-    python --version
-    python -m pip install --upgrade pip
-    python -m pip install --upgrade jinja2
-    python -m pip install --upgrade setuptools wheel
-    python -m pip install --upgrade conan
-    python -m pip install --upgrade gcovr
-    conan --version
-  displayName: 'Install Python Modules'
+  - bash: |
+      python --version
+      python -m pip install --upgrade pip
+      python -m pip install --upgrade jinja2
+      python -m pip install --upgrade setuptools wheel
+      python -m pip install --upgrade conan
+      python -m pip install --upgrade gcovr
+      conan --version
+    displayName: 'Install Python Modules'
 
-- bash: |
-    mkdir build
-    pushd build
-    conan remote add ot_deps https://api.bintray.com/conan/opentissue/Deps
-    [[ "$OSTYPE" == "darwin"* ]] && CXX_ABI=libc++ || CXX_ABI=libstdc++11
-    conan profile new default --detect
-    [[ "$OSTYPE" != "msys" ]] && conan profile update settings.compiler.libcxx=${CXX_ABI} default
-    conan install .. -s build_type=Debug -o *:shared=False || exit 1
-    popd
-  displayName: 'Resolve Dependencies'
+  - bash: |
+      mkdir build
+      pushd build
+      conan remote add ot_deps https://api.bintray.com/conan/opentissue/Deps
+      [[ "$OSTYPE" == "darwin"* ]] && CXX_ABI=libc++ || CXX_ABI=libstdc++11
+      conan profile new default --detect
+      [[ "$OSTYPE" != "msys" ]] && conan profile update settings.compiler.libcxx=${CXX_ABI} default
+      conan install .. -s build_type=Debug -o *:shared=False || exit 1
+      popd
+    displayName: 'Resolve Dependencies'
 
-- bash: |
-    cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=ON -S ${PWD} -B ${PWD}/build
-    cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
-    [[ "$OSTYPE" != "msys" ]] &&  gcovr --xml -k -r . -o build/Cobertura.xml build/
-    cmake --build ${PWD}/build --target Continuous -j 2
-    pushd build
-    ctest -T Test
-    [[ "$OSTYPE" != "msys" ]] && ctest -T Coverage
-    popd
-  displayName: 'Build and Run Unit Tests'
+  - bash: |
+      cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=ON -S ${PWD} -B ${PWD}/build
+      cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
+    displayName: 'Build Unit Tests'
 
-- bash: |
-    cmake -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
-    cmake --build ${PWD}/build --target package
-  displayName: 'Package'
+  - bash: |
+      cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -DOPENTISSUE_ENABLE_DEMOS=ON -S ${PWD} -B ${PWD}/build
+      cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
+    displayName: 'Build Demos'
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: cTest
-    testResultsFiles: build/Testing/*/Test.xml
-    testRunTitle: 'Publish test results'
+- stage: 'Test'
+  displayName: 'Run unit tests'
 
-- task: CopyFiles@2
-  inputs:
-    contents: 'build/OpenTissue-*'
-    targetFolder: $(Build.ArtifactStagingDirectory)
+  jobs:
+  - job: 'Test'
+  displayName: 'Run ctest'
+  pool: 
+    vmImage: '$(imageName)'
+    
+  steps:
+  - task: UsePythonVersion@0
+    displayName: Get Python for Python tools.
+    inputs:
+      versionSpec: '3.7'
+    name: pyTools
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+  - bash: |
+      python --version
+      python -m pip install --upgrade pip
+      python -m pip install --upgrade jinja2
+      python -m pip install --upgrade setuptools wheel
+      python -m pip install --upgrade conan
+      python -m pip install --upgrade gcovr
+      conan --version
+    displayName: 'Install Python Modules'
 
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/Cobertura.xml'
-    pathToSources: '$(System.DefaultWorkingDirectory)/OpenTissue'
+  - bash: |
+      mkdir build
+      pushd build
+      conan remote add ot_deps https://api.bintray.com/conan/opentissue/Deps
+      [[ "$OSTYPE" == "darwin"* ]] && CXX_ABI=libc++ || CXX_ABI=libstdc++11
+      conan profile new default --detect
+      [[ "$OSTYPE" != "msys" ]] && conan profile update settings.compiler.libcxx=${CXX_ABI} default
+      conan install .. -s build_type=Debug -o *:shared=False || exit 1
+      popd
+    displayName: 'Resolve Dependencies'
+
+  - bash: |
+      cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=ON -S ${PWD} -B ${PWD}/build
+      cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
+      cmake --build ${PWD}/build --target test -j 2
+    displayName: 'Run Unit Tests'
+
+  - bash: |
+      ctest -T Test
+      [[ "$OSTYPE" != "msys" ]] && ctest -T Coverage
+      popd
+    displayName: 'Run coverage'
+
+  - bash: |
+      cmake --build ${PWD}/build --target Continuous -j 2
+    displayName: 'Submit results to dashboard'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: cTest
+      testResultsFiles: build/Testing/*/Test.xml
+      testRunTitle: 'Publish test results'
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/Cobertura.xml'
+      pathToSources: '$(System.DefaultWorkingDirectory)/OpenTissue'
+
+- stage: 'Package'
+  displayName: 'Create OpenTissue package'
+
+  jobs:
+  - job: 'Package'
+  displayName: 'Create package'
+  pool: 
+    vmImage: 'ubuntu-latest'
+    
+  steps:
+  - task: UsePythonVersion@0
+    displayName: Get Python for Python tools.
+    inputs:
+      versionSpec: '3.7'
+    name: pyTools
+
+  - bash: |
+      python --version
+      python -m pip install --upgrade pip
+      python -m pip install --upgrade jinja2
+      python -m pip install --upgrade setuptools wheel
+      python -m pip install --upgrade conan
+      python -m pip install --upgrade gcovr
+      conan --version
+    displayName: 'Install Python Modules'
+
+  - bash: |
+      mkdir build
+      pushd build
+      conan remote add ot_deps https://api.bintray.com/conan/opentissue/Deps
+      [[ "$OSTYPE" == "darwin"* ]] && CXX_ABI=libc++ || CXX_ABI=libstdc++11
+      conan profile new default --detect
+      [[ "$OSTYPE" != "msys" ]] && conan profile update settings.compiler.libcxx=${CXX_ABI} default
+      conan install .. -s build_type=Debug -o *:shared=False || exit 1
+      popd
+    displayName: 'Resolve Dependencies'
+
+  - bash: |
+      cmake -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -S ${PWD} -B ${PWD}/build
+      cmake --build ${PWD}/build --target package
+    displayName: 'Package'
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'build/OpenTissue-*'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
