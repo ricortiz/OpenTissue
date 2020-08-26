@@ -12,7 +12,7 @@ stages:
 
   jobs:
   - job: 'Build'
-    displayName: 'Download tools and dependencies'
+    displayName: '$(imageName) - Download tools and dependencies'
     pool: 
       vmImage: '$(imageName)'
     
@@ -75,7 +75,7 @@ stages:
       maxParallel: 3
 
 - stage: 'Test'
-  displayName: 'Run unit tests'
+  displayName: '$(imageName) - Run unit tests'
   dependsOn: Build
 
   jobs:
