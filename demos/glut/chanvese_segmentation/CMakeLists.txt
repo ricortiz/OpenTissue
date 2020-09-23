@@ -8,6 +8,13 @@ target_link_libraries(chanvese_segmentation
     GLEW::glew
     DevIL::DevIL
     OpenTissue
+    Boost::headers
+    Graphics
+)
+
+target_compile_definitions(chanvese_segmentation 
+  PRIVATE
+   OT_INJECT_MAIN
 )
 
 install(
