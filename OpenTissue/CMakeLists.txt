@@ -38,6 +38,11 @@ target_compile_definitions(headers
     $<$<CXX_COMPILER_ID:GNU>:GL_SILENCE_DEPRECATION>
 )
 
+target_compile_options(headers
+  INTERFACE
+    $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:MSVC>>:/bigobj>
+)
+
 target_link_libraries(OpenTissue
   INTERFACE
     headers
