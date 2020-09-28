@@ -8,11 +8,10 @@ trigger:
 
 stages:
 - stage: 'Build'
-  displayName: 'Build OpenTissue Tests and Demos'
+  displayName: 'Build/Run OpenTissue unit tests.'
 
   jobs:
   - job: 'Build'
-    displayName: 'Download tools and dependencies'
     pool: 
       vmImage: '$(imageName)'
     
@@ -57,13 +56,6 @@ stages:
         cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
       displayName: 'Build Unit Tests'
 
-#   - bash: |
-#       if [[ ${OSTYPE} != "msys" ]]; then
-#         cmake -DOPENTISSUE_ENABLE_CODE_COVERAGE:BOOL=OFF -DCMAKE_BUILD_TYPE=Debug -DOPENTISSUE_ENABLE_UNIT_TESTS=OFF -DOPENTISSUE_ENABLE_DEMOS=ON -S ${PWD} -B ${PWD}/build || exit 1
-#         cmake --build ${PWD}/build $([[ "$OSTYPE" != "msys" ]] && echo "--target all") -j 2
-#       fi
-#     displayName: 'Build Demos'
-      
     strategy:
       matrix:
         linux:
