@@ -7,18 +7,12 @@ target_link_libraries(chanvese_segmentation
     GLUT::GLUT
     GLEW::glew
     DevIL::DevIL
-    OpenTissue
     Boost::headers
-    Graphics
+    OpenTissue
+    OpenTissueGraphics
 )
 
 target_compile_definitions(chanvese_segmentation 
   PRIVATE
    OT_INJECT_MAIN
 )
-
-install(
-  TARGETS chanvese_segmentation
-  RUNTIME DESTINATION  bin/demos/glut/
-  COMPONENT Demos
-  )
