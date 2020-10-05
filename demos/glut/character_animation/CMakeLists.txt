@@ -4,15 +4,15 @@ target_link_libraries(character_animation
   PRIVATE
     OpenGL::GL
     OpenGL::GLU
-    GLUT::GLUT
     GLEW::glew
     DevIL::DevIL
     TinyXML
     OpenTissue
     OpenTissueGraphics
+    glfw
 )
 
-target_compile_definitions(character_animation 
+target_compile_definitions(character_animation
   PRIVATE
    OT_INJECT_MAIN
 )
