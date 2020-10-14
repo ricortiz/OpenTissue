@@ -40,18 +40,18 @@ namespace OpenTissue
       bvh::get_nodes_at_height(geometry.m_bvh,1,nodes);
       //gl::ColorPicker(0.1,0.8,0.1);
       {
-        bv_iterator node = nodes.begin();
-        bv_iterator end = nodes.end();
-        for (;node!= end;++node )
+        for(auto &node : nodes)
+        {
           gl::DrawSphere( node->volume(), false );
+        }
       }
       bvh::get_nodes_at_depth(geometry.m_bvh,depth,nodes);
       //gl::ColorPicker(0.8,0.4,0.1);
       {
-        bv_iterator node = nodes.begin();
-        bv_iterator end = nodes.end();
-        for (;node!= end;++node )
+        for(auto &node : nodes)
+        {
           gl::DrawSphere( node->volume(), true );
+        }
       }
     }
 

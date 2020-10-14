@@ -40,7 +40,7 @@ namespace OpenTissue
         typedef typename bvh_type::bv_type                  bv_type;
         typedef typename bvh_type::bv_ptr                   bv_ptr;
         typedef typename bvh_type::bv_ptr_container         bv_ptr_container;
-        typedef typename bvh_type::bv_ptr_iterator          bv_ptr_iterator;
+        typedef typename bvh_type::bv_iterator          bv_iterator;
 
         this->reset(results);//--- collision_policy
 
@@ -64,24 +64,18 @@ namespace OpenTissue
           }
           if (  B->is_leaf()  || ( !A->is_leaf() && (   A->volume().volume() > B->volume().volume()  )  ) )
           {
-            bv_ptr_iterator a   = A->child_ptr_begin();
-            bv_ptr_iterator end = A->child_ptr_end();
-            for(;a!=end;++a)
+            for(auto &child : *A)
             {
-              bv_ptr ptr( *a );
-              Q.push_back( ptr );
+              Q.push_back( child );
               Q.push_back( B );
             }
           }
           else
           {
-            bv_ptr_iterator b   = B->child_ptr_begin();
-            bv_ptr_iterator end = B->child_ptr_end();
-            for(;b!=end;++b)
+            for(auto &child : *B)
             {
-              bv_ptr ptr( *b );
               Q.push_back( A );
-              Q.push_back( ptr );
+              Q.push_back( child );
             }
           }
         }

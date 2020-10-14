@@ -33,7 +33,6 @@ namespace OpenTissue
 
     template <
       typename value_type_
-      //, typename value_traits_ = ValueTraits<value_type_>
     >
     class Vector3
     {

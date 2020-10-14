@@ -25,7 +25,7 @@ namespace OpenTissue
     *
     * The first template argument is the bounding volume
     * hierarchy type and the second template argument is
-    * a user defined bounding volume traits class. 
+    * a user defined bounding volume traits class.
     */
     template <typename B, typename  T>
     class BV : public T
@@ -46,8 +46,6 @@ namespace OpenTissue
       typedef typename bvh_type::bv_ptr_container       bv_ptr_container;
       typedef typename bvh_type::bv_iterator            bv_iterator;
       typedef typename bvh_type::bv_const_iterator      bv_const_iterator;
-      typedef typename bvh_type::bv_ptr_iterator        bv_ptr_iterator;
-      typedef typename bvh_type::bv_const_ptr_iterator  bv_const_ptr_iterator;
 
     public:
 
@@ -73,15 +71,10 @@ namespace OpenTissue
 
     public:
 
-      bv_iterator       child_begin()       { return bv_iterator(m_children.begin());       }
-      bv_iterator       child_end()         { return bv_iterator(m_children.end());         }
-      bv_const_iterator child_begin() const { return bv_const_iterator(m_children.begin()); }
-      bv_const_iterator child_end()   const { return bv_const_iterator(m_children.end());   }
-
-      bv_ptr_iterator       child_ptr_begin()       { return m_children.begin(); }
-      bv_ptr_iterator       child_ptr_end()         { return m_children.end();   }
-      bv_const_ptr_iterator child_ptr_begin() const { return m_children.begin(); }
-      bv_const_ptr_iterator child_ptr_end()   const { return m_children.end();   }
+      bv_iterator       begin()       { return m_children.begin(); }
+      bv_iterator       end()         { return m_children.end();   }
+      bv_const_iterator begin() const { return m_children.begin(); }
+      bv_const_iterator end()   const { return m_children.end();   }
 
     public:
 
@@ -104,6 +97,30 @@ namespace OpenTissue
 
   } // namespace bvh
 } // namespace OpenTissue
+
+template<typename B, typename T>
+typename OpenTissue::bvh::BV<B,T>::bv_iterator begin(OpenTissue::bvh::BV<B,T> &bv)
+{
+  return bv.begin();
+}
+
+template<typename B, typename T>
+typename OpenTissue::bvh::BV<B,T>::bv_const_iterator begin(const OpenTissue::bvh::BV<B,T> &bv)
+{
+  return bv.begin();
+}
+
+template<typename B, typename T>
+typename OpenTissue::bvh::BV<B,T>::bv_iterator end(OpenTissue::bvh::BV<B,T> &bv)
+{
+  return bv.end();
+}
+
+template<typename B, typename T>
+typename OpenTissue::bvh::BV<B,T>::bv_const_iterator end(const OpenTissue::bvh::BV<B,T> &bv)
+{
+  return bv.end();
+}
 
 //OPENTISSUE_COLLISION_BVH_BVH_BV_NODE_H
 #endif

@@ -26,7 +26,7 @@ namespace OpenTissue
     {
       typedef typename bvh_type::bv_type           bv_type;
       typedef typename bvh_type::bv_ptr            bv_ptr;
-      typedef typename bvh_type::bv_ptr_iterator   bv_ptr_iterator;
+      typedef typename bvh_type::bv_iterator   bv_iterator;
 
       nodes.clear();
       if ( !bvh.root() )
@@ -44,17 +44,15 @@ namespace OpenTissue
       while ( !Q.empty() )
       {
         bv_ptr bv( Q.front() ); Q.pop_front();
-        unsigned int bv_depth = D.front();D.pop_front();
+        unsigned int bv_depth = D.front();
+        D.pop_front();
 
         if ( depth == bv_depth )
           nodes.push_back( bv );
 
-        bv_ptr_iterator child = bv->child_ptr_begin();
-        bv_ptr_iterator end = bv->child_ptr_end();
-        for(;child!=end;++child)
+        for(auto &child : *bv)
         {
-          bv_ptr ptr( *child );
-          Q.push_back( ptr );
+          Q.push_back( child );
           D.push_back( bv_depth + 1 );
         }
       }

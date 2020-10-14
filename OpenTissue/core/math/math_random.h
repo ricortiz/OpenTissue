@@ -27,11 +27,13 @@ public:
 public:
 
   Random(value_type const lower = 0, value_type const upper = 1)
-    : m_generator(m_random_device()), m_distribution(lower, upper)
-  {}
+  {
+    m_generator = generator_type(m_random_device());
+    m_distribution = distribution_type(lower, upper);
+  }
 
-  Random(Random const & rnd) = delete;
-  Random & operator=(Random const & rnd) = delete;
+  Random(Random const &) = delete;
+  Random & operator=(Random const &) = delete;
 
 public:
 

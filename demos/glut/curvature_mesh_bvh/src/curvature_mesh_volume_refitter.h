@@ -78,7 +78,7 @@ public:
     else
     {
       bv->m_dir_lut = 0xFFFF;
-      for ( bv_iterator child = bv->child_begin();child!=bv->child_end();++child )
+      for(auto &child : *bv)
       {
         bv->m_dir_lut = bv->m_dir_lut & child->m_dir_lut;
         vector3_type & min_corner = child->volume().min();

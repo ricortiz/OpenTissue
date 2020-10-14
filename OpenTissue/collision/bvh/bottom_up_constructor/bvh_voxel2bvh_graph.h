@@ -13,6 +13,7 @@
 #include <OpenTissue/core/containers/grid/util/grid_idx2coord.h>
 #include <OpenTissue/core/geometry/geometry_aabb.h>
 #include <OpenTissue/core/math/math_vector3.h>
+
 #include <vector>
 #include <iostream>
 

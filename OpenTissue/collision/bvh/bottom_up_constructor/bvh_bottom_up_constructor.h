@@ -12,8 +12,7 @@
 #include <OpenTissue/collision/bvh/bottom_up_constructor/bvh_graph.h>
 #include <OpenTissue/collision/bvh/bottom_up_constructor/bvh_default_priority_bottom_up_policy.h>
 
-#include <memory> // needed for std::static_pointer_cast
-
+#include <memory>
 #include <iostream>
 
 namespace OpenTissue
@@ -71,9 +70,7 @@ namespace OpenTissue
         bvh.clear();
         //--- Create leaf BVs in BVH
 
-        node_iterator node = graph.node_begin();
-        node_iterator end  = graph.node_end();
-        for(;node!=end;++node)
+        for(auto &node : graph.nodes())
         {
           if(node->coverage().empty())
           {
@@ -81,7 +78,7 @@ namespace OpenTissue
           }
           else
           {
-            node->create_bv(bvh,true);
+            node->create_bv(bvh, true);
             annotated_bv_ptr bv = std::static_pointer_cast<annotated_bv_type>(node->bv());
 
             bv->insert(node->coverage());

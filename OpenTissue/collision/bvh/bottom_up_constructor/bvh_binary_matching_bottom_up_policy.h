@@ -9,8 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
-
 #include <OpenTissue/collision/bvh/bottom_up_constructor/bvh_graph.h>
+
 #include <list>
 
 namespace OpenTissue
@@ -32,7 +32,6 @@ namespace OpenTissue
       typedef typename graph_type::node_ptr_type       node_ptr_type;
       typedef typename graph_type::edge_ptr_type       edge_ptr_type;
       typedef typename graph_type::edge_iterator       edge_iterator;
-      typedef typename graph_type::edge_ptr_iterator   edge_ptr_iterator;
       typedef typename graph_type::node_iterator       node_iterator;
       typedef typename graph_type::edge_ptr_container  edge_ptr_container;
       typedef typename graph_type::real_type           real_type;
@@ -111,23 +110,31 @@ namespace OpenTissue
       {
         bool possible_legal_collapse_exist = false;
 
-        edge_iterator edge = node->edge_begin();
-        edge_iterator end  = node->edge_end();
-        for(;edge!=end;++edge)
+        for(auto &edge : node->edges())
         {
-          node_ptr_type other = (edge->A() == node)?edge->B():edge->A();
+          auto other = (edge->A() == node) ? edge->B() : edge->A();
 
-          if(node->size_sub_nodes()+other->size_sub_nodes()<degree())
+          if((node->size_sub_nodes() + other->size_sub_nodes()) < degree())
+          {
             possible_legal_collapse_exist = true;
+          }
         }
+
         if(!possible_legal_collapse_exist)
         {
           return true;
         }
+
         if(node->size_sub_nodes() >= degree())
+        {
           return true;
-        if( (m_graph->size_edges()+1)< degree() )
+        }
+
+        if((m_graph->size_edges()+1) < degree())
+        {
           return true;
+        }
+
         return false;
       }
 
@@ -145,8 +152,11 @@ namespace OpenTissue
       *
       * @return     The fitted volume.
       */
-      template<typename geometry_iterator,typename volume_iterator>
-      volume_type fit(geometry_iterator g0,geometry_iterator g1,volume_iterator v0,volume_iterator v1){  return volume_type(); }
+      template<typename geometry_iterator, typename volume_iterator>
+      volume_type fit(geometry_iterator g0, geometry_iterator g1, volume_iterator v0, volume_iterator v1)
+      {
+        return volume_type();
+      }
 
     protected:
 
@@ -154,50 +164,49 @@ namespace OpenTissue
       {
         if(m_graph->size_edges()==0)
           return;
+
         m_matched.clear();
 
+        for(auto &edge : m_graph->edges())
         {
-          edge_iterator edge = m_graph->edge_begin();
-          edge_iterator end  = m_graph->edge_end();
-          for(;edge != end; ++edge)
-            edge->m_tag = 0;
+          edge->m_tag = 0;
         }
+
+        for(auto &node : m_graph->nodes())
         {
-          node_iterator node = m_graph->node_begin();
-          node_iterator end  = m_graph->node_end();
-          for(;node != end; ++node)
-            node->m_tag2 = node->m_tag = 0;
+          node->m_tag = 0;
         }
 
         std::list<node_ptr_type> Q;
-        node_ptr_type first( m_graph->edge_begin()->A() );
-        Q.push_back( first );
+        Q.push_back((*m_graph->edge_begin())->A());
 
         while(!Q.empty())
         {
-          node_ptr_type node( Q.front() );
+          auto node = Q.front();
           Q.pop_front();
           node->m_tag = 1;
 
-          edge_ptr_iterator e    = node->edge_ptr_begin();
-          edge_ptr_iterator end  = node->edge_ptr_end();
-          for(;e!=end;++e)
+          for(auto &edge : node->edges())
           {
-            if( (*e)->m_tag)
+            if(edge->m_tag)
+            {
               continue;
-            (*e)->m_tag = 1;
-            node_ptr_type other = ( (*e)->A() == node)? (*e)->B(): (*e)->A();
+            }
+
+            edge->m_tag = 1;
+            auto other = (edge->A() == node) ? edge->B() : edge->A();
+
             if(!other->m_tag)
             {
               Q.push_back(other);
             }
+
             //--- should we match node and other?
             if(!node->m_tag2 && !other->m_tag2)
             {
               node->m_tag2 = 1;
               other->m_tag2 = 1;
-              edge_ptr_type match( *e );
-              m_matched.push_back( match );
+              m_matched.push_back(edge);
             }
           }
         }
@@ -215,7 +224,7 @@ namespace OpenTissue
       *
       * @return        The branching factor.
       */
-      const unsigned int degree() const { return 2; }
+      virtual const unsigned int degree() const { return 2; }
     };
 
   } // namespace bvh

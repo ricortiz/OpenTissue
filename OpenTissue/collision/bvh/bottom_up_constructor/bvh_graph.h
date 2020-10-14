@@ -13,8 +13,6 @@
 #include <OpenTissue/collision/bvh/bottom_up_constructor/bvh_graph_edge.h>
 
 #include <memory>
-#include <boost/iterator/indirect_iterator.hpp>
-
 #include <cmath>       //Needed for fabs()
 #include <list>        //Needed for graph data structure: edges, nodes and volumes
 #include <iostream>    //Needed for debug output. NOTE: we should consider implementing a logging fascility!
@@ -32,85 +30,72 @@ namespace OpenTissue
     class BVHGraph
     {
     public:
-
-      //--- Conenience stuff for better readability
-      typedef BVHGraph<bvh_type>                     graph_type;
-      typedef BVHGraphNode<bvh_type>                 node_type;
-      typedef BVHGraphEdge<bvh_type>                 edge_type;
-      //typedef node_type *                            node_ptr_type;
-      //typedef edge_type *                            edge_ptr_type;
-      typedef std::shared_ptr<node_type>           node_ptr_type;
-      typedef std::shared_ptr<edge_type>           edge_ptr_type;
-      typedef std::shared_ptr<node_type const>     const_node_ptr_type;
-      typedef std::shared_ptr<edge_type const>     const_edge_ptr_type;
-      typedef typename bvh_type::geometry_container  geometry_container;
-      typedef typename bvh_type::geometry_type       geometry_type;
-      typedef typename bvh_type::volume_type         volume_type;
-      typedef typename std::list<volume_type>        volume_container;
-      typedef float                                  real_type;
+      typedef float                                       real_type;
+      typedef BVHGraph<bvh_type>                          graph_type;
+      typedef BVHGraphNode<bvh_type>                      node_type;
+      typedef BVHGraphEdge<bvh_type>                      edge_type;
+      typedef std::shared_ptr<node_type>                  node_ptr_type;
+      typedef std::shared_ptr<edge_type>                  edge_ptr_type;
+      typedef std::shared_ptr<node_type const>            const_node_ptr_type;
+      typedef std::shared_ptr<edge_type const>            const_edge_ptr_type;
+      typedef typename bvh_type::geometry_container       geometry_container;
+      typedef typename bvh_type::geometry_type            geometry_type;
+      typedef typename bvh_type::volume_type              volume_type;
+      typedef typename std::list<volume_type>             volume_container;
+      typedef typename std::list< edge_ptr_type >         edge_ptr_container;
+      typedef typename edge_ptr_container::iterator       edge_iterator;
+      typedef typename edge_ptr_container::const_iterator const_edge_iterator;
+      typedef typename std::list< node_ptr_type >         node_ptr_container;
+      typedef typename node_ptr_container::iterator       node_iterator;
+      typedef typename node_ptr_container::const_iterator const_node_iterator;
 
     public:
+      edge_iterator       edge_begin()       { return m_edges.begin(); }
+      edge_iterator       edge_end()         { return m_edges.end();   }
+      const_edge_iterator edge_begin() const { return m_edges.begin(); }
+      const_edge_iterator edge_end()   const { return m_edges.end();   }
 
-      typedef typename std::list< edge_ptr_type >                           edge_ptr_container;
-      typedef typename edge_ptr_container::iterator                         edge_ptr_iterator;
-      typedef typename edge_ptr_container::const_iterator                   const_edge_ptr_iterator;
-      typedef boost::indirect_iterator<edge_ptr_iterator,edge_type>         edge_iterator;
-      typedef boost::indirect_iterator<const_edge_ptr_iterator,edge_type>   const_edge_iterator;
+      node_iterator       node_begin()       { return m_nodes.begin(); }
+      node_iterator       node_end()         { return m_nodes.end();   }
+      const_node_iterator node_begin() const { return m_nodes.begin(); }
+      const_node_iterator node_end()   const { return m_nodes.end();   }
 
-      edge_iterator       edge_begin()       { return edge_iterator(m_edges.begin());       }
-      edge_iterator       edge_end()         { return edge_iterator(m_edges.end());         }
-      const_edge_iterator edge_begin() const { return const_edge_iterator(m_edges.begin()); }
-      const_edge_iterator edge_end()   const { return const_edge_iterator(m_edges.end());   }
-
-      edge_ptr_iterator       edge_ptr_begin()       { return m_edges.begin();       }
-      edge_ptr_iterator       edge_ptr_end()         { return m_edges.end();         }
-      const_edge_ptr_iterator edge_ptr_begin() const { return m_edges.begin();       }
-      const_edge_ptr_iterator edge_ptr_end()   const { return m_edges.end();         }
-
-      typedef typename std::list< node_ptr_type >                           node_ptr_container;
-      typedef typename node_ptr_container::iterator                         node_ptr_iterator;
-      typedef typename node_ptr_container::const_iterator                   const_node_ptr_iterator;
-      typedef boost::indirect_iterator<node_ptr_iterator,node_type>         node_iterator;
-      typedef boost::indirect_iterator<const_node_ptr_iterator,node_type>   const_node_iterator;
-
-      node_iterator node_begin()             { return node_iterator(m_nodes.begin());       }
-      node_iterator node_end()               { return node_iterator(m_nodes.end());         }
-      const_node_iterator node_begin() const { return const_node_iterator(m_nodes.begin()); }
-      const_node_iterator node_end()   const { return const_node_iterator(m_nodes.end());   }
-
-      node_ptr_iterator node_ptr_begin()             { return m_nodes.begin();       }
-      node_ptr_iterator node_ptr_end()               { return m_nodes.end();         }
-      const_node_ptr_iterator node_ptr_begin() const { return m_nodes.begin();       }
-      const_node_ptr_iterator node_ptr_end()   const { return m_nodes.end();         }
+      node_ptr_container       &nodes()       { return m_nodes; }
+      const node_ptr_container &nodes() const { return m_nodes; }
+      edge_ptr_container       &edges()       { return m_edges; }
+      const edge_ptr_container &edges() const { return m_edges; }
 
     public: // TODO should be protected. However we got a little problem with priority bottom up policy
-
       edge_ptr_container  m_edges;    ///< All edges in graph.
 
     protected:
       node_ptr_container  m_nodes;    ///< All nodes in graph.
 
     public:
-
       BVHGraph(){}
 
-      ~BVHGraph() { clear(); }
+      ~BVHGraph() { this->clear(); }
 
     public:
-
       /**
       * Retrive the number of edges in graph.
       *
       * @return          Number of edges.
       */
-      std::size_t size_edges() const {return m_edges.size();}
+      std::size_t size_edges() const
+      {
+        return m_edges.size();
+      }
 
       /**
       * Retrive the number of nodes in graph.
       *
       * @return          Number of nodes.
       */
-      std::size_t size_nodes()const{return m_nodes.size();}
+      std::size_t size_nodes() const
+      {
+        return m_nodes.size();
+      }
 
       /**
       * Insert Node.
@@ -119,7 +104,10 @@ namespace OpenTissue
       *
       * @return          A pointer to the new node.
       */
-      node_ptr_type insert(geometry_type const & g){ return insert(volume_type(),g); }
+      node_ptr_type insert(geometry_type const & g)
+      {
+        return insert(volume_type(), g);
+      }
 
       /**
       * Insert Node.
@@ -131,7 +119,7 @@ namespace OpenTissue
       node_ptr_type insert(volume_type const & volume)
       {
         geometry_container G;
-        return insert(volume,G);
+        return insert(volume, G);
       }
 
       /**
@@ -146,7 +134,7 @@ namespace OpenTissue
       {
         geometry_container G;
         G.push_back(g);
-        return insert(volume,G);
+        return insert(volume, G);
       }
 
       /**
@@ -165,7 +153,7 @@ namespace OpenTissue
         {
           //--- KE 13-10-2004: Something wrong copy does not work???
           //std::copy(geometry.begin(),geometry.end(),node->m_coverage.begin());
-          node->m_coverage.insert(node->m_coverage.end(),geometry.begin(),geometry.end());
+          node->m_coverage.insert(node->m_coverage.end(), geometry.begin(), geometry.end());
         }
         m_nodes.push_back(node);
         return node;
@@ -183,23 +171,29 @@ namespace OpenTissue
       *
       * @return    A pointer to the newly created edge.
       */
-      edge_ptr_type insert(node_ptr_type A,node_ptr_type B)
+      edge_ptr_type insert(node_ptr_type A, node_ptr_type B)
       {
-        assert(A!=B);
+        assert(A != B);
         //--- Test if edge already exist
-        edge_ptr_iterator e    = A->edge_ptr_begin();
-        edge_ptr_iterator end  = A->edge_ptr_end();
-        for(;e!=end;++e)
+        for(auto &e : A->edges())
         {
-          if(( (*e)->A()==A && (*e)->B()==B)||( (*e)->A()==B && (*e)->B()==A))
-            return edge_ptr_type(*e);
+          if(( e->A() == A && e->B() == B ) || ( e->A() == B && e->B() == A ))
+          {
+            return e;
+          }
         }
+
+        // Create a new edge
         edge_ptr_type new_edge(new edge_type());
-        new_edge->m_A = A ;
+
+        new_edge->A() = A;
+        new_edge->B() = B;
+
         A->m_edges.push_back(new_edge);
-        new_edge->m_B = B;
         B->m_edges.push_back(new_edge);
+
         m_edges.push_back(new_edge);
+
         return new_edge;
       }
 
@@ -226,16 +220,17 @@ namespace OpenTissue
         node_ptr_type C( new node_type() );
         node_ptr_type A = edge->A();
         node_ptr_type B = edge->B();
+
         //--- Move all edges to new node C
-        C->m_edges.splice(C->m_edges.end(),A->m_edges);
-        C->m_edges.splice(C->m_edges.end(),B->m_edges);
+        C->m_edges.splice(C->m_edges.end(), A->m_edges);
+        C->m_edges.splice(C->m_edges.end(), B->m_edges);
+
         assert(A->m_edges.empty());
         assert(B->m_edges.empty());
+
         //--- Re-assign node pointers going to A or B
         {
-          edge_iterator e    = C->edge_begin();
-          edge_iterator end  = C->edge_end();
-          for(; e != end; ++e)
+          for(auto &e : C->edges())
           {
             if(e->A() == A)
               e->A() = C;
@@ -247,41 +242,38 @@ namespace OpenTissue
               e->B() = C;
           }
         }
+
         //--- The move might have caused some inconsistency, so
         //--- we need to clean up things, removing self-loops and
         //--- multiple defined edges.
-
-        for(edge_ptr_iterator e = C->edge_ptr_begin(); e != C->edge_ptr_end(); )
+        std::vector<edge_ptr_type> edges_to_remove;
+        for(auto &e : C->edges())
         {
-          if( (*e)->A() == (*e)->B() )//--- self loop test
+          if( e->A() == e->B() )//--- self loop test
           {
-            edge_ptr_type self_loop( *e );
-            remove(self_loop);
-            e = C->edge_ptr_begin();//--- deletion have invalidated iterator...this is a simple workaround
+            edges_to_remove.emplace_back(e);
           }
-          else
-            ++e;
         }
 
-        for(edge_ptr_iterator i=C->edge_ptr_begin();i!=C->edge_ptr_end();++i)
+        auto p = C->edge_begin();
+        for(auto &e : C->edges())
         {
-          edge_ptr_iterator j = i;
-          ++j;
-          for(;j!=C->edge_ptr_end();)
+          ++p;
+          for(auto j = p; j != C->edge_end(); ++j)
           {
-            edge_ptr_iterator k = j;
-            ++j;
-            if(
-              ((*k)->A()==(*i)->A() && (*k)->B()==(*i)->B())
-              ||
-              ((*k)->A()==(*i)->B() && (*k)->B()==(*i)->A())
-              )//--- Redundant edge test
+            auto k = *j;
+            if(( k->A() == e->A() && k->B() == e->B() ) || ( k->A() == e->B() && k->B() == e->A() ))
             {
-              edge_ptr_type redundant( *k );
-              remove(redundant);
+              edges_to_remove.emplace_back(k);
             }
           }
         }
+
+        for(auto &e : edges_to_remove)
+        {
+          this->remove(e);
+        }
+
         //--- Take care of coverage geometry if any...
         //C->m_coverage.insert(C->m_coverage.end(),A->m_coverage.begin(),A->m_coverage.end());
         //A->m_coverage.clear();
@@ -293,25 +285,28 @@ namespace OpenTissue
         //---  Initialize internal data in the new node
         C->m_subtree_size = A->m_subtree_size + B->m_subtree_size;
         if(!A->size_sub_nodes())
+        {
           C->m_sub_nodes.push_back(A);
+        }
         else
         {
           C->m_sub_nodes.splice(C->m_sub_nodes.end(),A->m_sub_nodes);
           remove(A);
         }
         if(!B->size_sub_nodes())
+        {
           C->m_sub_nodes.push_back(B);
+        }
         else
         {
           C->m_sub_nodes.splice(C->m_sub_nodes.end(),B->m_sub_nodes);
           remove(B);
         }
+
         C->m_height = C->max_sub_node_height();
         m_nodes.push_back(C);
         return C;
       }
-
-
 
       /**
       * Remove Subnodes.
@@ -322,14 +317,13 @@ namespace OpenTissue
       void remove_sub_nodes(node_ptr_type node)
       {
         if(!node->size_sub_nodes())
-          return;
-
-        node_ptr_iterator sub_node = node->sub_node_ptr_begin();
-        node_ptr_iterator end      = node->sub_node_ptr_end();
-        for(;sub_node!=end;++sub_node)
         {
-          node_ptr_type target( *sub_node );
-          m_nodes.remove( target );
+          return;
+        }
+
+        for(auto &n : node->sub_nodes())
+        {
+          m_nodes.remove(n);
         }
         node->m_sub_nodes.clear();
       }

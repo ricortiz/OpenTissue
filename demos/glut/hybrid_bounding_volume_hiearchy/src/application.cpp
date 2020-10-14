@@ -13,7 +13,6 @@
 
 #include <OpenTissue/core/math/math_basic_types.h>
 #include <OpenTissue/collision/bvh/bvh.h>
-
 #include <OpenTissue/core/geometry/geometry_hybrid.h>
 
 #include "hbvh_constructor_policy.h"
@@ -64,17 +63,17 @@ public:
 
     OpenTissue::bvh::get_nodes_at_height(m_bvh,1,nodes);
     OpenTissue::gl::ColorPicker(0,.3,0);
-    bvh_type::bv_iterator node = nodes.begin();
-    bvh_type::bv_iterator end  = nodes.end();
-    for (;node!= end;++node )
-      OpenTissue::gl::DrawHybrid( node->volume() , false );
+    for(auto &node : nodes)
+    {
+      OpenTissue::gl::DrawHybrid(node->volume() , false);
+    }
 
     OpenTissue::bvh::get_nodes_at_closest_height(m_bvh,m_height,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
-    node = nodes.begin();
-    end  = nodes.end();
-    for (;node!= end;++node )
-      OpenTissue::gl::DrawHybrid( node->volume(), true );
+    for(auto &node : nodes)
+    {
+      OpenTissue::gl::DrawHybrid(node->volume(), true);
+    }
   }
 
   void do_action(unsigned char choice)
@@ -84,7 +83,7 @@ public:
     case '+':
       m_depth++;
       m_height++;
-      std::cout << "depth = " 
+      std::cout << "depth = "
         << m_depth
         << " height = "
         << m_height
@@ -97,7 +96,7 @@ public:
         m_height--;
         if ( m_height < 1 )
           m_height = 1;
-        std::cout << "depth = " 
+        std::cout << "depth = "
           << m_depth
           << " height = "
           << m_height

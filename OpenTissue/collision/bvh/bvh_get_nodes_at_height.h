@@ -25,19 +25,17 @@ namespace OpenTissue
       template<typename bvh_type, typename bv_ptr_type, typename bv_ptr_container>
       inline unsigned int visit(bvh_type const & bvh, bv_ptr_type bv, unsigned int const & height, bv_ptr_container & nodes )
       {
-        typedef typename bvh_type::bv_ptr_iterator   bv_ptr_iterator;
+        typedef typename bvh_type::bv_iterator   bv_iterator;
 
         using std::max;
 
         unsigned int bv_height = 0;
 
-        bv_ptr_iterator child = bv->child_ptr_begin();
-        bv_ptr_iterator   end = bv->child_ptr_end();
-        for(;child!=end;++child)
+        for(auto &child : *bv)
         {
-          bv_ptr_type ptr( *child );
-          bv_height = max( bv_height, visit(bvh, ptr, height, nodes ) );
+          bv_height = max( bv_height, visit(bvh, child, height, nodes ) );
         }
+
         bv_height = bv_height + 1;
         if ( bv_height == height )
         {

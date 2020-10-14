@@ -13,7 +13,6 @@
 #include <OpenTissue/collision/bvh/bottom_up_constructor/bvh_graph.h>
 #include <OpenTissue/core/math/math_constants.h>
 
-
 #include <cmath>       //Needed for fabs()
 
 namespace OpenTissue
@@ -34,23 +33,22 @@ namespace OpenTissue
     {
     public:
 
-      typedef BVHGraph<bvh_type>                       graph_type;
-      typedef typename graph_type::node_ptr_type       node_ptr_type;
-      typedef typename graph_type::edge_ptr_type       edge_ptr_type;
-      typedef typename graph_type::edge_iterator       edge_iterator;
-      typedef typename graph_type::edge_ptr_iterator   edge_ptr_iterator;
-      typedef typename graph_type::real_type           real_type;
-      typedef typename bvh_type::volume_type           volume_type;
-      typedef typename bvh_type::geometry_type         geometry_type;
+      typedef BVHGraph<bvh_type>                 graph_type;
+      typedef typename graph_type::node_ptr_type node_ptr_type;
+      typedef typename graph_type::edge_ptr_type edge_ptr_type;
+      typedef typename graph_type::edge_iterator edge_iterator;
+      typedef typename graph_type::real_type     real_type;
+      typedef typename bvh_type::volume_type     volume_type;
+      typedef typename bvh_type::geometry_type   geometry_type;
 
     protected:
 
       graph_type * m_graph;  ///< Pointer to graph that is currently being worked on.
 
     public:
-      
+
       virtual ~DefaultPriorityBottomUpPolicy(){};
-      
+
     public:
 
       /**
@@ -64,12 +62,9 @@ namespace OpenTissue
       void init(graph_type & graph)
       {
         m_graph = &graph;
-        edge_ptr_iterator edge = m_graph->edge_ptr_begin();
-        edge_ptr_iterator end  = m_graph->edge_ptr_end();
-        for(;edge != end; ++edge)
+        for(auto &edge : m_graph->edges())
         {
-          edge_ptr_type ptr( *edge );
-          ptr->priority() = priority(ptr);
+          edge->priority() = priority(edge);
         }
         update_heap();
       }
@@ -84,12 +79,9 @@ namespace OpenTissue
       */
       void update(node_ptr_type node)
       {
-        edge_ptr_iterator edge = node->edge_ptr_begin();
-        edge_ptr_iterator end  = node->edge_ptr_end();
-        for(; edge!=end; ++edge)
+        for(auto &edge : m_graph->edges())
         {
-          edge_ptr_type ptr( *edge );
-          ptr->priority() = priority(ptr);
+          edge->priority() = priority(edge);
         }
         update_heap();
       }
@@ -99,7 +91,7 @@ namespace OpenTissue
       *
       * @return     A pointer to the graph edge that should be collapsed.
       */
-      edge_ptr_type  get_next_edge() const{   return edge_ptr_type( *(m_graph->edge_ptr_begin()) ); }
+      edge_ptr_type  get_next_edge() const{   return edge_ptr_type( *(m_graph->edge_begin()) ); }
 
       /**
       * More Edges to Collapse Query.

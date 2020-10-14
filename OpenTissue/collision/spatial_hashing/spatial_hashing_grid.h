@@ -65,17 +65,13 @@ namespace OpenTissue
     protected:
 
       typedef std::vector<data_type*>                               data_ptr_container;
-      typedef typename data_ptr_container::iterator                 data_ptr_iterator;
-      typedef typename data_ptr_container::const_iterator           const_data_ptr_iterator;
+      typedef typename data_ptr_container::iterator                 data_iterator;
+      typedef typename data_ptr_container::const_iterator           const_data_iterator;
 
     protected:
 
       class Cell
       {
-      public:
-
-        typedef boost::indirect_iterator<data_ptr_iterator,data_type> data_iterator;
-
       public:
 
         size_t        m_time_stamp;   ///< Timestamp, used to mark last query when data were stored in the cell.
@@ -123,15 +119,14 @@ namespace OpenTissue
         {
           assert(m_owner);
           if (m_time_stamp == m_owner->m_time_stamp)
-            return data_iterator(m_data.begin());
-          return data_iterator(m_data.end());
+            return m_data.begin();
+          return m_data.end();
         }
 
         data_iterator end()
         {
           assert(m_owner);
-          //return data_iterator(m_data.end());
-          return data_iterator(m_data.begin()+m_next);
+          return m_data.begin()+m_next;
         }
 
       public:

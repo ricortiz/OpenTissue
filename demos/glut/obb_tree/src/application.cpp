@@ -13,14 +13,10 @@
 
 #include <OpenTissue/collision/obb_tree/obb_tree.h>
 #include <OpenTissue/collision/collision_obb_tree_obb_tree.h>
-
 #include <OpenTissue/core/containers/mesh/common/io/mesh_obj_read.h>
 #include <OpenTissue/utility/utility_timer.h>
-
 #include <OpenTissue/collision/bvh/bvh_get_nodes_at_height.h>
 #include <OpenTissue/collision/bvh/bvh_get_nodes_at_depth.h>
-
-
 
 class Application : public OpenTissue::glut::PerspectiveViewApplication
 {
@@ -67,17 +63,17 @@ public:
 
     OpenTissue::bvh::get_nodes_at_height(m_treeA,1,nodes);
     OpenTissue::gl::ColorPicker(0,.7,0);
-    tree_type::bv_iterator node = nodes.begin();
-    tree_type::bv_iterator end = nodes.end();
-    for (;node!=end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawOBB( node->volume(), false );
+    }
 
     OpenTissue::bvh::get_nodes_at_depth(m_treeA,m_depth,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
-    node = nodes.begin();
-    end = nodes.end();
-    for (;node!=end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawOBB( node->volume() , true );
+    }
 
     glPopMatrix();
     glPushMatrix();
@@ -88,17 +84,17 @@ public:
 
     OpenTissue::bvh::get_nodes_at_height(m_treeB,1,nodes);
     OpenTissue::gl::ColorPicker(0,.7,0);
-    node = nodes.begin();
-    end = nodes.end();
-    for (;node!=end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawOBB( node->volume() , false );
+    }
 
     OpenTissue::bvh::get_nodes_at_depth(m_treeB,m_depth,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
-    node = nodes.begin();
-    end = nodes.end();
-    for (;node!=end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawOBB( node->volume() , true );
+    }
     glPopMatrix();
   }
 
@@ -109,9 +105,9 @@ public:
     case '+':
       m_depth++;
       m_height++;
-      std::cout << "depth = " 
+      std::cout << "depth = "
         << m_depth
-        << " height = " 
+        << " height = "
         << m_height
         << std::endl;
       break;
@@ -122,9 +118,9 @@ public:
         m_height--;
         if ( m_height < 1 )
           m_height = 1;
-        std::cout << "depth = " 
+        std::cout << "depth = "
           << m_depth
-          << " height = " 
+          << " height = "
           << m_height
           << std::endl;
       }

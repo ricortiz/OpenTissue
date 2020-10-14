@@ -19,15 +19,15 @@ namespace OpenTissue
     * Runs a traversal on all bv nodes in BVH.
     */
     template<typename bvh_type>
-    class BVTraversalIterator 
-      : public std::iterator<std::forward_iterator_tag, typename bvh_type::bv_type> 
+    class BVTraversalIterator
+      : public std::iterator<std::forward_iterator_tag, typename bvh_type::bv_type>
     {
     public:
 
       typedef typename bvh_type::bv_type          bv_type;
       typedef typename bvh_type::bv_ptr_container bv_ptr_container;
       typedef typename bvh_type::bv_ptr           bv_ptr;
-      typedef typename bvh_type::bv_ptr_iterator  bv_ptr_iterator;
+      typedef typename bvh_type::bv_iterator  bv_iterator;
       typedef typename bvh_type::bv_const_ptr     bv_const_ptr;
 
     protected:
@@ -42,10 +42,10 @@ namespace OpenTissue
       {
         if(bv)
         {
-          bv_ptr_iterator begin = m_bv->child_ptr_begin();
-          bv_ptr_iterator end   = m_bv->child_ptr_end();
-          for(bv_ptr_iterator child = begin; child != end; ++child )
-            m_queue.push_back( *child );
+          for(auto &child : *bv)
+          {
+            m_queue.push_back(child);
+          }
         }
       }
 
@@ -71,10 +71,12 @@ namespace OpenTissue
         }
         m_bv = m_queue.front();
         m_queue.pop_front();
-        bv_ptr_iterator begin = m_bv->child_ptr_begin();
-        bv_ptr_iterator end   = m_bv->child_ptr_end();
-        for(bv_ptr_iterator child = begin; child != end; ++child )
-          m_queue.push_back( *child );
+
+        for(auto &child : *m_bv)
+        {
+          m_queue.push_back(child);
+        }
+
         return (*this);
       }
     };

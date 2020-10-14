@@ -106,7 +106,7 @@ particles as time progresses.
       typedef typename math_types::real_type                 real_type;
       typedef typename math_types::value_traits              value_traits;
 
-      real_type const dt   = boost::numeric_cast<real_type>(time_step);
+      real_type const dt   = OpenTissue::utility::numeric_cast<real_type>(time_step);
       real_type const dtt2 = dt*dt/value_traits::two();
 
       particle_iterator p   = particles.begin();

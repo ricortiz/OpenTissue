@@ -377,10 +377,10 @@ namespace OpenTissue
                 continue;
               cell.m_query_stamp=m_query_stamp;
 
-              typename cell_type::data_iterator Dbegin = cell.begin();
-              typename cell_type::data_iterator Dend = cell.end();
-              for(typename cell_type::data_iterator data = Dbegin;data!=Dend;++data)
-                collision_policy::report( (*data), query, results);
+              for(auto &data : cell)
+              {
+                collision_policy::report(*data, query, results);
+              }
             }
       }
 

@@ -74,10 +74,10 @@ namespace aabb_tree
       }
       else
       {
-        for ( bv_iterator child = bv->child_begin();child!=bv->child_end();++child )
+        for(auto &child : *bv)
         {
-          m = min( m,  child->volume().min() );
-          M = max( M,  child->volume().max() );
+          m = min(m, child->volume().min());
+          M = max(M, child->volume().max());
         }
       }
     }

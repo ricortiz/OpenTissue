@@ -82,17 +82,17 @@ public:
 
     OpenTissue::bvh::get_nodes_at_height(m_bvh,1,nodes);
     OpenTissue::gl::ColorPicker(0,.7,0);
-    bvh_type::bv_iterator node = nodes.begin();
-    bvh_type::bv_iterator end  = nodes.end();
-    for (;node!= end; ++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawAABB(node->volume() , false );
+    }
 
     OpenTissue::bvh::get_nodes_at_depth(m_bvh,m_depth,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
-    node = nodes.begin();
-    end  = nodes.end();
-    for (;node!= end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawAABB( node->volume(), true );
+    }
   }
 
   void do_action(unsigned char choice)
@@ -102,9 +102,9 @@ public:
     case '+':
       m_depth++;
       m_height++;
-      std::cout << "depth = " 
+      std::cout << "depth = "
         << m_depth
-        << "height = " 
+        << "height = "
         << m_height
         << std::endl;
       break;
@@ -115,9 +115,9 @@ public:
         m_height--;
         if ( m_height < 1 )
           m_height = 1;
-        std::cout << "depth = " 
+        std::cout << "depth = "
           << m_depth
-          << "height = " 
+          << "height = "
           << m_height
           << std::endl;
       }
@@ -147,19 +147,18 @@ public:
         unsigned int adj_max = 0;
         unsigned int branch_max = 0;
         unsigned int branch_total = 0;
-        bvh_type::bv_iterator bv  = nodes.begin();
-        bvh_type::bv_iterator end = nodes.end();
-        for(;bv!=end;++bv)
+        for(auto &node : nodes)
         {
-          adj_total += static_cast<unsigned int>( bv->m_adjacency.size() );
-          if(bv->m_adjacency.size()>adj_max)
-            adj_max = static_cast<unsigned int>( bv->m_adjacency.size() );
-          if(bv->m_adjacency.size()!=0 && bv->m_adjacency.size()<adj_min)
-            adj_min = static_cast<unsigned int>( bv->m_adjacency.size() );
-          branch_total += bv->children();
-          if(bv->children()>branch_max)
-            branch_max = bv->children();
+          adj_total += static_cast<unsigned int>( node->m_adjacency.size() );
+          if(node->m_adjacency.size()>adj_max)
+            adj_max = static_cast<unsigned int>( node->m_adjacency.size() );
+          if(node->m_adjacency.size()!=0 && node->m_adjacency.size()<adj_min)
+            adj_min = static_cast<unsigned int>( node->m_adjacency.size() );
+          branch_total += node->children();
+          if(node->children()>branch_max)
+            branch_max = node->children();
         }
+
         std::cout << "Average adjacency list contains " << ((1.0*adj_total)/nodes.size()) << " vertices" << std::endl;
         std::cout << "Minimum adjacency list contains " << adj_min << " vertices" << std::endl;
         std::cout << "Maximum adjacency list contains " << adj_max << " vertices" << std::endl;
@@ -182,11 +181,11 @@ public:
         watch.start();
         m_collision_query.run(m_bvh,m_results);
         watch.stop();
-        std::cout << "Self collision query took " 
-                  << watch() 
-                  << " secs. found " 
+        std::cout << "Self collision query took "
+                  << watch()
+                  << " secs. found "
                   << m_results.size()
-                  << " collision" 
+                  << " collision"
                   << std::endl;
       }
       break;

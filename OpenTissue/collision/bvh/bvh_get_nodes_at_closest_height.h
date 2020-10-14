@@ -28,18 +28,15 @@ namespace OpenTissue
       template<typename bvh_type, typename bv_ptr,typename height_map>
       inline unsigned int compute_heights(bvh_type const & bvh, bv_ptr bv, height_map & heights )
       {
-        typedef typename bvh_type::bv_ptr_iterator       bv_ptr_iterator;
+        typedef typename bvh_type::bv_iterator       bv_iterator;
         typedef typename bvh_type::bv_type               bv_type;
 
         using std::max;
 
         unsigned int bv_height = 0;
-        bv_ptr_iterator child = bv->child_ptr_begin();
-        bv_ptr_iterator end   = bv->child_ptr_end();
-        for( ;child != end; ++child)
+        for(auto &child : *bv)
         {
-          bv_ptr ptr( *child );
-          bv_height = max( bv_height, compute_heights(bvh, ptr, heights ) );
+          bv_height = max( bv_height, compute_heights(bvh, child, heights ) );
         }
         bv_height = bv_height + 1;
         heights[ bv ] = bv_height;
@@ -58,7 +55,7 @@ namespace OpenTissue
       typedef typename bvh_type::bv_ptr                 bv_ptr;
       typedef typename bvh_type::bv_type                bv_type;
       typedef typename bvh_type::bv_ptr_container       internal_bv_ptr_container;
-      typedef typename bvh_type::bv_ptr_iterator        bv_ptr_iterator;
+      typedef typename bvh_type::bv_iterator        bv_iterator;
       typedef typename std::map< bv_ptr, unsigned int>  height_map;
 
       nodes.clear();
@@ -73,8 +70,8 @@ namespace OpenTissue
 
       internal_bv_ptr_container all;
       bvh::get_all_nodes(bvh,all);
-      bv_ptr_iterator bv  = all.begin();
-      bv_ptr_iterator end = all.end();
+      bv_iterator bv  = all.begin();
+      bv_iterator end = all.end();
 
       for(; bv!=end; ++bv )
       {

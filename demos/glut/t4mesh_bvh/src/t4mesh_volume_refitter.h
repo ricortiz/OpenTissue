@@ -112,7 +112,7 @@ public:
     }
     else
     {
-      for ( bv_iterator child = bv->child_begin();child!=bv->child_end();++child )
+      for(auto &child : *bv)
       {
         vector3_type & min_corner = child->volume().min();
         vector3_type & max_corner = child->volume().max();

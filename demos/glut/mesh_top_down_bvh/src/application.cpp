@@ -75,14 +75,14 @@ public:
     bvh_type::bv_iterator node = nodes.begin();
     bvh_type::bv_iterator end = nodes.end();
     for (;node!=end;++node )
-      OpenTissue::gl::DrawAABB( node->volume(), false );
+      OpenTissue::gl::DrawAABB( (*node)->volume(), false );
 
     OpenTissue::bvh::get_nodes_at_depth(m_bvh,m_depth,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
     node = nodes.begin();
     end = nodes.end();
     for (;node!=end;++node )
-      OpenTissue::gl::DrawAABB( node->volume(), true );
+      OpenTissue::gl::DrawAABB( (*node)->volume(), true );
   }
 
   void do_action(unsigned char choice)
@@ -92,9 +92,9 @@ public:
     case '+':
       m_depth++;
       m_height++;
-      std::cout << "depth = " 
+      std::cout << "depth = "
         << m_depth
-        << " height = " 
+        << " height = "
         << m_height
         << std::endl;
       break;
@@ -105,9 +105,9 @@ public:
         m_height--;
         if ( m_height < 1 )
           m_height = 1;
-        std::cout << "depth = " 
+        std::cout << "depth = "
           << m_depth
-          << " height = " 
+          << " height = "
           << m_height
           << std::endl;
       }

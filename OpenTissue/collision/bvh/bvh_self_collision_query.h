@@ -10,7 +10,6 @@
 #include <OpenTissue/configuration.h>
 
 #include <memory> // needed for std::const_pointer_cast
-
 #include <list>
 
 namespace OpenTissue
@@ -47,7 +46,7 @@ namespace OpenTissue
       typedef typename bvh_type::bv_ptr          bv_ptr;
       typedef typename bvh_type::bv_ptr_container     bv_ptr_container;
       typedef typename bvh_type::bv_type              bv_type;
-      typedef typename bv_type::bv_ptr_iterator       bv_ptr_iterator;
+      typedef typename bv_type::bv_iterator       bv_iterator;
 
     public:
 
@@ -85,18 +84,18 @@ namespace OpenTissue
         if( this->curvature_test( bv ) )  //--- collision_policy
           return;
 
-        bv_ptr_iterator a   = bv->child_ptr_begin();
-        bv_ptr_iterator end = bv->child_ptr_end();
-        for(;a!=end;++a)
+        auto a   = bv->begin();
+        auto end = bv->end();
+
+        for(;a != end; ++a)
         {
-          bv_ptr ptr1( *a );
+          bv_ptr ptr1 = *a;
           self_test( ptr1, results );
-          bv_ptr_iterator b = a;
+          bv_iterator b = a;
           ++b;
           for ( ;b != end; ++b )
           {
-            bv_ptr ptr2( *b );
-            tandem_test( ptr1, ptr2, results );
+            tandem_test( ptr1, *b, results );
           }
         }
       }
@@ -141,25 +140,19 @@ namespace OpenTissue
           }
           if (  B->is_leaf()  || ( !A->is_leaf() && (   A->volume().volume() > B->volume().volume()  )  ) )
           {
-            bv_ptr_iterator a   = A->child_ptr_begin();
-            bv_ptr_iterator end = A->child_ptr_end();
-            for(;a!=end;++a)
+            for(auto &child : *A)
             {
-              bv_ptr ptr( *a );
-              Q.push_back( ptr );
+              Q.push_back( child );
               Q.push_back( B );
               adj_queue.push_back( adj );
             }
           }
           else
           {
-            bv_ptr_iterator b   = B->child_ptr_begin();
-            bv_ptr_iterator end = B->child_ptr_end();
-            for(;b!=end;++b)
+            for(auto &child : *B)
             {
-              bv_ptr ptr( *b );
               Q.push_back( A );
-              Q.push_back( ptr );
+              Q.push_back( child );
               adj_queue.push_back( adj );
             }
           }

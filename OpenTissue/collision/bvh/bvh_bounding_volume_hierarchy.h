@@ -33,41 +33,36 @@ namespace OpenTissue
     {
     public:
 
-      typedef BoundingVolumeHierarchy<V,G,T>               bvh_type;
-      typedef V                                            volume_type;
-      typedef G                                            geometry_type;
-      typedef BV<bvh_type, T>                              bv_type;
-      typedef AnnotatedBV<bvh_type, T>                     annotated_bv_type;
-      typedef BVTraversalIterator<bvh_type>                bv_traversal_iterator;
+      typedef BoundingVolumeHierarchy<V,G,T>                      bvh_type;
+      typedef V                                                   volume_type;
+      typedef G                                                   geometry_type;
+      typedef BV<bvh_type, T>                                     bv_type;
+      typedef AnnotatedBV<bvh_type, T>                            annotated_bv_type;
+      typedef BVTraversalIterator<bvh_type>                       bv_traversal_iterator;
 
-      typedef std::shared_ptr<bvh_type>                  bvh_ptr;
-      typedef std::weak_ptr<bvh_type>                    bvh_weak_ptr;
-      typedef std::shared_ptr<bvh_type const>            bvh_const_ptr;
-      typedef std::weak_ptr<bvh_type const>              bvh_const_weak_ptr;
-      typedef std::shared_ptr<volume_type>               volume_ptr;
-      typedef std::shared_ptr<geometry_type>             geometry_ptr;
-      typedef std::shared_ptr<bv_type>                   bv_ptr;
-      typedef std::weak_ptr<bv_type>                     bv_weak_ptr;
-      typedef std::shared_ptr<bv_type const>             bv_const_ptr;
-      typedef std::weak_ptr<bv_type const>               bv_const_weak_ptr;
-      typedef std::shared_ptr<annotated_bv_type>         annotated_bv_ptr;
+      typedef std::shared_ptr<bvh_type>                           bvh_ptr;
+      typedef std::weak_ptr<bvh_type>                             bvh_weak_ptr;
+      typedef std::shared_ptr<bvh_type const>                     bvh_const_ptr;
+      typedef std::weak_ptr<bvh_type const>                       bvh_const_weak_ptr;
+      typedef std::shared_ptr<volume_type>                        volume_ptr;
+      typedef std::shared_ptr<geometry_type>                      geometry_ptr;
+      typedef std::shared_ptr<bv_type>                            bv_ptr;
+      typedef std::weak_ptr<bv_type>                              bv_weak_ptr;
+      typedef std::shared_ptr<bv_type const>                      bv_const_ptr;
+      typedef std::weak_ptr<bv_type const>                        bv_const_weak_ptr;
+      typedef std::shared_ptr<annotated_bv_type>                  annotated_bv_ptr;
 
-      typedef typename std::list<bv_ptr>                   bv_ptr_container;
-      typedef typename bv_ptr_container::iterator          bv_ptr_iterator;
-      typedef typename bv_ptr_container::const_iterator    bv_const_ptr_iterator;
+      typedef typename std::list<bv_ptr>                          bv_ptr_container;
+      typedef typename bv_ptr_container::iterator                 bv_iterator;
+      typedef typename bv_ptr_container::const_iterator           bv_const_iterator;
 
-      typedef typename std::list<annotated_bv_ptr>                    annotated_bv_ptr_container;
-      typedef typename annotated_bv_ptr_container::iterator           annotated_bv_ptr_iterator;
-      typedef typename annotated_bv_ptr_container::const_iterator     annotated_bv_const_ptr_iterator;
+      typedef typename std::list<annotated_bv_ptr>                annotated_bv_ptr_container;
+      typedef typename annotated_bv_ptr_container::iterator       annotated_bv_iterator;
+      typedef typename annotated_bv_ptr_container::const_iterator annotated_bv_const_iterator;
 
-      typedef boost::indirect_iterator<bv_ptr_iterator,bv_type>                   bv_iterator;
-      typedef boost::indirect_iterator<bv_const_ptr_iterator,bv_type>             bv_const_iterator;
-      typedef boost::indirect_iterator<bv_ptr_iterator,annotated_bv_type>         bv_annotated_iterator;
-      typedef boost::indirect_iterator<bv_const_ptr_iterator,annotated_bv_type>   annotated_bv_const_iterator;
-
-      typedef typename std::list<geometry_type>                                   geometry_container;
-      typedef typename geometry_container::iterator                               geometry_iterator;
-      typedef typename geometry_container::const_iterator                         geometry_const_iterator;
+      typedef typename std::list<geometry_type>                   geometry_container;
+      typedef typename geometry_container::iterator               geometry_iterator;
+      typedef typename geometry_container::const_iterator         geometry_const_iterator;
 
     protected:
 
@@ -157,9 +152,9 @@ namespace OpenTissue
       bv_ptr insert( bv_ptr_container const & children, bool const annotated = false )
       {
         //--- Sanity Check
-        bv_const_ptr_iterator begin = children.begin();
-        bv_const_ptr_iterator end   = children.end();
-        for (bv_const_ptr_iterator child = begin; child != end; ++child )
+        bv_const_iterator begin = children.begin();
+        bv_const_iterator end   = children.end();
+        for (bv_const_iterator child = begin; child != end; ++child )
         {
           if ( !( (*child)->m_parent.expired() ) )
             return bv_ptr();
@@ -181,7 +176,7 @@ namespace OpenTissue
         bv->m_owner = this->get_this();
         bv->m_parent.reset();
 
-        for (bv_const_ptr_iterator child = begin; child != end;++child )
+        for (bv_const_iterator child = begin; child != end;++child )
         {
           (*child)->m_parent = bv;
           bv_ptr ptr( *child );

@@ -71,7 +71,7 @@ public:
 
   Application()
     : m_depth(0)
-    , m_height(1) 
+    , m_height(1)
   {
   }
 
@@ -87,17 +87,17 @@ public:
 
     OpenTissue::bvh::get_nodes_at_height(m_bvh,1,nodes);
     OpenTissue::gl::ColorPicker(0,.7,0);
-    bvh_type::bv_iterator node = nodes.begin();
-    bvh_type::bv_iterator end  = nodes.end();
-    for (;node!= end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawAABB(node->volume(), false );
+    }
 
     OpenTissue::bvh::get_nodes_at_closest_height(m_bvh,m_height,nodes);
     OpenTissue::gl::ColorPicker(1,0,0);
-    node = nodes.begin();
-    end  = nodes.end();
-    for (;node!= end;++node )
+    for(auto &node : nodes)
+    {
       OpenTissue::gl::DrawAABB( node->volume() , true );
+    }
 
     OpenTissue::gl::ColorPicker(.7,0,0);
     OpenTissue::gl::DrawPointsT4Mesh(m_coords_A,m_mesh_A,0.95,true);
@@ -134,7 +134,7 @@ public:
       m_height++;
       std::cout << "depth = "
         << m_depth
-        << " height = " 
+        << " height = "
         << m_height
         << std::endl;
       break;
@@ -147,7 +147,7 @@ public:
           m_height = 1;
         std::cout << "depth = "
           << m_depth
-          << " height = " 
+          << " height = "
           << m_height
           << std::endl;
       }

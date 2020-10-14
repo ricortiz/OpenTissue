@@ -570,14 +570,14 @@ value_type ss = static_cast<value_type>(s);
 value_type b = ss + a(0,0) * ss;
 </pre>
 
-Or one of the other types of cast, eg. dynamic_cast. This is however not the OpenTissue way of doing it. In OpenTissue we rely completely on boost::numeric_cast for handling numerical conversions. That is the OpenTissue way to handle it would be something like this
+Or one of the other types of cast, eg. dynamic_cast. This is however not the OpenTissue way of doing it. In OpenTissue we rely completely on OpenTissue::utility::numeric_cast for handling numerical conversions. That is the OpenTissue way to handle it would be something like this
 
 <pre>
-value_type ss = boost::numeric_cast<value_type>(s);
+value_type ss = OpenTissue::utility::numeric_cast<value_type>(s);
 value_type b = ss + a(0,0) * ss;
 </pre>
 
-The reason is that boost::numeric_cast is more safe, and it performs boundary checks in debug mode.
+The reason is that OpenTissue::utility::numeric_cast is more safe, and it performs boundary checks in debug mode.
 
 ## Use Assertions
 

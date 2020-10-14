@@ -9,10 +9,11 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <OpenTissue/core/containers/mesh/mesh.h>
+
 #include <iostream>
 #include <queue>
 #include <map>
-#include <OpenTissue/core/containers/mesh/mesh.h>
 
 namespace OpenTissue
 {

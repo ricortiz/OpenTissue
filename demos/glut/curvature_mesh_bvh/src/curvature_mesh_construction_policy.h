@@ -81,7 +81,7 @@ public:
   void init(graph_type & graph)
   {
     OpenTissue::bvh::BinaryMatchBottomUpPolicy<bvh_type>::init(graph);
-    for(node_iterator node = graph.node_begin();node!=graph.node_end();++node)
+    for(auto &node : graph.nodes())
     {
       assert(node->bv()->is_leaf());
 
@@ -89,7 +89,7 @@ public:
 
       face_type * geometry = *(bv->geometry_begin());
 
-      mesh_type::face_vertex_circulator v(*geometry),vend;
+      mesh_type::face_vertex_circulator v(*geometry), vend;
       for(;v!=vend;++v)
       {
         bv->m_adjacency.push_back(  &(*v) );
@@ -117,24 +117,26 @@ public:
       //--- Add the union of all child adjacency information to the new bv
       //---
       bv_ptr bv = node->bv();
-      for(bv_iterator child = bv->child_begin();child!=bv->child_end();++child)
+      for(auto &child : *bv)
       {
-        for(adjacency_iterator adj=child->m_adjacency.begin();adj!=child->m_adjacency.end();++adj)
+        for(auto &adj : child->m_adjacency)
         {
-          adjacency_iterator lookup = find(bv->m_adjacency.begin(),bv->m_adjacency.end(), (*adj) );
-          if(lookup==bv->m_adjacency.end())
-            bv->m_adjacency.push_back( (*adj) );
-          (*adj)->m_tag = 0;
+          auto lookup = find(bv->m_adjacency.begin(), bv->m_adjacency.end(), adj);
+          if(lookup == bv->m_adjacency.end())
+          {
+            bv->m_adjacency.push_back(adj);
+          }
+          adj->m_tag = 0;
         }
       }
       //---
       //--- for each vertex count the number of neighboring faces lying in the surface region
       //---
-      for(geometry_iterator face = node->coverage().begin();face!=node->coverage().end();++face)
+      for(auto &face : node->coverage())
       {
-        (*face)->m_tag = 1;
-        mesh_type::face_vertex_circulator v( *(*face) ),vend;
-        for( ; v!=vend; ++v )
+        face->m_tag = 1;
+        mesh_type::face_vertex_circulator v(*face),vend;
+        for( ; v != vend; ++v )
           ++v->m_tag;
       }
       //--- Remove vertices where the number of total neighboring faces is equal to
@@ -143,17 +145,17 @@ public:
       //---   These vertices must lie inside the surface region, thus they are not
       //---   contributing to the boundary information.
       //---
-      for(adjacency_iterator adj=bv->m_adjacency.begin();adj!=bv->m_adjacency.end();)
+      auto i_adj = bv->m_adjacency.begin();
+      for(auto &adj : bv->m_adjacency)
       {
-        adjacency_iterator target = adj;
-        ++adj;
-        (*target)->m_tag = valency(*(*target)) - (*target)->m_tag;
-        assert((*target)->m_tag>=0);
-        if((*target)->m_tag==0)
+        adj->m_tag = valency(*adj) - adj->m_tag;
+        assert(adj->m_tag >= 0);
+        if(adj->m_tag == 0)
         {
-          //--- this means that verex only had neighboring faces lying in the surface region
-          bv->m_adjacency.erase(target);
+          //--- this means that vertex only had neighboring faces lying in the surface region
+          bv->m_adjacency.erase(i_adj);
         }
+        ++i_adj;
       }
       //--- Boundary may still contain redudant information, clearly if a vertex
       //--- have more than 2 neighboring faces lying outside the surface region, it
@@ -168,20 +170,23 @@ public:
       //--- Vertices with exactly two neighboring faces outside the surface region, may
       //--- be removed if the remaing vertices in the adjacency list indicates that
       //--- the two faces are neighbors.
-      for(adjacency_iterator adj=bv->m_adjacency.begin();adj!=bv->m_adjacency.end();)
+      for(auto &adj : bv->m_adjacency)
       {
-        adjacency_iterator target = adj;
-        ++adj;
-        if((*target)->m_tag==1)
-          bv->m_adjacency.erase(target);
-        else if((*target)->m_tag==2)
+        if(adj->m_tag==1)
+        {
+          bv->m_adjacency.erase(i_adj);
+        }
+        else if(adj->m_tag==2)
         {
           //--- sorry not implemented!!!
         }
+        ++i_adj;
       }
       //--- reset face tages in coverage
-      for(geometry_iterator face = node->coverage().begin();face!=node->coverage().end();++face)
-        (*face)->m_tag = 0;
+      for(auto &face : node->coverage())
+      {
+        face->m_tag = 0;
+      }
     }
   }
 

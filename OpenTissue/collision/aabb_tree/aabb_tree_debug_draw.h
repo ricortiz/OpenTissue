@@ -29,10 +29,10 @@ namespace OpenTissue
       typename bvh_type::bv_ptr_container nodes;
       OpenTissue::bvh::get_leaf_nodes(aabb_tree.m_bvh,nodes);
 
-      typename bvh_type::bv_iterator node = nodes.begin();
-      typename bvh_type::bv_iterator end  = nodes.end();
-      for (;node!= end;++node )
-        node->volume().draw( GL_LINE_LOOP );
+      for(auto &node : nodes)
+      {
+        node->volume().draw(GL_LINE_LOOP);
+      }
     }
 
   } // namespace aabb_tree
