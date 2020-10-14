@@ -13,8 +13,8 @@
 #include <OpenTissue/core/function/function_signed_distance_function.h>
 #include <OpenTissue/utility/utility_class_id.h>
 
-#include <OpenTissue/core/containers/mesh/polymesh/polymesh.h> 
-#include <OpenTissue/core/containers/mesh/common/util/mesh_make_cylinder.h> 
+#include <OpenTissue/core/containers/mesh/polymesh/polymesh.h>
+#include <OpenTissue/core/containers/mesh/common/util/mesh_make_cylinder.h>
 
 #include <cassert>
 #include <cmath>  // Needed for acos in compute_surface_points
@@ -249,7 +249,7 @@ namespace OpenTissue
         using std::sqrt;
         real_type const f = evaluate(x);
         real_type const sign = OpenTissue::math::sgn(f);
-        return real_type(boost::numeric_cast<real_type>(0.1)*sign*sqrt(sign*f));
+        return real_type(OpenTissue::utility::numeric_cast<real_type>(0.1)*sign*sqrt(sign*f));
       }
 
       /**

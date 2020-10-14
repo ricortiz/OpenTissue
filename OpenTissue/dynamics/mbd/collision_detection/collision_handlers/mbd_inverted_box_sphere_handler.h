@@ -149,7 +149,7 @@ namespace OpenTissue
             // such that
             //
             //   f( a ) < f( b ) < f( c )
-            //           
+            //
             size_type permutation[3] = {0,1,2};
             for(size_type i=1;i<3;++i)
             {
@@ -169,7 +169,7 @@ namespace OpenTissue
             // center position
             int sign[3];
             for(size_type i=0;i<3;++i)
-              sign[i] = boost::numeric_cast<int>( (c(i)<value_traits::zero())?-value_traits::one():value_traits::one() );
+              sign[i] = OpenTissue::utility::numeric_cast<int>( (c(i)<value_traits::zero())?-value_traits::one():value_traits::one() );
 
             //--- Determine how many sides of the box that intersect the sphere
             size_type case_idx = 0;
@@ -248,7 +248,7 @@ namespace OpenTissue
             info.get_contacts()->push_back(contact);
             return (distance  <  -info.get_envelope() );
           }
-          return false;          
+          return false;
         }
 
         static bool mirrowed_test(

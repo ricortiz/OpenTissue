@@ -115,8 +115,8 @@ namespace OpenTissue
 
     protected:
 
-      class vector3_iterator 
-        : public std::iterator<std::forward_iterator_tag, vector3_type> 
+      class vector3_iterator
+        : public std::iterator<std::forward_iterator_tag, vector3_type>
       {
       protected:
 
@@ -225,7 +225,7 @@ namespace OpenTissue
             std::swap(m_geometry[current],m_geometry[last]);
             --last;
           }
-          else 
+          else
           {
             ++current;
           }
@@ -237,7 +237,7 @@ namespace OpenTissue
         size_t last_right  = set.m_right;
 
         left_subset  = partition_type( this, first_left,  last_left  );
-        right_subset = partition_type( this, first_right, last_right );       
+        right_subset = partition_type( this, first_right, last_right );
       }
 
       void split(partition_type & partition)
@@ -323,7 +323,7 @@ namespace OpenTissue
         //    std::swap(m_geometry[i],m_geometry[last]);
         //    --last;
         //  }
-        //  else 
+        //  else
         //  {
         //    ++i;
         //  }
@@ -342,7 +342,7 @@ namespace OpenTissue
 
         if(partition.annotated())
         {
-          annotated_bv_ptr A = boost::static_pointer_cast<annotated_bv_type>(bv);
+          annotated_bv_ptr A = std::static_pointer_cast<annotated_bv_type>(bv);
           A->insert( m_geometry[partition.m_left] );
         }
         vector3_iterator begin( this, partition.m_left     );

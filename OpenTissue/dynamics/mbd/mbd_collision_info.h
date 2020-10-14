@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp>  // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>  // needed for OpenTissue::utility::numeric_cast
 
 namespace OpenTissue
 {
@@ -59,7 +59,7 @@ namespace OpenTissue
         , body_type * B
         , real_type const & envelope
         , material_type * material
-        , contact_container * contacts        
+        , contact_container * contacts
         )
         : m_A(A)
         , m_B(B)
@@ -75,7 +75,7 @@ namespace OpenTissue
        * This method flip bodies A and B. This is usefull when
        * mirrowing an invokation of a collision handler.
        */
-      void flip_bodies() 
+      void flip_bodies()
       {
         body_type * tmp = m_A;
         m_A = m_B;

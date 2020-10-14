@@ -11,7 +11,7 @@
 
 #include <OpenTissue/core/math/math_value_traits.h>
 
-#include <boost/cast.hpp> // Needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // Needed for OpenTissue::utility::numeric_cast
 
 #include <fstream>
 #include <stdexcept>
@@ -23,7 +23,7 @@ namespace OpenTissue
     namespace big
     {
       /**
-      * Save a matrix to a ASCII text file (Fortran format). See 
+      * Save a matrix to a ASCII text file (Fortran format). See
       * Matlab Function reference, dlmread, dlmwrite.
       *
       * @param A                 The matrix that should be written.
@@ -38,9 +38,9 @@ namespace OpenTissue
         typedef typename matrix_type::value_type                   value_type;
         typedef          OpenTissue::math::ValueTraits<value_type> value_traits;
 
-        static value_type const tiny = boost::numeric_cast<value_type>(1e-10);
+        static value_type const tiny = OpenTissue::utility::numeric_cast<value_type>(1e-10);
 
-        std::ofstream file;        
+        std::ofstream file;
         file.open( filename.c_str() );
         if ( !file.is_open() || file.bad() )
         {

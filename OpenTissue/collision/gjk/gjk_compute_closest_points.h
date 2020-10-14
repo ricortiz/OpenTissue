@@ -33,62 +33,62 @@ namespace OpenTissue
     * Given two objects represented by the two sets \f$A\f$ and \f$B\f$
     * then the two objects overlap if there exist at least one
     * \f$a \in A\f$ and one \f$b \in B\f$ such that
-    * 
+    *
     *   \f[
-    *     a - b = 0  
+    *     a - b = 0
     *   \f]
-    * 
+    *
     * Thus one way to test for intersection of the two objects is to form the set
-    * 
+    *
     *   \f[
-    *     A \ominus B = \{ a - b | a \in A, b \in B \}  
+    *     A \ominus B = \{ a - b | a \in A, b \in B \}
     *   \f]
-    * 
+    *
     * and see if
-    * 
+    *
     *   \f[
-    *     0 \in A \ominus B  
+    *     0 \in A \ominus B
     *   \f]
-    * 
+    *
     * The set \f$A \ominus B\f$ is called the Minokowsky difference. Clearly if the two
     * objects are separated one must have that
-    * 
+    *
     *   \f[
-    *     a - b \neq 0  
+    *     a - b \neq 0
     *   \f]
-    * 
+    *
     * holds for all \f$a \in A\f$ and all \f$b \in B\f$, or equivalently that
-    * 
+    *
     *   \f[
-    *     0 \notin A \ominus B  
+    *     0 \notin A \ominus B
     *   \f]
-    * 
+    *
     * Assume that the two objects are separated then one may want to know the minimum
     * distance between the two objects. That is one wants to find
-    * 
+    *
     *   \f[
     *     (a^*, b^*) = \min_{a \in A, b \in B} \norm{(a-b)} = \min_{y \in A \ominus B} \norm{(y)}
     *   \f]
-    * 
+    *
     * or equivalently
-    * 
+    *
     *   \f[
     *     y^* = \min_{y \in A \ominus B} \norm{(y)}
     *   \f]
-    * 
+    *
     * Thus seeking the minimum distance between the two object is equivalent to
     * finding the minimum norm point in the set \f$A \ominus B\f$. Or said differently to
     * find a point in \f$A \ominus B\f$ that is closest to zero.
-    * 
+    *
     * Observe that if we find such a point \f$y^* \in A \ominus B\f$ then we implicitly
     * also know the two closest points between \f$A\f$ and \f$B\f$, since \f$y^*\f$ is defined as
     * \f$y^* = a^* - b^*\f$ for some \f$a^* \in A\f$ and some \f$b^* \in B\f$.
-    * 
+    *
     * The important thing to realise is that the problem of finding the minimum
     * distance between two sets \f$A\f$ and \f$B\f$ is equivalent to the problem of finding
     * the distance between a point and the set \f$A \ominus B\f$. Thus we have replaced
     * the original problem with a simple one.
-    * 
+    *
     * One should notice that the solution may not be unique since there could exist
     * multiple \f$y^* \in A \ominus B\f$ that yield the same minimum distance. Further a
     * solution may not exist if \f$0 \in A \ominus B\f$.
@@ -111,9 +111,9 @@ namespace OpenTissue
     *
     * @param iterations           Upon return this argument holds the number of iterations used.
     * @param status               The status code of the algorithm.
-    * @param absolute_tolerance   
-    * @param relative_tolerance   
-    * @param stagnation_tolerance   
+    * @param absolute_tolerance
+    * @param relative_tolerance
+    * @param stagnation_tolerance
     * @param max_iterations
     *
     * @tparam transform_type           This template argument provides a coordinate transformation
@@ -122,7 +122,7 @@ namespace OpenTissue
     *                                  of the translation. The OpenTissue CoordSys template class can be
     *                                  used for creating the type.
     * @tparam simplex_solver_policy    This template argument provides the algorithm with a policy for
-    *                                  how to deal with the simplex approximation. 
+    *                                  how to deal with the simplex approximation.
     */
     template<
       typename transform_type
@@ -130,7 +130,7 @@ namespace OpenTissue
       , typename support_functor2
       , typename simplex_solver_policy
     >
-    inline void compute_closest_points( 
+    inline void compute_closest_points(
       transform_type const & transform_A
     , support_functor1 const & support_function_A
     , transform_type const & transform_B
@@ -156,13 +156,13 @@ namespace OpenTissue
       typedef typename transform_type::value_traits  value_traits;
       typedef          Simplex<V>                    simplex_type;
 
-      if( absolute_tolerance < value_traits::zero() ) 
+      if( absolute_tolerance < value_traits::zero() )
         throw std::invalid_argument( "absolute tolerance must be non-negative" );
-      if( relative_tolerance < value_traits::zero() ) 
+      if( relative_tolerance < value_traits::zero() )
         throw std::invalid_argument( "relative tolerance must be non-negative" );
-      if( stagnation_tolerance < value_traits::zero() ) 
+      if( stagnation_tolerance < value_traits::zero() )
         throw std::invalid_argument( "stagnation tolerance must be non-negative" );
-      if( max_iterations <= 0u ) 
+      if( max_iterations <= 0u )
         throw std::invalid_argument( "max_iterations must be positive" );
 
       distance   = value_traits::infinity();
@@ -181,7 +181,7 @@ namespace OpenTissue
       V v = V( value_traits::zero(), value_traits::zero(), value_traits::zero() );
 
 
-      // Lower error bound on distance from origin to closest point 
+      // Lower error bound on distance from origin to closest point
       T mu = value_traits::zero();
 
       // We use a maximum iteration count to guard against infinite loops.
@@ -328,7 +328,7 @@ namespace OpenTissue
       , typename support_functor1
       , typename support_functor2
     >
-    inline void compute_closest_points( 
+    inline void compute_closest_points(
       transform_type const & transform_A
     , support_functor1 const & A
     , transform_type const & transform_B
@@ -345,11 +345,11 @@ namespace OpenTissue
 
       size_t       iterations           = 0u;
       size_t const max_iterations       = 100u;
-      T      const absolute_tolerance   = boost::numeric_cast<T>(10e-6);
-      T      const relative_tolerance   = boost::numeric_cast<T>(10e-10); // Don't be too greedy!
-      T      const stagnation_tolerance = boost::numeric_cast<T>(10e-16);
+      T      const absolute_tolerance   = OpenTissue::utility::numeric_cast<T>(10e-6);
+      T      const relative_tolerance   = OpenTissue::utility::numeric_cast<T>(10e-10); // Don't be too greedy!
+      T      const stagnation_tolerance = OpenTissue::utility::numeric_cast<T>(10e-16);
 
-      compute_closest_points( 
+      compute_closest_points(
         transform_A
         , A
         , transform_B

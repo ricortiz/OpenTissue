@@ -12,6 +12,7 @@
 #include "generate_problem.h"
 
 #include <OpenTissue/utility/utility_timer.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 #include <OpenTissue/core/math/big/big_types.h>
 #include <OpenTissue/core/math/big/io/big_matlab_write.h>
 #include <OpenTissue/core/math/optimization/optimization_bfgs.h>
@@ -75,7 +76,7 @@ public:
 * @param N            The problem size.
 * @param T            Number of test cases that should be run (i.e. problems to solve).
 */
-inline void benchmark( 
+inline void benchmark(
                         std::string const & prefix
                       , std::string const & matlab_filename
                       , std::string const & latex_filename
@@ -134,23 +135,23 @@ inline void benchmark(
     matrix_type A;
     vector_type x,b,l,u, profile;
 
-    generate_problem(N, A, b, l, u ); 
+    generate_problem(N, A, b, l, u );
 
     F f(A,b);
     nabla_F nabla_f(A,b);
 
     size_type max_iteration_limit  = 1000;
-    real_type absolute_tolerance   = boost::numeric_cast<real_type>(1e-6);
-    //real_type relative_tolerance   = boost::numeric_cast<real_type>(0.000000001);
-    //real_type stagnation_tolerance = boost::numeric_cast<real_type>(0.000000001);
-    real_type relative_tolerance   = boost::numeric_cast<real_type>(0.0);
-    real_type stagnation_tolerance = boost::numeric_cast<real_type>(0.0);
+    real_type absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(1e-6);
+    //real_type relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
+    //real_type stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
+    real_type relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.0);
+    real_type stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.0);
     size_t status                  = 0;
     size_type iteration            = 0;
-    real_type accuracy             = boost::numeric_cast<real_type>(0.0);
+    real_type accuracy             = OpenTissue::utility::numeric_cast<real_type>(0.0);
 
-    real_type alpha                = boost::numeric_cast<real_type>(0.0001);
-    real_type beta                 = boost::numeric_cast<real_type>(0.5);
+    real_type alpha                = OpenTissue::utility::numeric_cast<real_type>(0.0001);
+    real_type beta                 = OpenTissue::utility::numeric_cast<real_type>(0.5);
 
     x.resize(N, false);
     x.clear();
@@ -181,7 +182,7 @@ inline void benchmark(
       f
       , nabla_f
       , H
-      , x 
+      , x
       , max_iteration_limit
       , absolute_tolerance
       , relative_tolerance

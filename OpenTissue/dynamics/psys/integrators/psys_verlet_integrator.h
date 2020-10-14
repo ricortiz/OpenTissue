@@ -56,9 +56,9 @@ namespace OpenTissue
         system.compute_forces();
         system.compute_accelerations();
 
-        static real_type zero = boost::numeric_cast<real_type>(0.0);
-        static real_type one = boost::numeric_cast<real_type>(1.0);
-        real_type dt = boost::numeric_cast < real_type > ( timestep );
+        static real_type zero = OpenTissue::utility::numeric_cast<real_type>(0.0);
+        static real_type one = OpenTissue::utility::numeric_cast<real_type>(1.0);
+        real_type dt = OpenTissue::utility::numeric_cast < real_type > ( timestep );
         real_type inv_dt  = dt > zero ? one/dt : one;
         real_type dt_sqr  = dt*dt;
 

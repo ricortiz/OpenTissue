@@ -25,12 +25,13 @@ namespace ublas = boost::numeric::ublas;
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
-/** 
+/**
 * Make a immutable triangular adaptor from a matrix
 *
-* \usage: 
+* \usage:
 <code>
 A = triangular< lower >(B);
 A = triangular(B, lower());
@@ -43,10 +44,10 @@ triangular(const MATRIX & A, const TYPE& uplo = TYPE())
   return ublas::triangular_adaptor<const MATRIX, TYPE>(A);
 }
 
-/** 
+/**
 * Make a immutable banded adaptor from a matrix
 *
-* \usage: 
+* \usage:
 <code>
 A = banded(B, lower, upper);
 </code>
@@ -58,10 +59,10 @@ banded(const MATRIX & A, const size_t lower, const size_t upper)
   return ublas::banded_adaptor<const MATRIX>(A, lower, upper);
 }
 
-/** 
+/**
 * Make a immutable symmetric adaptor from a matrix
 *
-* \usage: 
+* \usage:
 <code>
 A = symmetric< lower >(B);
 A = symmetric(B, lower());
@@ -75,8 +76,8 @@ symmetric(const MATRIX & A, const TYPE& uplo = TYPE())
 }
 
 
-/** 
-* Fill lower triangular matrix L 
+/**
+* Fill lower triangular matrix L
 */
 template < class MATRIX >
 void fill_symm(MATRIX & L, const size_t bands = std::numeric_limits<size_t>::max() )
@@ -86,9 +87,9 @@ void fill_symm(MATRIX & L, const size_t bands = std::numeric_limits<size_t>::max
   assert(L.size1() == L.size2());
 
   size_type size = L.size1();
-  for (size_type i=0; i<size; i++) 
+  for (size_type i=0; i<size; i++)
   {
-    for (size_type j = ((i>bands)?(i-bands):0); j<i; j++) 
+    for (size_type j = ((i>bands)?(i-bands):0); j<i; j++)
     {
       L(i,j) = 1 + (1.0 + i)/(1.0 + j) + 1.0 / (0.5 + i - j);
     }
@@ -109,7 +110,7 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
   typedef typename matrix_type::value_type real_type;
   typedef typename matrix_type::size_type  size_type;
 
-  real_type const tol = boost::numeric_cast<real_type>(0.01);
+  real_type const tol = OpenTissue::utility::numeric_cast<real_type>(0.01);
 
   size_type const m = A.size1();
   size_type const n = A.size2();
@@ -181,12 +182,12 @@ BOOST_AUTO_TEST_CASE(Gunter_Winkler_Konstantin_Kutzkow_Test)
     A = ublas::prod(T, trans(T));
     b = prod( A, y);
     size_t res = OpenTissue::math::big::cholesky_decompose(A, L);
-    
+
     BOOST_CHECK( res == 0u );
-    
+
     x = b;
     OpenTissue::math::big::cholesky_solve(L, x, ublas::lower());
-    //std::cout << res << ": " 
+    //std::cout << res << ": "
     //          << ublas::norm_inf(L-T) << " "
     //          << ublas::norm_2(x-y) << " "
     //          << " (deco: " << watch1() << " sec)"
@@ -216,12 +217,12 @@ BOOST_AUTO_TEST_CASE(Gunter_Winkler_Konstantin_Kutzkow_Test)
     A = triangular<ublas::lower>( ublas::prod(T, trans(T)) );
     b = prod( symmetric<ublas::lower>(A), y);
     size_t res = OpenTissue::math::big::cholesky_decompose(A, L);
-    
+
     BOOST_CHECK( res == 0u );
 
     x = b;
     OpenTissue::math::big::cholesky_solve(L, x, ublas::lower());
-    //std::cout << res << ": " 
+    //std::cout << res << ": "
     //          << ublas::norm_inf(L-T) << " "
     //          << ublas::norm_2(x-y) << " "
     //          << " (deco: " << watch1() << " sec)"
@@ -252,12 +253,12 @@ BOOST_AUTO_TEST_CASE(Gunter_Winkler_Konstantin_Kutzkow_Test)
     A = banded( ublas::prod(T, trans(T)), bands, 0 );
     b = prod( symmetric<ublas::lower>(A), y);
     size_t res = OpenTissue::math::big::cholesky_decompose(A, L);
-    
+
     BOOST_CHECK( res == 0u );
-   
+
     x = b;
     OpenTissue::math::big::cholesky_solve(L, x, ublas::lower());
-    //std::cout << res << ": " 
+    //std::cout << res << ": "
     //          << ublas::norm_inf(L-T) << " "
     //          << ublas::norm_2(x-y) << " "
     //          << " (deco: " << watch1() << " sec)"
@@ -295,7 +296,7 @@ BOOST_AUTO_TEST_CASE(random_test_case)
 
     OpenTissue::math::Random<double> value(0.0,1.0);
     for(size_t i=0;i<R.size1();++i)
-    { 
+    {
       b(i) = value();
       x(i) = value();
       y(i) = value();

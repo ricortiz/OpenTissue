@@ -16,6 +16,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 typedef OpenTissue::math::default_math_types		  			                 math_types;
@@ -34,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(opentissue_kinematics_inverse_joint_parameters);
 
 BOOST_AUTO_TEST_CASE(test_cases)
 {
-  real_type const tol = boost::numeric_cast<real_type>(0.01);
+  real_type const tol = OpenTissue::utility::numeric_cast<real_type>(0.01);
 
   skeleton_type skeleton;
   bone_type * b[4];
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_cases)
 
   for(size_t j=0u;j<3u;++j)
   {
-    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[2]), j, value_traits::pi());  
+    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[2]), j, value_traits::pi());
     b[2]->box_limits().min_limit(j) = -value_traits::pi_quarter();
     b[2]->box_limits().max_limit(j) =  value_traits::pi_quarter();
   }
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_cases)
   BOOST_CHECK(b[3]->type() == bone_traits::ball_type );
   for(size_t j=0u;j<3u;++j)
   {
-    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]), j, -value_traits::pi());    
+    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]), j, -value_traits::pi());
     b[3]->box_limits().min_limit(j) = -value_traits::pi_half();
     b[3]->box_limits().max_limit(j) =  value_traits::pi_half();
   }
@@ -154,9 +155,9 @@ BOOST_AUTO_TEST_CASE(test_cases)
 
   OpenTissue::kinematics::inverse::set_joint_parameters( skeleton, theta );
 
-      
-  
-  
+
+
+
   BOOST_CHECK_CLOSE(OpenTissue::kinematics::inverse::ACCESSOR::unsynch_get_theta( *(b[0]), 0), value_traits::one(), tol );
   BOOST_CHECK_CLOSE(b[0]->box_limits().min_limit(0), -value_traits::one(), tol );
   BOOST_CHECK_CLOSE(b[0]->box_limits().max_limit(0), value_traits::one(), tol );

@@ -11,7 +11,7 @@
 
 #include <OpenTissue/collision/bvh/bvh.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 template<typename bvh_type_,typename mesh_type_>
 class ConnectedMeshTopDownPolicy
@@ -207,7 +207,7 @@ protected:
     {
       assert(partition.size()==1);
 
-      annotated_bv_ptr A = boost::static_pointer_cast<annotated_bv_type>(bv);
+      annotated_bv_ptr A = std::static_pointer_cast<annotated_bv_type>(bv);
 
       A->insert( partition.m_face );
     }
@@ -261,4 +261,4 @@ protected:
 };
 
 // CONNECTED_MESH_TOP_DOWN_POLICY_H
-#endif 
+#endif

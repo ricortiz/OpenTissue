@@ -48,7 +48,7 @@ namespace OpenTissue
 
       /**
        * Get Next Time Stamp.
-       * This methods computes a new global unique time stamp. It should 
+       * This methods computes a new global unique time stamp. It should
        * be invoked by caller whenever a new time-stamp is wanted. Notice
        * this implementation technique keeps everything in headers only!
        *
@@ -111,9 +111,9 @@ namespace OpenTissue
 
       template<typename result_container>
       bool report(coordsys_type const & A2B, bv_ptr bvA, bv_ptr bvB, result_container & results)
-      {       
-        annotated_bv_ptr  nodeA = boost::static_pointer_cast<annotated_bv_type>(bvA);
-        annotated_bv_ptr  nodeB = boost::static_pointer_cast<annotated_bv_type>(bvB);
+      {
+        annotated_bv_ptr  nodeA = std::static_pointer_cast<annotated_bv_type>(bvA);
+        annotated_bv_ptr  nodeB = std::static_pointer_cast<annotated_bv_type>(bvB);
 
         face_ptr_type A = *(nodeA->geometry_begin());
         face_ptr_type B = *(nodeB->geometry_begin());

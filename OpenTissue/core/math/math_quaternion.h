@@ -252,8 +252,8 @@ namespace OpenTissue
 
         value_type teta = rad/value_traits::two();
 
-        value_type cteta = boost::numeric_cast<value_type>( cos(teta) );
-        value_type steta = boost::numeric_cast<value_type>( sin(teta) );
+        value_type cteta = OpenTissue::utility::numeric_cast<value_type>( cos(teta) );
+        value_type steta = OpenTissue::utility::numeric_cast<value_type>( sin(teta) );
         m_s = cteta;
 
         m_v = unit(axe) * steta;
@@ -280,10 +280,10 @@ namespace OpenTissue
         using std::sin;
 
         value_type teta  = rad/value_traits::two();
-        value_type cteta = boost::numeric_cast<value_type>( cos(teta) );
-        value_type steta = boost::numeric_cast<value_type>( sin(teta) );
+        value_type cteta = OpenTissue::utility::numeric_cast<value_type>( cos(teta) );
+        value_type steta = OpenTissue::utility::numeric_cast<value_type>( sin(teta) );
 
-        m_s    = cteta; 
+        m_s    = cteta;
         m_v(0) = steta;
         m_v(1) = value_traits::zero();
         m_v(2) = value_traits::zero();
@@ -300,8 +300,8 @@ namespace OpenTissue
         using std::sin;
 
         value_type teta  = rad/value_traits::two();
-        value_type cteta = boost::numeric_cast<value_type>( cos(teta) );
-        value_type steta = boost::numeric_cast<value_type>( sin(teta) );
+        value_type cteta = OpenTissue::utility::numeric_cast<value_type>( cos(teta) );
+        value_type steta = OpenTissue::utility::numeric_cast<value_type>( sin(teta) );
 
         m_s    = cteta;
         m_v(0) = value_traits::zero();
@@ -320,8 +320,8 @@ namespace OpenTissue
         using std::sin;
 
         value_type teta  = rad/value_traits::two();
-        value_type cteta = boost::numeric_cast<value_type>( cos(teta) );
-        value_type steta = boost::numeric_cast<value_type>( sin(teta) );
+        value_type cteta = OpenTissue::utility::numeric_cast<value_type>( cos(teta) );
+        value_type steta = OpenTissue::utility::numeric_cast<value_type>( sin(teta) );
 
         m_s    = cteta;
         m_v(0) = value_traits::zero();
@@ -405,7 +405,7 @@ namespace OpenTissue
 
     template<typename T>
     inline T const length(Quaternion<T> const & q)
-    { 
+    {
       using std::sqrt;
       return sqrt( q*q );
     }
@@ -447,8 +447,8 @@ namespace OpenTissue
       if(q.s()==value_traits::one() && is_zero(q.v()))
         return Quaternion<T>(value_traits::zero(),value_traits::zero(),value_traits::zero(),value_traits::zero());
 
-      T teta = boost::numeric_cast<T>( acos(q.s()) );
-      T st   = boost::numeric_cast<T>( sin(teta)   );
+      T teta = OpenTissue::utility::numeric_cast<T>( acos(q.s()) );
+      T st   = OpenTissue::utility::numeric_cast<T>( sin(teta)   );
       return Quaternion<T>( value_traits::zero(), q.v()*(teta/st) );
     }
 
@@ -482,9 +482,9 @@ namespace OpenTissue
 
       //--- teta^2 x^2 + teta^2 y^2 +teta^2 z^2 =
       //--- teta^2 (x^2 + y^2 + z^2) = teta^2
-      T teta = boost::numeric_cast<T>(  sqrt(q.v() *q.v())  );
-      T ct   = boost::numeric_cast<T>(  cos(teta)           );
-      T st   = boost::numeric_cast<T>(  sin(teta)           );
+      T teta = OpenTissue::utility::numeric_cast<T>(  sqrt(q.v() *q.v())  );
+      T ct   = OpenTissue::utility::numeric_cast<T>(  cos(teta)           );
+      T st   = OpenTissue::utility::numeric_cast<T>(  sin(teta)           );
 
       return Quaternion<T>(ct,q.v()*st);
     }
@@ -510,8 +510,8 @@ namespace OpenTissue
       typedef typename Quaternion<T>::value_traits   value_traits;
 
       assert(w>=value_traits::zero() || !"qlerp(): w must not be less than 0");
-      assert(w<=value_traits::one()  || !"qlerp(): w must not be larger than 1");	  
-      T mw = value_traits::one() - w; 
+      assert(w<=value_traits::one()  || !"qlerp(): w must not be larger than 1");
+      T mw = value_traits::one() - w;
       return ((mw * A) + (w * B));
     }
 
@@ -533,9 +533,9 @@ namespace OpenTissue
       using std::sin;
 
       assert(w>=value_traits::zero() || !"slerp(): w must not be less than 0");
-      assert(w<=value_traits::one()  || !"slerp(): w must not be larger than 1");	  
+      assert(w<=value_traits::one()  || !"slerp(): w must not be larger than 1");
 
-      T q_tiny = boost::numeric_cast<T>( 10e-7 );  // TODO prober constant type conversion?
+      T q_tiny = OpenTissue::utility::numeric_cast<T>( 10e-7 );  // TODO prober constant type conversion?
 
       T norm = A*B;
 
@@ -553,10 +553,10 @@ namespace OpenTissue
       }
       else
       {
-        T theta    = boost::numeric_cast<T>( acos(norm)                                          );
-        T s_val    = boost::numeric_cast<T>( value_traits::one() / sin(theta)                    ); 
-        inv_weight = boost::numeric_cast<T>( sin((value_traits::one() - weight) * theta) * s_val );
-        weight     = boost::numeric_cast<T>( sin(weight * theta) * s_val                         );
+        T theta    = OpenTissue::utility::numeric_cast<T>( acos(norm)                                          );
+        T s_val    = OpenTissue::utility::numeric_cast<T>( value_traits::one() / sin(theta)                    );
+        inv_weight = OpenTissue::utility::numeric_cast<T>( sin((value_traits::one() - weight) * theta) * s_val );
+        weight     = OpenTissue::utility::numeric_cast<T>( sin(weight * theta) * s_val                         );
       }
       if(flip)
       {
@@ -592,9 +592,9 @@ namespace OpenTissue
       typedef typename Quaternion<T>::value_traits   value_traits;
 
       assert(u>=value_traits::zero() || !"squad(): u must not be less than 0");
-      assert(u<=value_traits::one()  || !"squad(): u must not be larger than 1");	  
+      assert(u<=value_traits::one()  || !"squad(): u must not be larger than 1");
 
-      T u2 = value_traits::two() *u*(value_traits::one() -u); 
+      T u2 = value_traits::two() *u*(value_traits::one() -u);
       return slerp( slerp(q0,q3,u), slerp(q1,q2,u), u2);
     }
 
@@ -656,7 +656,7 @@ namespace OpenTissue
       // This is seen by straightforward substitution
       //
       //  [ cos(-theta/2), sin(-theta/2) (-n) ] = [ cos(theta/2), sin(theta/2) n ]
-      // 
+      //
       // Thus we get the same quaternion regardless of whether we
       // use (+theta,+n) or (-theta,-n).
       //
@@ -678,7 +678,7 @@ namespace OpenTissue
       //
       //  theta_1 = 2 atan2( y, x)        equivalent to      sign(sin(theta/2)) = 1
       //
-      // or 
+      // or
       //
       //  theta_2 = 2 atan2( -y, x)       equivalent to      sign(sin(theta/2)) = -1
       //
@@ -697,14 +697,14 @@ namespace OpenTissue
       //
       //
       //         Q_1 = [cos(theta_1/2),  sin(theta_1/2)   \frac{v}{\norm{v}}]
-      //             = [s ,  \norm{v}   \frac{v}{\norm{v}}] 
+      //             = [s ,  \norm{v}   \frac{v}{\norm{v}}]
       //             = Q
       //
       // Now if we choose theta_2 as the solution we would have
       //
       //         Q_2 = [cos(theta_2/2),  sin(theta_2/2)   -\frac{v}{\norm{v}}]
-      //             = [s ,  -\norm{v}   -\frac{v}{\norm{v}}] 
-      //             = [s ,  \norm{v}   \frac{v}{\norm{v}}] 
+      //             = [s ,  -\norm{v}   -\frac{v}{\norm{v}}]
+      //             = [s ,  \norm{v}   \frac{v}{\norm{v}}]
       //             = Q
       //
       // Thus we observe that regardless of which solution we pick we always have Q = Q_1 = Q_2.
@@ -815,7 +815,7 @@ namespace OpenTissue
       }
       //--- The angle we get will be between 0..2*pi, but we want
       //--- to return angles between -pi..pi
-      if (theta > value_traits::pi())   
+      if (theta > value_traits::pi())
         theta -= value_traits::two()*value_traits::pi();
 
       //--- The angle we've just extracted has the wrong sign (Why???).

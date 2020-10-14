@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp> //--- needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- needed for OpenTissue::utility::numeric_cast
 #include <cassert>
 
 namespace OpenTissue
@@ -33,7 +33,7 @@ namespace OpenTissue
         return;
       }
 
-      real_type  higher =  boost::numeric_cast <real_type>(magnitude);
+      real_type  higher =  OpenTissue::utility::numeric_cast <real_type>(magnitude);
       real_type  lower  = - higher;
 
       for( iterator iter = field.begin(); iter != field.end(); ++iter )

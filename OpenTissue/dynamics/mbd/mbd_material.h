@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp>  // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>  // needed for OpenTissue::utility::numeric_cast
 
 namespace OpenTissue
 {
@@ -60,7 +60,7 @@ namespace OpenTissue
       real_type    m_e_t;                     ///< Coefficient of tangential restitution.
       real_type    m_erp;                     ///< Error reduction parameter (must be in the range 0..1).
       real_type    m_gamma;                   ///< The regularization (damping) term to be used for the normal force. Also known as constraint force mixing.
-      
+
       bool         m_use_sliding_direction;   ///< A boolean value indicating whether the relative sliding direction at a contact point should be used to pick the x-vector of the contact plane span. Default value is true.
       bool         m_use_prefixed_direction;  ///< A boolean value indicating whether the relative sliding direction at a contact point is set by a prefixed direction. The use slidning direction takes precedience over this setting.  Default value is false.
 
@@ -93,7 +93,7 @@ namespace OpenTissue
         m_material_idx_B = 0;
         m_e_n = value_traits::half();
         m_e_t = value_traits::zero();
-        m_erp = boost::numeric_cast<real_type>(0.8);
+        m_erp = OpenTissue::utility::numeric_cast<real_type>(0.8);
         m_gamma = value_traits::zero();
         m_use_sliding_direction = true;
         m_use_prefixed_direction = false;
@@ -242,7 +242,7 @@ namespace OpenTissue
        *
        * @return    The number of friction directions.
        */
-      size_t get_number_of_friction_directions() const 
+      size_t get_number_of_friction_directions() const
       {
         return m_mu.size();
       }
@@ -362,7 +362,7 @@ namespace OpenTissue
       {
         return m_prefixed_material_idx;
       }
-    
+
     };
 
   } // namespace mbd

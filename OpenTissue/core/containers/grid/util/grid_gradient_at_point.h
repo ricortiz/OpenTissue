@@ -12,6 +12,7 @@
 #include <OpenTissue/core/math/math_trillinear.h>
 #include <OpenTissue/core/containers/grid/util/grid_enclosing_indices.h>
 #include <OpenTissue/core/containers/grid/util/grid_gradient.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 namespace OpenTissue
 {
@@ -56,9 +57,9 @@ namespace OpenTissue
       if ( g111( 0 ) == unused )
         return vector3_type( infty, infty, infty );
 
-      typename vector3_type::value_type s = ( point(0) - ( i0*grid.dx() + grid.min_coord(0) ) ) / grid.dx();
-      typename vector3_type::value_type t = ( point(1) - ( j0*grid.dy() + grid.min_coord(1) ) ) / grid.dy();
-      typename vector3_type::value_type u = ( point(2) - ( k0*grid.dz() + grid.min_coord(2) ) ) / grid.dz();
+      value_type s = utility::numeric_cast<value_type>(( point(0) - ( i0*grid.dx() + grid.min_coord(0) ) ) / grid.dx());
+      value_type t = utility::numeric_cast<value_type>(( point(1) - ( j0*grid.dy() + grid.min_coord(1) ) ) / grid.dy());
+      value_type u = utility::numeric_cast<value_type>(( point(2) - ( k0*grid.dz() + grid.min_coord(2) ) ) / grid.dz());
 
       return  OpenTissue::math::trillinear(g000, g001, g010, g011, g100, g101, g110, g111, s, t, u ) ;
     }

@@ -17,6 +17,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 typedef double real_type;
 typedef ublas::compressed_matrix<real_type> matrix_type;
@@ -63,20 +64,20 @@ void do_unconstrained_minimizer_test(func_functor & f, grad_functor & nabla_f, v
   using namespace OpenTissue::math::big;
 
   size_type max_iterations       = 100;
-  real_type absolute_tolerance   = boost::numeric_cast<real_type>(1e-6);
-  real_type relative_tolerance   = boost::numeric_cast<real_type>(0.000000001);
-  real_type stagnation_tolerance = boost::numeric_cast<real_type>(0.000000001);
+  real_type absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(1e-6);
+  real_type relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
+  real_type stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
   size_t status = 0;
   size_type iteration = 0;
-  real_type accuracy = boost::numeric_cast<real_type>(0.0);
-  real_type alpha = boost::numeric_cast<real_type>(0.0001);
-  real_type beta = boost::numeric_cast<real_type>(0.5);
+  real_type accuracy = OpenTissue::utility::numeric_cast<real_type>(0.0);
+  real_type alpha = OpenTissue::utility::numeric_cast<real_type>(0.0001);
+  real_type beta = OpenTissue::utility::numeric_cast<real_type>(0.5);
 
   OpenTissue::math::optimization::bfgs(
     f
     , nabla_f
     , H
-    , x 
+    , x
     , max_iterations
     , absolute_tolerance
     , relative_tolerance
@@ -88,17 +89,17 @@ void do_unconstrained_minimizer_test(func_functor & f, grad_functor & nabla_f, v
     , beta
     );
 
-  std::cout << "status     = " 
-    << OpenTissue::math::optimization::get_error_message(status) 
+  std::cout << "status     = "
+    << OpenTissue::math::optimization::get_error_message(status)
     << std::endl;
-  std::cout << "absolute   = " 
-    << accuracy  
+  std::cout << "absolute   = "
+    << accuracy
     << std::endl;
-  std::cout << "iterations = " 
-    << iteration 
+  std::cout << "iterations = "
+    << iteration
     << std::endl;
-  std::cout << "x          = " 
-    << x 
+  std::cout << "x          = "
+    << x
     << std::endl;
 
   if(status==OpenTissue::math::optimization::ABSOLUTE_CONVERGENCE)
@@ -126,7 +127,7 @@ public:
   real_type operator()( vector_type const & x ) const
   {
     real_type x_1 = x(0);
-    real_type x_2 = x(1);        
+    real_type x_2 = x(1);
     return (10.0*(x_2-x_1*x_1)*(x_2-x_1*x_1) + (1- x_1)*(1- x_1));
   }
 };
@@ -168,7 +169,7 @@ BOOST_AUTO_TEST_CASE(simple_test_case)
   //
   //   H = nabla^2 Q(x) = 2 A
   //
-  // The stationary points are given by 
+  // The stationary points are given by
   //
   //  | 4 0| |x_1| + | -1| = 0
   //  | 0 4| |x_2|   | -2|
@@ -184,7 +185,7 @@ BOOST_AUTO_TEST_CASE(simple_test_case)
   b.resize(N,false);
 
   A(0,0) = 2.0;  A(0,1) = 0.0;
-  A(1,0) = 0.0;  A(1,1) = 2.0;  
+  A(1,0) = 0.0;  A(1,1) = 2.0;
 
   b(0) = -1.0;
   b(1) = -2.0;
@@ -205,37 +206,37 @@ BOOST_AUTO_TEST_CASE(simple_test_case)
   // use H = I/4, and x = 0
   x.clear();
   H(0,0) = 0.25;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 0.25;   
+  H(1,0) = 0.0;    H(1,1) = 0.25;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I, and x = 0
   x.clear();
   H(0,0) = 1.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 1.0;   
+  H(1,0) = 0.0;    H(1,1) = 1.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = 4*I, and x = 0
   x.clear();
   H(0,0) = 4.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 4.0;   
+  H(1,0) = 0.0;    H(1,1) = 4.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I/4, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   H(0,0) = 0.25;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 0.25;   
+  H(1,0) = 0.0;    H(1,1) = 0.25;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   H(0,0) = 1.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 1.0;   
+  H(1,0) = 0.0;    H(1,1) = 1.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = 4*I, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   H(0,0) = 4.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 4.0;   
+  H(1,0) = 0.0;    H(1,1) = 4.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = random PD, and x = 0
@@ -266,7 +267,7 @@ BOOST_AUTO_TEST_CASE(simple_test_case)
   x(0) = -0.25;
   x(1) = -0.5;
   H(0,0) = 4.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 4.0;   
+  H(1,0) = 0.0;    H(1,1) = 4.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
 }
@@ -295,7 +296,7 @@ BOOST_AUTO_TEST_CASE(rosenbrock_test_case)
   x(0)=2.0;
   x(1)=2.0;
   H(0,0) = 0.25;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 0.25;   
+  H(1,0) = 0.0;    H(1,1) = 0.25;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I, and x = 0
@@ -306,7 +307,7 @@ BOOST_AUTO_TEST_CASE(rosenbrock_test_case)
   x(1)=2.0;
   std::cout << "using H = I   x = " << x <<  std::endl;
   H(0,0) = 1.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 1.0;   
+  H(1,0) = 0.0;    H(1,1) = 1.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = 4*I, and x = 0
@@ -315,28 +316,28 @@ BOOST_AUTO_TEST_CASE(rosenbrock_test_case)
   x.clear();
   std::cout << "using H = 4*I   x = "<< x << std::endl;
   H(0,0) = 4.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 4.0;   
+  H(1,0) = 0.0;    H(1,1) = 4.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I/4, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   x *= 3.0;
   H(0,0) = 0.25;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 0.25;   
+  H(1,0) = 0.0;    H(1,1) = 0.25;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = I, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   x *= 3.0;
   H(0,0) = 1.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 1.0;   
+  H(1,0) = 0.0;    H(1,1) = 1.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = 4*I, and x = random
   OpenTissue::math::big::generate_random( 2, x);
   x *= 3.0;
   H(0,0) = 4.0;   H(0,1) = 0.0;
-  H(1,0) = 0.0;    H(1,1) = 4.0;   
+  H(1,0) = 0.0;    H(1,1) = 4.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
   // use H = random PD, and x = 0
@@ -354,7 +355,7 @@ BOOST_AUTO_TEST_CASE(rosenbrock_test_case)
   x(0) = 1.0;
   x(1) = 1.0;
   H(0,0) = 82.0;   H(0,1) = -40.0;
-  H(1,0) = -40.0;    H(1,1) = 20.0;   
+  H(1,0) = -40.0;    H(1,1) = 20.0;
   do_unconstrained_minimizer_test(f,nabla_f,x,H,solution);
 
 }

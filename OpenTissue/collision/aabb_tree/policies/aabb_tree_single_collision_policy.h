@@ -54,7 +54,7 @@ namespace OpenTissue
       bool overlap(
         coord_transform const & /*xform*/
         , bv_ptr bv
-        , point_data_type const & point 
+        , point_data_type const & point
         )
       {
         vector3_type r     = point.position();
@@ -94,7 +94,7 @@ namespace OpenTissue
         vector3_type r     = point.position();
         vector3_type r_old = point.old_position();
 
-        annotated_bv_ptr annotated_bv = boost::static_pointer_cast<annotated_bv_type>(bv);
+        annotated_bv_ptr annotated_bv = std::static_pointer_cast<annotated_bv_type>(bv);
 
         geometry_type * triangle = &(*( annotated_bv->geometry_begin()));
         assert(triangle);

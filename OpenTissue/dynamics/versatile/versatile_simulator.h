@@ -100,14 +100,14 @@ namespace OpenTissue
         //---
         //---
 
-        real_type const min_dt = boost::numeric_cast<real_type>( 0.001 );
+        real_type const min_dt = OpenTissue::utility::numeric_cast<real_type>( 0.001 );
 
         real_type n    =  ceil( - log( fraction ));             //--- number of steps to take so procenwise error drops below fraction.
         real_type tau  = dT/n;                                  //--- characteristic time step size.
         real_type mu   = value_traits::one();                   //--- maximum mass in configuration (I just hardwired this for now).
         real_type b = (value_traits::two()*mu)/tau;             //--- maximum possible damping coefficient of penalty force.
         real_type dt = min(min_dt,value_traits::four()*mu/b);   //--- Step size of Verlet Integrator...
-        int N = boost::numeric_cast<int>( ceil(dT/dt) );        //--- Number of Verlet steps to take...
+        int N = OpenTissue::utility::numeric_cast<int>( ceil(dT/dt) );        //--- Number of Verlet steps to take...
 
         collision_detection();
 

@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 
 namespace OpenTissue
 {
@@ -23,7 +23,7 @@ namespace OpenTissue
       * This function is intended for debugging purposes it has
       * not been implemented with focus on performance or accuracy.
       * The function simply takes a brute force approach and tests
-      * if the specified matrix is symmetric. 
+      * if the specified matrix is symmetric.
       *
       * @param A    The matrix that should be tested.
       *
@@ -45,7 +45,7 @@ namespace OpenTissue
         assert( n>0         || !"is_symmetric(): n was out of range");
         assert( m==n        || !"is_symmetric(): m and n was not equal");
 
-        value_type const precision = ::boost::numeric_cast<value_type>(10e-6);
+        value_type const precision = ::OpenTissue::utility::numeric_cast<value_type>(10e-6);
 
         for ( size_type i = 0; i < n; ++i )
           for ( size_type j = i+1; j < n; ++j )

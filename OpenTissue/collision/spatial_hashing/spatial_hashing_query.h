@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <list>
 #include <map>
@@ -85,7 +85,7 @@ namespace OpenTissue
     *
     */
     template<typename child_type,typename hash_grid, typename collision_policy>
-    class Query 
+    class Query
       : public hash_grid
       , public collision_policy
     {
@@ -198,7 +198,7 @@ namespace OpenTissue
       * @param type      This argument specifies the report type, possible types are all_tag or no_collisions_tag.
       */
       template< typename query_type,typename result_container,typename report_type >
-      void operator()( 
+      void operator()(
         query_type const & q
         , result_container & results
         , report_type const & type
@@ -276,7 +276,7 @@ namespace OpenTissue
         using std::min;
 
         size_t cnt = 0;
-        point_type mean;      
+        point_type mean;
         mean.clear();
 
         for(iterator cur = begin;cur!=end;++cur,++cnt)
@@ -284,7 +284,7 @@ namespace OpenTissue
           point_type d = collision_policy::max_coord(*cur) - collision_policy::min_coord(*cur);//--- min_coord and max_coord by collision_policy
           mean += d;
         }
-        mean /= boost::numeric_cast<typename point_type::value_type>( cnt );
+        mean /= OpenTissue::utility::numeric_cast<typename point_type::value_type>( cnt );
         size_t size = cnt;//--- KE 06-05-2005: Hmmm, cnt , appears to be a better value than  cnt/ 4?
         real_type spacing =  max (mean(0),  max( mean(1), mean(2) ) );
         this->resize( size );

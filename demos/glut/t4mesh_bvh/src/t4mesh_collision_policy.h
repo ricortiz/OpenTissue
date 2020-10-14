@@ -11,7 +11,7 @@
 
 #include <OpenTissue/collision/intersect/intersect_aabb_aabb.h>
 #include <OpenTissue/core/geometry/geometry_barycentric.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <vector>
 
@@ -66,8 +66,8 @@ public:
 
   void report(bv_ptr A,bv_ptr B,results_container & results)
   {
-    annotated_bv_ptr bvA = boost::static_pointer_cast<annotated_bv_type>(A);
-    annotated_bv_ptr bvB = boost::static_pointer_cast<annotated_bv_type>(B);
+    annotated_bv_ptr bvA = std::static_pointer_cast<annotated_bv_type>(A);
+    annotated_bv_ptr bvB = std::static_pointer_cast<annotated_bv_type>(B);
 
     geometry_type geoA = *(bvA->geometry_begin());
 

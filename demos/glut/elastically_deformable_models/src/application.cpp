@@ -23,12 +23,13 @@
 #include <OpenTissue/core/math/math_basic_types.h>
 #include <OpenTissue/core/math/math_functions.h>
 #include <OpenTissue/utility/utility_fps_counter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <cstring>
 
 
 template <typename M>
-class EDMMaterial 
+class EDMMaterial
 {
 public:
 
@@ -142,11 +143,11 @@ public:
     glNormal3f(a0.n(0), a0.n(1), a0.n(2));
     glTexCoord2f(a0.t.u, a0.t.v);
     glVertex3f(a0.r(0), a0.r(1), a0.r(2));
-    
+
     glNormal3f(a1.n(0), a1.n(1), a1.n(2));
     glTexCoord2f(a1.t.u, a1.t.v);
     glVertex3f(a1.r(0), a1.r(1), a1.r(2));
-    
+
     glNormal3f(a2.n(0), a2.n(1), a2.n(2));
     glTexCoord2f(a2.t.u, a2.t.v);
     glVertex3f(a2.r(0), a2.r(1), a2.r(2));
@@ -163,14 +164,14 @@ private:
 };
 
 
-class Application 
+class Application
   : public OpenTissue::glut::PerspectiveViewApplication
 {
 public:
 
   typedef OpenTissue::math::BasicMathTypes<double, int>  math_types;
   typedef EDMMaterial<math_types>                        edm_material;
-  
+
   typedef OpenTissue::edm::Types<math_types, edm_material, edm_material>  edm_types;
 
 protected:
@@ -188,12 +189,12 @@ protected:
 
   OpenTissue::utility::Timer<double>        m_timer;
   OpenTissue::utility::FPSCounter<double>   m_fps_timer;
-  
+
   bool m_show_fps;
   char const * m_scene;   ///< the last good known scene configuration (reset feature)
   bool m_action[256];          ///< Boolean array used to keep track of the user actions/selections.
   bool m_playing_god;
-  
+
   static unsigned char const SPACE_KEY = ' ';
   static unsigned char const D_KEY     = 'd';
   static unsigned char const W_KEY     = 'w';
@@ -239,7 +240,7 @@ protected:
       edm_types::vector3_type p1;
       GLdouble sx, sy, sz;
       gluProject( p0[ 0 ], p0[ 1 ], p0[ 2 ], mm, pm, vp, &sx, &sy, &sz );
-      
+
       gluUnProject( 1.*x, 1.*(vp[ 3 ] - y + 1), sz, mm, pm, vp, &p1[ 0 ], &p1[ 1 ], &p1[ 2 ] );
       if (edm_types::EDM_Solid == m_sel_model->type()) {
         edm_types::Particle const & a = m_sel_model->particle(m_sel_idx);
@@ -303,9 +304,9 @@ protected:
 
   void release()
   {
-    if (m_sel_model) 
+    if (m_sel_model)
     {
-      if (m_F) 
+      if (m_F)
       {
         m_sel_model->remove(m_sel_model->particle(m_sel_idx), *m_F);
         delete m_F;
@@ -401,8 +402,8 @@ public:
     : m_sel_model(0)
     , m_sel_idx(0)
     , m_F(0)
-    , m_k(boost::numeric_cast<edm_types::real_type>(1250))
-    , m_strength(boost::numeric_cast<edm_types::real_type>(1))
+    , m_k(OpenTissue::utility::numeric_cast<edm_types::real_type>(1250))
+    , m_strength(OpenTissue::utility::numeric_cast<edm_types::real_type>(1))
     , m_show_fps(false)
     , m_scene(0)
   {
@@ -455,7 +456,7 @@ public:
     edm_types::system_type::EDMIOModels::const_iterator model;
     for (model = models.begin(); model != models.end(); ++model) {
       edm_types::model_type const * m = model->second;
-      switch (m->type()) 
+      switch (m->type())
       {
         case edm_types::EDM_Surface : draw_surface(*static_cast<surface_type const*>(m)); break;
         case edm_types::EDM_Solid : draw_solid(*static_cast<solid_type const*>(m)); break;
@@ -539,12 +540,12 @@ public:
       std::cout << "frames per second (FPS): " << ( m_show_fps ? "ON" : "OFF" ) << std::endl;
       break;
     case '+':
-      m_strength = min( boost::numeric_cast<edm_types::real_type>(4), m_strength + boost::numeric_cast<edm_types::real_type>(0.05) );
+      m_strength = min( OpenTissue::utility::numeric_cast<edm_types::real_type>(4), m_strength + OpenTissue::utility::numeric_cast<edm_types::real_type>(0.05) );
       m_sys.get_model( 0 ).strength() = m_strength;
       std::cout << "strength: " << m_strength << std::endl;
       break;
     case '-':
-      m_strength = max( boost::numeric_cast<edm_types::real_type>(0), m_strength - boost::numeric_cast<edm_types::real_type>(0.05) );
+      m_strength = max( OpenTissue::utility::numeric_cast<edm_types::real_type>(0), m_strength - OpenTissue::utility::numeric_cast<edm_types::real_type>(0.05) );
       m_sys.get_model( 0 ).strength() =  m_strength;
       std::cout << "strength: " << m_strength << std::endl;
       break;
@@ -562,7 +563,7 @@ public:
     math_types::vector3_type target(0,2,-4);
     math_types::vector3_type up(0,0,1);
     this->camera().init(position, target, up);
- 
+
     m_playing_god = false;
     reset();
   }
@@ -585,18 +586,18 @@ public:
 
   void do_shutdown(){}
 
-  void mouse_down(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right) 
+  void mouse_down(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right)
   {
     OpenTissue::glut::PerspectiveViewApplication::mouse_down(cur_x, cur_y, shift, ctrl, alt, left, middle, right);
     if ( ctrl && left )
     {
-      this->fetch( boost::numeric_cast<long>(cur_x), boost::numeric_cast<long>(cur_y) );
+      this->fetch( OpenTissue::utility::numeric_cast<long>(cur_x), OpenTissue::utility::numeric_cast<long>(cur_y) );
       glutPostRedisplay();
       m_playing_god = true;
     }
   }
 
-  void mouse_up(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right) 
+  void mouse_up(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right)
   {
     OpenTissue::glut::PerspectiveViewApplication::mouse_up(cur_x, cur_y, shift, ctrl, alt, left, middle, right);
     if ( m_playing_god && left )
@@ -606,11 +607,11 @@ public:
     }
   }
 
-  void mouse_move(double cur_x,double cur_y) 
+  void mouse_move(double cur_x,double cur_y)
   {
     OpenTissue::glut::PerspectiveViewApplication::mouse_move(cur_x, cur_y);
     if ( m_playing_god )
-      this->fetch( boost::numeric_cast<long>(cur_x), boost::numeric_cast<long>(cur_y) );
+      this->fetch( OpenTissue::utility::numeric_cast<long>(cur_x), OpenTissue::utility::numeric_cast<long>(cur_y) );
   }
 
   void draw_surface(surface_type const & surface) const

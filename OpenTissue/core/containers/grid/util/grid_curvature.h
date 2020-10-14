@@ -11,7 +11,7 @@
 
 #include <cmath>
 #include <OpenTissue/core/math/math_eigen_system_decomposition.h>
-#include <OpenTissue/core/containers/grid/util/grid_gradient.h> 
+#include <OpenTissue/core/containers/grid/util/grid_gradient.h>
 #include <OpenTissue/core/containers/grid/util/grid_hessian.h>
 
 namespace OpenTissue
@@ -50,7 +50,7 @@ namespace OpenTissue
       typedef OpenTissue::math::Vector3<real_type>          vector3_type;
       typedef OpenTissue::math::Matrix3x3<real_type>        matrix3x3_type;
 
-      real_type limit_K = boost::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
+      real_type limit_K = OpenTissue::utility::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
 
       vector3_type g;
       matrix3x3_type H;
@@ -64,7 +64,7 @@ namespace OpenTissue
       if ( h == 0 )
         h = 1;
       //--- Compute Mean curvature, defined as: kappa = \nabla \cdot (\nabla \phi / \norm{\nabla \phi}  )
-      const static real_type exponent = boost::numeric_cast<real_type>( 3. / 2. );
+      const static real_type exponent = OpenTissue::utility::numeric_cast<real_type>( 3. / 2. );
       K = ( 1.0 / pow( h, exponent ) ) * (
         g( 0 ) * g( 0 ) * ( H( 1, 1 ) + H( 2, 2 ) ) - 2. * g( 1 ) * g( 2 ) * H( 1, 2 ) +
         g( 1 ) * g( 1 ) * ( H( 0, 0 ) + H( 2, 2 ) ) - 2. * g( 0 ) * g( 2 ) * H( 0, 2 ) +
@@ -128,7 +128,7 @@ namespace OpenTissue
       typedef OpenTissue::math::Vector3<real_type>          vector3_type;
       typedef OpenTissue::math::Matrix3x3<real_type>        matrix3x3_type;
 
-      //real_type limit_K = boost::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
+      //real_type limit_K = OpenTissue::utility::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
 
       vector3_type g;
       matrix3x3_type H;
@@ -197,7 +197,7 @@ namespace OpenTissue
 
       typedef OpenTissue::math::Vector3<real_type>          vector3_type;
       typedef OpenTissue::math::Matrix3x3<real_type>        matrix3x3_type;
-      //real_type limit_K = boost::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
+      //real_type limit_K = OpenTissue::utility::numeric_cast<real_type>(   1. / min( grid.dx(), min( grid.dy(), grid.dz() ) )    );
 
       vector3_type g;
       matrix3x3_type H;

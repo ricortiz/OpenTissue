@@ -49,7 +49,7 @@ namespace OpenTissue
         coords[j++] = (*p)(2);
       }
       std::vector<vertex_handle> handles(N);
-      int iN = boost::numeric_cast<int,size_t>(N);
+      int iN = OpenTissue::utility::numeric_cast<int,size_t>(N);
       exitcode= qh_new_qhull (dim,  iN, coords, ismalloc, flags, outfile, errfile);
       if(!exitcode)
       {

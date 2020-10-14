@@ -26,7 +26,7 @@ namespace OpenTissue
     * @return
     */
     template<typename vector_type>
-    typename vector_type::value_type compute_triangle_area(vector_type const & p,vector_type const & pi,vector_type const & pj)  
+    typename vector_type::value_type compute_triangle_area(vector_type const & p,vector_type const & pi,vector_type const & pj)
     {
       using std::sqrt;
 
@@ -37,11 +37,11 @@ namespace OpenTissue
 
       // Specialized 3D case
       vector_type n = u%v;
-      real_type area = sqrt(n*n)*.5;  // TODO: maybe boost::numeric_cast???
+      real_type area = sqrt(n*n)*.5;  // TODO: maybe OpenTissue::utility::numeric_cast???
 
       // General nD formulae...
       //real_type dot = u*v;
-      //real_type area = sqrt( (u*u)*(v*v) - dot*dot)*.5; // TODO: maybe boost::numeric_cast???
+      //real_type area = sqrt( (u*u)*(v*v) - dot*dot)*.5; // TODO: maybe OpenTissue::utility::numeric_cast???
 
       return area;
     }

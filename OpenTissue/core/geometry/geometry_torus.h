@@ -55,7 +55,7 @@ namespace OpenTissue
 
       size_t const class_id() const { return OpenTissue::utility::ClassID<OpenTissue::geometry::Torus<math_types_> >::class_id(); }
 
-      Torus() 
+      Torus()
         : m_center(value_traits::zero())
         , m_radius(value_traits::zero())
         , m_tube(value_traits::zero())
@@ -183,7 +183,7 @@ namespace OpenTissue
         // TODO: verify this!!!
 // 2007-07-24 kenny: Maybe write unit( this->gradient(x) )? I think this-> is mandatory inside template classes...
 //   2007-07-24 micky: Can you try to compile it on gcc? I only thought this-> was required to reference functions from derived classes.
-//     2007-07-27 kenny: My linux box is broken:-( 
+//     2007-07-27 kenny: My linux box is broken:-(
 //       2007-09-25 micky: Can you give it a new shot?
 //         2007-09-26 kenny: Still don't got any linux:-( Maybe Sune or Jesper can help out, they are linux users.
 
@@ -196,7 +196,7 @@ namespace OpenTissue
         using std::sqrt;
         real_type const f = evaluate(x);
         real_type const sign = OpenTissue::math::sgn(f);
-        return real_type(boost::numeric_cast<real_type>(0.1)*sign*sqrt(sign*f));
+        return real_type(OpenTissue::utility::numeric_cast<real_type>(0.1)*sign*sqrt(sign*f));
       }
 
       /**

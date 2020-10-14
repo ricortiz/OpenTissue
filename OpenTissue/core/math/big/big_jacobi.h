@@ -9,9 +9,9 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <OpenTissue/core/math/big/big_types.h>  
-#include <OpenTissue/core/math/big/big_prod_row.h>  
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/core/math/big/big_types.h>
+#include <OpenTissue/core/math/big/big_prod_row.h>
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 #include <stdexcept>
 
 namespace OpenTissue
@@ -31,11 +31,11 @@ namespace OpenTissue
       *
       */
       template<typename T>
-      inline void jacobi(      
+      inline void jacobi(
         ublas::compressed_matrix<T>  const & A
         , ublas::vector<T>                 & x
         , ublas::vector<T>           const & b
-        )           
+        )
       {
         typedef ublas::compressed_matrix<T>     matrix_type;
         typedef ublas::vector<T>                vector_type;
@@ -83,14 +83,14 @@ namespace OpenTissue
       * @param iterations       Upon return this argument holds the number of used iterations.
       */
       template<typename T>
-      inline void jacobi(      
+      inline void jacobi(
         ublas::compressed_matrix<T>  const & A
         , ublas::vector<T>                 & x
         , ublas::vector<T>           const & b
         , size_t                     const & max_iterations
         , T                          const & /*epsilon*/
         , size_t                           & iterations
-        )           
+        )
       {
         if(max_iterations < 1)
           throw std::invalid_argument("jacobi(): max_iterations must be a positive number");
@@ -117,15 +117,15 @@ namespace OpenTissue
       * @param iterations       Upon return this argument holds the number of used iterations.
       */
       template<typename T>
-      inline void jacobi(      
+      inline void jacobi(
         ublas::compressed_matrix<T>  const & A
         , ublas::vector<T>            & x
         , ublas::vector<T>         const  & b
         , size_t & iterations
-        )           
+        )
       {
-        size_t max_iterations( 15 ); 
-        T epsilon = boost::numeric_cast<T>( 10e-4 );
+        size_t max_iterations( 15 );
+        T epsilon = OpenTissue::utility::numeric_cast<T>( 10e-4 );
         jacobi(A,x,b,max_iterations, epsilon, iterations);
       }
 
@@ -143,24 +143,24 @@ namespace OpenTissue
       public:
 
         template<typename T>
-        void operator()(      
+        void operator()(
           ublas::compressed_matrix<T>  const & A
           , ublas::vector<T>                 & x
           , ublas::vector<T>           const & b
-          )           
+          )
         {
           jacobi(A,x,b);
         }
 
         template<typename T>
-        void operator()(      
+        void operator()(
           ublas::compressed_matrix<T>  const & A
           , ublas::vector<T>                 & x
           , ublas::vector<T>           const & b
           , size_t                     const & max_iterations
           , T                          const & epsilon
           , size_t                           & iterations
-          )           
+          )
         {
           jacobi(A,x,b,max_iterations,epsilon,iterations);
         }
@@ -171,7 +171,7 @@ namespace OpenTissue
           , ublas::vector<T>            & x
           , ublas::vector<T>         const  & b
           , size_t & iterations
-          )           
+          )
         {
           jacobi(A,x,b,iterations);
         }

@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/array.hpp>
+#include <array>
 #include <cassert>
 
 namespace OpenTissue
@@ -36,7 +36,7 @@ namespace OpenTissue
 
       index_type                m_idx;      ///< Global index of tetrahedron
       mesh_type               * m_owner;    ///< Pointer to mesh which the node belongs to.
-      boost::array<index_type, 4> m_nodes;  ///< Global index of node i,j,k and m
+      std::array<index_type, 4> m_nodes;    ///< Global index of node i,j,k and m
 
     private:
 
@@ -51,23 +51,23 @@ namespace OpenTissue
 
     public:
 
-      T4Tetrahedron() 
+      T4Tetrahedron()
         : m_idx( mesh_type::undefined() )
-        , m_owner(0) 
-      { 
-        m_nodes.assign( mesh_type::undefined() ); 
+        , m_owner(0)
+        , m_nodes{mesh_type::undefined()}
+      {
       }
 
     public:
 
       index_type            idx()   const { return m_idx; }
 
-      index_type            node_idx(index_type const & local_idx) const 
-      { 
+      index_type            node_idx(index_type const & local_idx) const
+      {
         assert(0<=local_idx);
         assert(local_idx<=3);
 
-        return m_nodes[local_idx]; 
+        return m_nodes[local_idx];
       }
 
       node_iterator       i()         { return m_owner->node(m_nodes[0]);       }
@@ -127,14 +127,14 @@ namespace OpenTissue
       mesh_type const * owner() const { return m_owner; }
 
 
-      node_iterator node(index_type local_idx)       
+      node_iterator node(index_type local_idx)
       {
-        return m_owner->node( this->local2global( local_idx) );       
+        return m_owner->node( this->local2global( local_idx) );
       }
 
-      const_node_iterator node(index_type local_idx) const 
+      const_node_iterator node(index_type local_idx) const
       {
-        return m_owner->const_node( this->local2global( local_idx ) ); 
+        return m_owner->const_node( this->local2global( local_idx ) );
       }
 
       index_type local2global(index_type local_idx) const

@@ -41,13 +41,13 @@ namespace OpenTissue
         /**
         * Function Calculator Functor class
         * This functor class provides functionality for calculating the objective
-        * function of the inverse kinematics problem. It keeps a pointer to the 
+        * function of the inverse kinematics problem. It keeps a pointer to the
         * solver class for easy update of its parameters and provides a () operator
         * for easy calling.
         *
         * @warning The class must be initialized before use
         *
-        * @tparam solver_type The solver_type that this Function calculator is used on 
+        * @tparam solver_type The solver_type that this Function calculator is used on
         */
         template< typename solver_type >
         class FunctionCalculator
@@ -105,17 +105,17 @@ namespace OpenTissue
         *
         * @warning The class must be initialized before use
         *
-        * @tparam solver_type The solver_type that this Function calculator is used on 
+        * @tparam solver_type The solver_type that this Function calculator is used on
         */
         template<typename solver_type >
         class GradientCalculator
         {
         public:
 
-          typedef typename solver_type::math_types    math_types; 
-          typedef typename solver_type::vector_type   vector_type; 
-          typedef typename solver_type::matrix_type   matrix_type; 
-          typedef typename math_types::value_traits   value_traits; 
+          typedef typename solver_type::math_types    math_types;
+          typedef typename solver_type::vector_type   vector_type;
+          typedef typename solver_type::matrix_type   matrix_type;
+          typedef typename math_types::value_traits   value_traits;
 
         protected:
 
@@ -151,7 +151,7 @@ namespace OpenTissue
           * \f[
           *  d f = d(\vec g - \vec F(\vec \theta))^T \mat W (\vec g-\vec F(\vec \theta))
           *  +
-          *  (\vec g - \vec F(\vec \theta))^T \mat W d(\vec g - \vec F(\vec \theta)) 
+          *  (\vec g - \vec F(\vec \theta))^T \mat W d(\vec g - \vec F(\vec \theta))
           * ]\f
           * which reduces to
           * \f[
@@ -169,14 +169,14 @@ namespace OpenTissue
           * ]\f
           * From this we have
           * \f[
-          * \frac{d f}{d \vec \theta} = - 2 (\vec g - \vec F(\vec \theta))^T \mat W \mat J  
+          * \frac{d f}{d \vec \theta} = - 2 (\vec g - \vec F(\vec \theta))^T \mat W \mat J
           * ]\f
           * and the gradient can now be written
           * \f[
-          * \nabla f 
-          *   = 
+          * \nabla f
+          *   =
           *   \frac{d f}{d \vec \theta}^T = - 2 \mat J^T \mat W ( \vec g - \vec F(\vec
-          *   \theta) )  
+          *   \theta) )
           * ]\f
           *
           * @param theta   The current value of the joint paramters.
@@ -198,7 +198,7 @@ namespace OpenTissue
             vector_type & tmp = const_cast<vector_type&>( this->m_tmp );
             if(tmp.size() != J.size2())
               tmp.resize( J.size2() );
-            OpenTissue::math::big::prod_trans( J, delta, tmp ); 
+            OpenTissue::math::big::prod_trans( J, delta, tmp );
             tmp *= -value_traits::two();
             return tmp;
           }
@@ -214,17 +214,17 @@ namespace OpenTissue
         *
         * @warning The class must be initialized before use
         *
-        * @tparam solver_type The solver_type that this Function calculator is used on 
+        * @tparam solver_type The solver_type that this Function calculator is used on
         */
         template<typename solver_type >
         class ProjectionCalculator
         {
         public:
 
-          typedef typename solver_type::math_types    math_types; 
-          typedef typename solver_type::vector_type   vector_type; 
-          typedef typename math_types::real_type      real_type; 
-          typedef typename math_types::value_traits   value_traits; 
+          typedef typename solver_type::math_types    math_types;
+          typedef typename solver_type::vector_type   vector_type;
+          typedef typename math_types::real_type      real_type;
+          typedef typename math_types::value_traits   value_traits;
 
         protected:
 
@@ -258,7 +258,7 @@ namespace OpenTissue
           vector_type operator ()(vector_type const & theta) const
           {
             // 2008-07-06 kenny: Hmm is this efficient? Would this not create a un-needed temporary?
-            vector_type ret = theta; 
+            vector_type ret = theta;
             OpenTissue::kinematics::inverse::compute_joint_limits_projection(*(this->m_S->skeleton()), ret );
             return ret;
           }
@@ -273,13 +273,13 @@ namespace OpenTissue
       * each chain have exactly one end-effector. Thus we agglomerate the \f$K\f$
       * end-effector functions into one function
       * \f[
-      *   \vec y = 
+      *   \vec y =
       *   \begin{bmatrix}
       *     \vec y_1 \\
       *     \hdots\\
       *     \vec y_K
       *   \end{bmatrix}
-      *   = 
+      *   =
       *   \begin{bmatrix}
       *     \vec F_1(\vec \theta) \\
       *     \vdots\\
@@ -292,10 +292,10 @@ namespace OpenTissue
       * agglomerated end-effector function we create the objective function
       * \f[
       *   \label{eq:objective:function}
-      *   f(\vec \theta) 
-      *   = 
-      *   (\vec g - \vec F(\vec \theta))^T 
-      *   \mat W 
+      *   f(\vec \theta)
+      *   =
+      *   (\vec g - \vec F(\vec \theta))^T
+      *   \mat W
       *   (\vec g- \vec F(\vec \theta)),
       * ]\f
       * where \f$\mat W$\f is a symmetric positive definite and possible diagonal matrix and
@@ -313,7 +313,7 @@ namespace OpenTissue
       * which models the minimum and maximum joint parameter values. Here \f$\vec l$\f is a
       * vector containing the minimum joint limits and \f$\vec u$\f is a vector of the
       * maximum joints limits. This implies \f$\vec l \leq \vec u$\f at all times.
-      * 
+      *
       * Our formulation is a squared weighted norm measuring the distance between the
       * goal positions and the end-effector positions. If \f$\vec F$\f is sufficiently
       * smooth then when \f$\vec \theta \rightarrow \vec \theta^*$\f we have that
@@ -351,7 +351,7 @@ namespace OpenTissue
 
         typedef typename chain_container::iterator	               chain_iterator;
         typedef typename chain_container::const_iterator	         const_chain_iterator;
-        typedef typename ublas::vector<real_type>	                 vector_type;  
+        typedef typename ublas::vector<real_type>	                 vector_type;
         typedef typename ublas::vector_range< vector_type >        vector_range;
         typedef typename ublas::vector_range< const vector_type >  const_vector_range;
         typedef typename ublas::compressed_matrix<real_type>	     matrix_type;
@@ -422,7 +422,7 @@ namespace OpenTissue
 
         /**
         * Remove Chain.
-        * This method removes a chain from the chain list 
+        * This method removes a chain from the chain list
         *
         * @param chain   An iterator for the chain that should be removed.
         * @return        An iterator to some other chain in the solver.
@@ -449,7 +449,7 @@ namespace OpenTissue
           this->m_projection.init(this);
         }
 
-        NonlinearSolver(solver_type const & solver)  
+        NonlinearSolver(solver_type const & solver)
           : m_gradient()
           , m_function()
           , m_projection()
@@ -641,7 +641,7 @@ namespace OpenTissue
 
           bool      const & resynchronization () const { return m_resynchronization; }
           bool            & resynchronization ()       { return m_resynchronization; }
-          
+
        public:
 
           Settings()
@@ -708,15 +708,15 @@ namespace OpenTissue
         */
         static Settings const & default_BFGS_settings()
         {
-          static Settings settings( 
+          static Settings settings(
             0u
             , true
             , 5u
-            , boost::numeric_cast<real_type>(1e-3)
-            , boost::numeric_cast<real_type>(0.00001)
-            , boost::numeric_cast<real_type>(0.00001)
-            , boost::numeric_cast<real_type>(0.0001)
-            , boost::numeric_cast<real_type>(0.5)
+            , OpenTissue::utility::numeric_cast<real_type>(1e-3)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.0001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.5)
             , value_traits::zero()
             );
           return settings;
@@ -729,15 +729,15 @@ namespace OpenTissue
         */
         static Settings const & default_SD_settings()
         {
-          static Settings settings( 
+          static Settings settings(
             1u
             , false
             , 10u
-            , boost::numeric_cast<real_type>(1e-3)
-            , boost::numeric_cast<real_type>(0.00001)
-            , boost::numeric_cast<real_type>(0.00001)
-            , boost::numeric_cast<real_type>(0.0001)
-            , boost::numeric_cast<real_type>(0.5)
+            , OpenTissue::utility::numeric_cast<real_type>(1e-3)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.0001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.5)
             , value_traits::zero()
             );
           return settings;
@@ -750,16 +750,16 @@ namespace OpenTissue
         */
         static Settings const & default_SDF_settings()
         {
-          static Settings settings( 
+          static Settings settings(
             2u
             , false
             , 100u
-            , boost::numeric_cast<real_type>(1e-3)
-            , boost::numeric_cast<real_type>(0.00001)
-            , boost::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(1e-3)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.00001)
             , value_traits::zero()
             , value_traits::zero()
-            , boost::numeric_cast<real_type>(0.001)
+            , OpenTissue::utility::numeric_cast<real_type>(0.001)
             );
           return settings;
         }
@@ -813,7 +813,7 @@ namespace OpenTissue
           Settings const * settings_ = 0
           , Output * output = 0
           )
-        {   
+        {
           Settings const * settings = settings_ ? settings_ : &this->default_SD_settings();
 
           size_t        status        = 0u;
@@ -920,7 +920,7 @@ namespace OpenTissue
             output->iterations()    = iteration;
             output->value()         = this->m_function( this->m_theta );
             output->wall_time()     = watch();
- 
+
           }
 
         }

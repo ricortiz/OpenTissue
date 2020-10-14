@@ -31,8 +31,8 @@ namespace OpenTissue
     * Compute Gaussian Curvature of Vertex.
     * This implementation is based on the paper:
     *
-    *    Meyer, M., Desbrun, M., Schröder, P., AND Barr, A. H. Discrete Differential Geometry Operators for Triangulated 2-Manifolds, 2002. VisMath.
-    * 
+    *    Meyer, M., Desbrun, M., Schrï¿½der, P., AND Barr, A. H. Discrete Differential Geometry Operators for Triangulated 2-Manifolds, 2002. VisMath.
+    *
     *
     * @param v         A reference to the vertex at which the Gaussian curvature should be computed.
     * @param Kg        Upon return this argument holds the computed Gaussian curvature.
@@ -54,7 +54,7 @@ namespace OpenTissue
 
       static real_type const epsilon = math::machine_precision<real_type>();
       static real_type const zero    = real_type(); //--- by standard default constructed integral types is zero
-      static real_type const two     = boost::numeric_cast<real_type>(2.0); 
+      static real_type const two     = OpenTissue::utility::numeric_cast<real_type>(2.0);
 
       if(is_boundary(v))
       {
@@ -69,9 +69,9 @@ namespace OpenTissue
       real_type         area = zero;
       real_type    angle_sum = zero;
       vector3_type         p = v.m_coord;
-      //--- 
+      //---
       //---  Orignally we have
-      //--- 
+      //---
       //---                  p                                                                                //
       //---                 /|\                                                                               //
       //---                / | \                                                                              //
@@ -80,42 +80,42 @@ namespace OpenTissue
       //---                \ | /                                                                              //
       //---                 \|/                                                                               //
       //---                 p_k                                                                               //
-      //--- 
+      //---
       //---  But we could just as easily re-write this as
-      //---         
+      //---
       //---                  p                                                                                         //
       //---                 /|\                                                                                        //
       //---                / | \                                                                                       //
       //---      alpha_j  /  |  \ beta_i        K_p =  1/A_p * sum_i ( cot(alpha_j)(p-p_j) + cot(beta_i))*(p-p_i) )    //
       //---              /-------\                                                                                     //
       //---            p_i        p_j                                                                                  //
-      //--- 
+      //---
       //---  which is the forumula we have implemented below
       vertex_halfedge_circulator h(v),hend;
       for(;h!=hend;++h)
       {
         assert( h->get_next_iterator()->get_origin_iterator()->get_handle().get_idx()      != v.get_handle().get_idx() || !"compute_vertex_mean_curvature_normal(): illegal topology");
-        assert( h->get_next_iterator()->get_destination_iterator()->get_handle().get_idx() != v.get_handle().get_idx() || !"compute_vertex_mean_curvature_normal(): illegal topology");      
+        assert( h->get_next_iterator()->get_destination_iterator()->get_handle().get_idx() != v.get_handle().get_idx() || !"compute_vertex_mean_curvature_normal(): illegal topology");
         vector3_type pi = h->get_next_iterator()->get_origin_iterator()->m_coord;
         vector3_type pj = h->get_next_iterator()->get_destination_iterator()->m_coord;
         area += OpenTissue::geometry::compute_area_mixed(p,pi,pj);
-        //--- 
+        //---
         //--- we could have used the cosine formula
         //---
-        //---                     (pi-p) \cdot (pj-p) 
+        //---                     (pi-p) \cdot (pj-p)
         //---     \cos(\theta) = ----------------------
-        //---                     ||pi-p|| || pj-p || 
+        //---                     ||pi-p|| || pj-p ||
         //---
         //--- However, this involves computing the length of the vectors (pi-p) and (pj-p)
         //---
         //--- The angle_from_coton avoids this (no square root computations), at the cost of a atan2 call.
-        //--- 
+        //---
         angle_sum += OpenTissue::geometry::angle_from_cot(p,pi,pj);
       }
-      if (area > epsilon) 
-        Kg = boost::numeric_cast<real_type2> ( (two*math::detail::pi<real_type>() - angle_sum)/area  );
+      if (area > epsilon)
+        Kg = OpenTissue::utility::numeric_cast<real_type2> ( (two*math::detail::pi<real_type>() - angle_sum)/area  );
       else
-        Kg = boost::numeric_cast<real_type2>( zero );
+        Kg = OpenTissue::utility::numeric_cast<real_type2>( zero );
       return true;
     }
 

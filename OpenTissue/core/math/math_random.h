@@ -8,141 +8,51 @@
 // OTTL is licensed under zlib: http://opensource.org/licenses/zlib-license.php
 //
 #include <OpenTissue/configuration.h>
-
-#include <boost/cast.hpp> // Needed for boost::numeric_cast
-
 #include <OpenTissue/core/math/math_constants.h>
 
+#include <random>
 
-#ifdef BOOST_VERSION  //--- FIXME: Nicer way too see if we have boost?
-#  include <boost/random.hpp>
-#else
-#  include <ctime>   // for std::time()
-#  include <cstdlib> // for std::srand() and std::rand(), defaults to this if no boost!
-#endif
+namespace OpenTissue {
+namespace math {
 
-namespace OpenTissue
+template<typename value_type>
+class Random
 {
+public:
 
-  namespace math
+  typedef std::minstd_rand                           generator_type;
+  typedef std::random_device                         random_device_type;
+  typedef std::uniform_real_distribution<value_type> distribution_type;
+
+public:
+
+  Random(value_type const lower = 0, value_type const upper = 1)
+    : m_generator(m_random_device()), m_distribution(lower, upper)
+  {}
+
+  Random(Random const & rnd) = delete;
+  Random & operator=(Random const & rnd) = delete;
+
+public:
+
+  value_type operator()()
   {
+    return m_distribution(m_generator);
+  }
 
-#ifdef BOOST_RANDOM_HPP
+  bool operator==(Random const & rnd) const
+  {
+    return m_distribution == rnd.m_distribution;
+  }
 
+private:
 
-    template<typename value_type>
-    class Random
-    {
-    public:
+  generator_type          m_generator;
+  distribution_type       m_distribution;
+  random_device_type      m_random_device;
+};
 
-      typedef boost::minstd_rand          generator_type;
-
-    protected:
-
-      static generator_type &  generator()
-      {
-        static generator_type tmp(static_cast<unsigned int>(std::time(0)));
-        return tmp;
-      }
-
-    public:
-
-      typedef value_type                                                     T;
-      typedef boost::uniform_real<T>                                         distribution_type;
-      typedef boost::variate_generator<generator_type&, distribution_type >  random_type;
-
-      distribution_type       m_distribution;
-      random_type             m_random;
-
-    public:
-
-      Random()
-        : m_distribution((value_type) 0,(value_type) 1)
-        , m_random(generator(), m_distribution)
-      {}
-
-      Random(T lower,T upper)
-        : m_distribution(lower,upper)
-        , m_random(generator(), m_distribution)
-      {}
-
-    private:
-
-      Random(Random const & rnd){}
-      Random & operator=(Random const & rnd){return *this;}
-
-    public:
-
-      T operator()() { return m_random();  }
-
-      bool operator==(Random const & rnd) const { return m_distribution == rnd.m_distribution; }
-
-    };
-
-#else
-
-
-    template <typename value_type>
-    class Random
-    {
-    protected:
-
-      typedef value_type  T;
-      typedef Random<T>   self;
-
-      T m_lower;
-      T m_upper;
-
-    protected:
-
-      static bool & is_initialized()
-      {
-        static bool initialized = false;
-        return initialized;
-      }
-
-    public:
-
-      Random() 
-        : m_lower(math::detail::zero<T>()) 
-        , m_upper(math::detail::one<T>())
-      {
-        using std::time;
-        if(!is_initialized())
-        {
-          std::srand(static_cast<unsigned int>(std::time(0)));
-          is_initialized() = true;
-        }
-      }
-
-      Random(T lower,T upper) 
-        : m_lower(lower) 
-        , m_upper(upper)
-      { 
-        self();
-      }
-
-    private:
-
-      Random(Random const & rnd){}
-      Random & operator=(Random const & rnd){return *this;}
-
-    public:
-
-      T operator()() const
-      {
-        double rnd = rand()/(1.0*RAND_MAX);
-        return boost::numeric_cast<T>(m_lower+(m_upper-m_lower)*rnd);
-      }
-
-      bool operator==(Random const & rnd) const { return (m_lower==rnd.m_lower && m_upper==rnd.m_upper);  }
-
-    };
-
-#endif
-
-  } // namespace math
-
+} // namespace math
 } // namespace OpenTissue
 
 //OPENTISSUE_CORE_MATH_MATH_RANDOM_H

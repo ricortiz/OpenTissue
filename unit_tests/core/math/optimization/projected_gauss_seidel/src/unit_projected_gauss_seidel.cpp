@@ -14,6 +14,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 template <typename vector_type>
@@ -58,16 +59,16 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
   BoundFunction<vector_type> u(false);
 
   size_type max_iterations       = 1000;
-  real_type absolute_tolerance   = boost::numeric_cast<real_type>(0.025);
-  real_type relative_tolerance   = boost::numeric_cast<real_type>(0.00001);
-  real_type stagnation_tolerance = boost::numeric_cast<real_type>(0.00001);
+  real_type absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.025);
+  real_type relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.00001);
+  real_type stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.00001);
   size_t status = 0;
   size_type iteration = 0;
-  real_type accuracy = boost::numeric_cast<real_type>(0.0);
-  real_type relative_accuracy = boost::numeric_cast<real_type>(0.0);
+  real_type accuracy = OpenTissue::utility::numeric_cast<real_type>(0.0);
+  real_type relative_accuracy = OpenTissue::utility::numeric_cast<real_type>(0.0);
 
-  OpenTissue::math::optimization::projected_gauss_seidel( 
-    A, b, l , u, x 
+  OpenTissue::math::optimization::projected_gauss_seidel(
+    A, b, l , u, x
     ,  max_iterations
     ,  absolute_tolerance
     ,  relative_tolerance
@@ -121,7 +122,7 @@ BOOST_AUTO_TEST_CASE(random_test_case)
 
     OpenTissue::math::Random<double> value(0.0,1.0);
     for(size_t i=0;i<R.size1();++i)
-    { 
+    {
       b(i) = -value();
 
       x(i) = value();

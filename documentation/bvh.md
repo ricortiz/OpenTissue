@@ -67,7 +67,7 @@ the root bounding volume can be obtained by writing
 
 Observe that a bounding volume node pointer type have been defined in
 the BVH type. This hides the fact that the BVH class manages it's
-memory allocation using boost::shared_ptr. The bv_ptr_type can be used
+memory allocation using std::shared_ptr. The bv_ptr_type can be used
 in very much the same way as if one had written
 
     bvh_type::bv_type * root = .....
@@ -105,7 +105,7 @@ is
 
     bv_ptr_type some_bv = ...
     if(some_bv->has_geometry())
-      annotated_bv_ptr_type annotated = boost::static_pointer_cast<annotated_bv_type>(some_bv);
+      annotated_bv_ptr_type annotated = std::static_pointer_cast<annotated_bv_type>(some_bv);
 
 Only annotated bounding volumes will return the value true when invoking the
 has_geometry() method.

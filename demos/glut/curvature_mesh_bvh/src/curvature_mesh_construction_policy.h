@@ -11,7 +11,7 @@
 
 #include <OpenTissue/collision/bvh/bvh.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 /**
 * Bottom-Up Construction Policy.
@@ -36,7 +36,7 @@
 *
 */
 template<typename bvh_type_>
-class CurvatureMeshConstructionPolicy 
+class CurvatureMeshConstructionPolicy
   : public OpenTissue::bvh::BinaryMatchBottomUpPolicy<bvh_type_>
 {
 public:
@@ -85,7 +85,7 @@ public:
     {
       assert(node->bv()->is_leaf());
 
-      annotated_bv_ptr bv = boost::static_pointer_cast<annotated_bv_type>(node->bv());
+      annotated_bv_ptr bv = std::static_pointer_cast<annotated_bv_type>(node->bv());
 
       face_type * geometry = *(bv->geometry_begin());
 
@@ -215,7 +215,7 @@ private:
     }
     return aabb_type(pmin,pmax);
   }
-  
+
   template<typename volume_iterator>
     aabb_type fit_volumes( volume_iterator begin, volume_iterator end )
   {

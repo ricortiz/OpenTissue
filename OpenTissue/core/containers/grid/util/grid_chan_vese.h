@@ -13,7 +13,7 @@
 #include <OpenTissue/core/math/math_matrix3x3.h>
 #include <OpenTissue/core/containers/grid/grid.h>
 
-#include <boost/cast.hpp> //--- needed for numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- needed for numeric_cast
 
 #include <iostream>
 #include <cmath>
@@ -322,10 +322,10 @@ namespace OpenTissue
           // TODO: problems might arise when image_type is unsigned
           //        C_in *= real_type(1.1);
           //        C_out *= real_type(0.9);
-          const real_type upper = boost::numeric_cast<real_type>( 1.1 );
-          const real_type lower = boost::numeric_cast<real_type>( 0.9 );
-          C_in  = boost::numeric_cast<image_type>( C_in* upper   );
-          C_out = boost::numeric_cast<image_type>( C_out * lower );
+          const real_type upper = OpenTissue::utility::numeric_cast<real_type>( 1.1 );
+          const real_type lower = OpenTissue::utility::numeric_cast<real_type>( 0.9 );
+          C_in  = OpenTissue::utility::numeric_cast<image_type>( C_in* upper   );
+          C_out = OpenTissue::utility::numeric_cast<image_type>( C_out * lower );
         }
         real_type max_delta = chan_vese::update(phi,U,C_in,C_out,lambda,mu,nu,dt,psi);
         std::cout << "Chan-Vese: Delta max = " << max_delta << std::endl;
@@ -440,10 +440,10 @@ namespace OpenTissue
         // TODO: problems might arise when image_type is unsigned
         //      C_in *= real_type(1.1);
         //      C_out *= real_type(0.9);
-        const real_type upper = boost::numeric_cast<real_type>( 1.1 );
-        const real_type lower = boost::numeric_cast<real_type>( 0.9 );
-        C_in  = boost::numeric_cast<image_type>( C_in* upper   );
-        C_out = boost::numeric_cast<image_type>( C_out * lower );
+        const real_type upper = OpenTissue::utility::numeric_cast<real_type>( 1.1 );
+        const real_type lower = OpenTissue::utility::numeric_cast<real_type>( 0.9 );
+        C_in  = OpenTissue::utility::numeric_cast<image_type>( C_in* upper   );
+        C_out = OpenTissue::utility::numeric_cast<image_type>( C_out * lower );
       }
       chan_vese::update(phi,U,C_in,C_out,lambda,mu,nu,dt,psi);
     }
@@ -491,10 +491,10 @@ namespace OpenTissue
         // TODO: problems might arise when image_type is unsigned
         //      C_in *= real_type(1.1);
         //      C_out *= real_type(0.9);
-        const real_type upper = boost::numeric_cast<real_type>( 1.1 );
-        const real_type lower = boost::numeric_cast<real_type>( 0.9 );
-        C_in  = boost::numeric_cast<image_type>( C_in* upper   );
-        C_out = boost::numeric_cast<image_type>( C_out * lower );
+        const real_type upper = OpenTissue::utility::numeric_cast<real_type>( 1.1 );
+        const real_type lower = OpenTissue::utility::numeric_cast<real_type>( 0.9 );
+        C_in  = OpenTissue::utility::numeric_cast<image_type>( C_in* upper   );
+        C_out = OpenTissue::utility::numeric_cast<image_type>( C_out * lower );
       }
       chan_vese::update(phi,U,C_in,C_out,lambda,mu,nu,dt,psi);
     }

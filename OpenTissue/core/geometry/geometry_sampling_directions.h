@@ -10,10 +10,10 @@
 #include <OpenTissue/configuration.h>
 
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh.h>
-#include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_make_sphere.h> 
-#include <OpenTissue/core/containers/mesh/common/util/mesh_make_sphere.h> 
+#include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_make_sphere.h>
+#include <OpenTissue/core/containers/mesh/common/util/mesh_make_sphere.h>
 
-#include <boost/cast.hpp> //--- Needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for OpenTissue::utility::numeric_cast
 #include <cmath>
 #include <vector>
 
@@ -37,30 +37,30 @@ namespace OpenTissue
 
       protected:
 
-        static sampling_type & type() 
-        {   
+        static sampling_type & type()
+        {
           static sampling_type tmp = icosahedron_type;
           return tmp;
         }
 
       public:
 
-        static sampling_type get_type() 
-        {   
+        static sampling_type get_type()
+        {
           changed() = false;
           return type();
         }
 
-        static void set_type(sampling_type new_type) 
-        {   
+        static void set_type(sampling_type new_type)
+        {
           changed() = true;
           type() = new_type;
         }
 
-        static bool & changed() 
+        static bool & changed()
         {
           static bool tmp = true;
-          return tmp; 
+          return tmp;
         }
       };
 
@@ -116,7 +116,7 @@ namespace OpenTissue
               std::cout << "SamplingDirections::init(): Using icosahedron type" << std::endl;
               mesh_type sphere;
               make_sphere(1.0,3,sphere);
-              max_samples = static_cast<unsigned int>( sphere.size_vertices() ); 
+              max_samples = static_cast<unsigned int>( sphere.size_vertices() );
               dir().resize(max_samples);
               typename mesh_type::vertex_iterator v = sphere.vertex_begin();
               for(unsigned int k=0;k<max_samples;++k,++v)
@@ -130,7 +130,7 @@ namespace OpenTissue
               //--- construct tetrahedron with all edges having same length
               mesh_type sphere;
               make_sphere(1.0,4,sphere,true);
-              max_samples = static_cast<unsigned int>( sphere.size_vertices() ); 
+              max_samples = static_cast<unsigned int>( sphere.size_vertices() );
               dir().resize(max_samples);
               typename mesh_type::vertex_iterator v = sphere.vertex_begin();
               for(unsigned int k=0;k<max_samples;++k,++v)
@@ -141,7 +141,7 @@ namespace OpenTissue
             {
               std::cout << "SamplingDirections::init(): Using random type" << std::endl;
               //--- seens to create curly curves...
-              max_samples = 642; 
+              max_samples = 642;
               dir().resize(max_samples);
               for(unsigned int k=0;k<max_samples;++k)
               {
@@ -156,7 +156,7 @@ namespace OpenTissue
               //--- this actually looks the best eventhough there is higher density at the poles
               mesh_type sphere;
               mesh::make_sphere(1.0,25,25,sphere);
-              max_samples = static_cast<unsigned int>( sphere.size_vertices() ); 
+              max_samples = static_cast<unsigned int>( sphere.size_vertices() );
               dir().resize(max_samples);
               typename mesh_type::vertex_iterator v = sphere.vertex_begin();
               for(unsigned int k=0;k<max_samples;++k,++v)

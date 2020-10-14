@@ -74,7 +74,7 @@ namespace OpenTissue
       using std::sqrt;
 
       static real_type const epsilon = math::working_precision<real_type>();
-      static real_type const four    = boost::numeric_cast<real_type>(4.0);
+      static real_type const four    = OpenTissue::utility::numeric_cast<real_type>(4.0);
       static real_type const two     = detail::two<real_type>();
       static real_type const zero    = detail::zero<real_type>();
 
@@ -98,7 +98,7 @@ namespace OpenTissue
       }
 
       assert( discr > zero || !"compute_polynomial_roots(): discriminant was expected to be positive");
-      
+
       discr = sqrt(discr);
       roots[0] = (-c1 - discr)/(two*c2);
       roots[1] = (-c1 + discr)/(two*c2);
@@ -132,12 +132,12 @@ namespace OpenTissue
       using std::cos;
       using std::sin;
 
-      static real_type const THIRD         = boost::numeric_cast<real_type>( 1.0/3.0   );
-      static real_type const TWENTYSEVENTH = boost::numeric_cast<real_type>( 1.0/27.0  );
-      static real_type const NINE          = boost::numeric_cast<real_type>( 9.0       );
+      static real_type const THIRD         = OpenTissue::utility::numeric_cast<real_type>( 1.0/3.0   );
+      static real_type const TWENTYSEVENTH = OpenTissue::utility::numeric_cast<real_type>( 1.0/27.0  );
+      static real_type const NINE          = OpenTissue::utility::numeric_cast<real_type>( 9.0       );
       static real_type const TWO           = detail::two<real_type>();
       static real_type const ZERO          = detail::zero<real_type>();
-      static real_type const SQRT3         = boost::numeric_cast<real_type>( sqrt(3.0) );
+      static real_type const SQRT3         = OpenTissue::utility::numeric_cast<real_type>( sqrt(3.0) );
       static real_type const epsilon       = math::working_precision<real_type>();
 
       if ( fabs(c3) <= epsilon )
@@ -177,16 +177,16 @@ namespace OpenTissue
       else if ( discr > ZERO )  // 1 real, 2 complex roots
       {
         discr = sqrt(discr);
-        
+
         real_type temp = -half_B + discr;
         //if ( temp >= ZERO )
         //  roots[0] = pow(temp,THIRD);
         //else
         //  roots[0] = -pow(-temp,THIRD);
         roots[0] = ( temp >= ZERO ) ? pow(temp,THIRD) : -pow(-temp,THIRD);
-        
+
         temp = - half_B - discr;
-        
+
         //if ( temp >= ZERO )
         //  roots[0] += pow(temp,THIRD);
         //else
@@ -234,9 +234,9 @@ namespace OpenTissue
       using std::fabs;
       using std::sqrt;
 
-      static real_type const THREEQUATERS  = boost::numeric_cast<real_type>( 0.75 );
-      static real_type const FOUR          = boost::numeric_cast<real_type>( 4.0 );
-      static real_type const EIGHT         = boost::numeric_cast<real_type>( 8.0 );
+      static real_type const THREEQUATERS  = OpenTissue::utility::numeric_cast<real_type>( 0.75 );
+      static real_type const FOUR          = OpenTissue::utility::numeric_cast<real_type>( 4.0 );
+      static real_type const EIGHT         = OpenTissue::utility::numeric_cast<real_type>( 8.0 );
       static real_type const ZERO          = detail::zero<real_type>();
       static real_type const TWO           = detail::two<real_type>();
       static real_type const ONE           = detail::one<real_type>();

@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 template<typename bvh_type_,typename mesh_type_>
 class VolumeRefitter
@@ -47,7 +47,7 @@ public:
     pmax = -pmin;
     if(bv->is_leaf())
     {
-      annotated_bv_ptr annotated_bv = boost::static_pointer_cast<annotated_bv_type>(bv);
+      annotated_bv_ptr annotated_bv = std::static_pointer_cast<annotated_bv_type>(bv);
 
       geometry_type geometry = *(annotated_bv->geometry_begin());
 
@@ -94,4 +94,4 @@ public:
 };
 
 // VOLUME_REFITTER_H
-#endif 
+#endif

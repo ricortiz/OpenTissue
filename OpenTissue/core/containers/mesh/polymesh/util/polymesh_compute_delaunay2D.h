@@ -11,7 +11,7 @@
 
 #include <Triangle/triangle.h>
 #include <boost/property_map/vector_property_map.hpp>
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 #include <cstring>        // needed for memset
 
 namespace OpenTissue
@@ -46,17 +46,17 @@ namespace OpenTissue
       memset(&out, 0, sizeof(triangulateio));
       memset(&vorout, 0, sizeof(triangulateio));
 
-      in.numberofpoints = boost::numeric_cast<int>(vertices.size());
+      in.numberofpoints = OpenTissue::utility::numeric_cast<int>(vertices.size());
 
-      std::vector<REAL> input_points( in.numberofpoints*2 ); 
+      std::vector<REAL> input_points( in.numberofpoints*2 );
 
       for(size_type i=0;i<vertices.size();++i)
       {
-        real_type x = boost::numeric_cast<real_type>( vertices[i](0) );
-        real_type y = boost::numeric_cast<real_type>( vertices[i](1) );
+        real_type x = OpenTissue::utility::numeric_cast<real_type>( vertices[i](0) );
+        real_type y = OpenTissue::utility::numeric_cast<real_type>( vertices[i](1) );
 
-        input_points[i*2  ] = boost::numeric_cast<REAL>( x );
-        input_points[i*2+1] = boost::numeric_cast<REAL>( y );
+        input_points[i*2  ] = OpenTissue::utility::numeric_cast<REAL>( x );
+        input_points[i*2+1] = OpenTissue::utility::numeric_cast<REAL>( y );
       }
 
       in.pointlist = &input_points[0];
@@ -67,24 +67,24 @@ namespace OpenTissue
 
       boost::vector_property_map<vertex_handle> handles;
 
-      for (int n = 0; n < out.numberofpoints; ++n) 
+      for (int n = 0; n < out.numberofpoints; ++n)
       {
         vector3_type coord;
-        coord[0] = boost::numeric_cast<real_type>( out.pointlist[n*2  ] );
-        coord[1] = boost::numeric_cast<real_type>( out.pointlist[n*2+1] );    
+        coord[0] = OpenTissue::utility::numeric_cast<real_type>( out.pointlist[n*2  ] );
+        coord[1] = OpenTissue::utility::numeric_cast<real_type>( out.pointlist[n*2+1] );
         coord[2] = value_traits::zero();
         vertex_handle h = mesh.add_vertex( coord );
         handles[n] = h;
       }
 
-      for (int n = 0; n < out.numberoftriangles; ++n) 
+      for (int n = 0; n < out.numberoftriangles; ++n)
       {
         int idx0 = out.trianglelist[n*3  ];
         int idx1 = out.trianglelist[n*3 +1 ];
         int idx2 = out.trianglelist[n*3 +2 ];
         mesh.add_face( handles[idx0],handles[idx1],handles[idx2] );
       }
-      
+
       // Clean up any memory used by ::triangulate
       free(vorout.pointlist);
       free(vorout.pointattributelist);

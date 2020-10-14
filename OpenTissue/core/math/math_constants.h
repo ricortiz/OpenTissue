@@ -10,13 +10,13 @@
 #include <OpenTissue/configuration.h>
 
 #include <boost/numeric/conversion/bounds.hpp>
-#include <boost/cast.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 #include <cmath>
 
 
 namespace OpenTissue
 {
-	
+
   namespace math
   {
 
@@ -158,7 +158,7 @@ namespace OpenTissue
     }  // namespace detail
 
 
-    // constant: ½ (half)
+    // constant: ï¿½ (half)
     namespace detail
     {
 
@@ -179,13 +179,13 @@ namespace OpenTissue
     {
 
       template<typename T>
-      inline T pi() { return boost::numeric_cast<T>(M_PI); }
+      inline T pi() { return OpenTissue::utility::numeric_cast<T>(M_PI); }
 
       template<typename T>
-      inline T pi_half() {  return boost::numeric_cast<T>(M_PI_2); }
+      inline T pi_half() {  return OpenTissue::utility::numeric_cast<T>(M_PI_2); }
 
       template<typename T>
-      inline T pi_quarter() {  return boost::numeric_cast<T>(M_PI_4); }
+      inline T pi_quarter() {  return OpenTissue::utility::numeric_cast<T>(M_PI_4); }
 
     }  // namespace detail
 
@@ -205,16 +205,16 @@ namespace OpenTissue
 
       // one degree in radians
       template<typename T>
-      inline T degree() {  return boost::numeric_cast<T>(0.017453292519943295769236907684886); }
+      inline T degree() {  return OpenTissue::utility::numeric_cast<T>(0.017453292519943295769236907684886); }
 
       // one radian in degrees
       template<typename T>
-      inline T radian() {  return boost::numeric_cast<T>(57.295779513082320876798154814105); }
+      inline T radian() {  return OpenTissue::utility::numeric_cast<T>(57.295779513082320876798154814105); }
 
     }
 
   }  // namespace math
-  
+
 }  // namespace OpenTissue
 
 // #define OPENTISSUE_CORE_MATH_MATH_CONSTANTS_H

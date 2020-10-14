@@ -28,7 +28,7 @@ namespace OpenTissue
 
     template<
       typename value_type_
-      //, typename value_traits_ = ValueTraits<value_type_> 
+      //, typename value_traits_ = ValueTraits<value_type_>
     >
     class Matrix3x3
     {
@@ -89,46 +89,46 @@ namespace OpenTissue
     public:
 
       value_type & operator()(index_type i, index_type j)
-      { 
+      {
         assert( ( i>=0 && i<3 ) || !"Matrix3x3::(i,j) i must be in range [0..2]");
         assert( ( j>=0 && j<3 ) || !"Matrix3x3::(i,j) j must be in range [0..2]");
-        return (*(&m_row0+i))(j); 
+        return (*(&m_row0+i))(j);
       }
 
-      value_type const & operator()(index_type i, index_type j) const 
-      { 
+      value_type const & operator()(index_type i, index_type j) const
+      {
         assert( ( i>=0 && i<3 ) || !"Matrix3x3::(i,j) i must be in range [0..2]");
         assert( ( j>=0 && j<3 ) || !"Matrix3x3::(i,j) j must be in range [0..2]");
-        return (*(&m_row0+i))(j); 
+        return (*(&m_row0+i))(j);
       }
 
       vector3_type & operator[](index_type i)
-      { 
+      {
         assert( ( i>=0 && i<3 ) || !"Matrix3x3::(i,j) i must be in range [0..2]");
-        return *(&m_row0+i); 
+        return *(&m_row0+i);
       }
 
-      vector3_type const & operator[](index_type i) const 
-      { 
+      vector3_type const & operator[](index_type i) const
+      {
         assert( ( i>=0 && i<3 ) || !"Matrix3x3::(i,j) i must be in range [0..2]");
-        return *(&m_row0+i); 
+        return *(&m_row0+i);
       }
 
       Matrix3x3 & operator=( Matrix3x3 const & cpy )
       {
         m_row0=cpy.m_row0;
         m_row1=cpy.m_row1;
-        m_row2=cpy.m_row2; 
+        m_row2=cpy.m_row2;
         return *this;
       }
 
       // TODO: Comparing floats with == or != is not safe NOTE T might not be a float type it could be anything? This suggest that we need some kinf of metaprogramming technique to deal with ths problem?
-      bool operator==(Matrix3x3 const & cmp ) const 
+      bool operator==(Matrix3x3 const & cmp ) const
       {
         return (m_row0==cmp.m_row0) && (m_row1==cmp.m_row1) && (m_row2==cmp.m_row2);
       }
 
-      bool operator!=( Matrix3x3 const & cmp ) const 
+      bool operator!=( Matrix3x3 const & cmp ) const
       {
         return !(*this==cmp);
       }
@@ -139,7 +139,7 @@ namespace OpenTissue
       Matrix3x3 & operator-= ( Matrix3x3 const & m   )       { m_row0-=m.m_row0; m_row1-=m.m_row1; m_row2-=m.m_row2; return *this; }
       Matrix3x3 & operator*= ( value_type const & s  )       {m_row0*=s;m_row1*=s;m_row2*=s;return *this;}
 
-      Matrix3x3 & operator/= ( value_type const & s  )       
+      Matrix3x3 & operator/= ( value_type const & s  )
       {
         assert(s || !"Matrix3x3/=(): division by zero");
         m_row0/=s;
@@ -209,7 +209,7 @@ namespace OpenTissue
 
         m_row0(i) = column(0);
         m_row1(i) = column(1);
-        m_row2(i) = column(2);      
+        m_row2(i) = column(2);
       }
 
       vector3_type       & row(index_type i)       { return (*this)[i]; }
@@ -281,8 +281,8 @@ namespace OpenTissue
       using std::cos;
       using std::sin;
 
-      T cosinus = boost::numeric_cast<T>( cos(radians) );
-      T sinus   = boost::numeric_cast<T>( sin(radians) );
+      T cosinus = OpenTissue::utility::numeric_cast<T>( cos(radians) );
+      T sinus   = OpenTissue::utility::numeric_cast<T>( sin(radians) );
 
       return Matrix3x3<T>(
         value_traits::one(), value_traits::zero(),        value_traits::zero(),
@@ -306,8 +306,8 @@ namespace OpenTissue
       using std::cos;
       using std::sin;
 
-      T cosinus = boost::numeric_cast<T>( cos(radians) );
-      T sinus   = boost::numeric_cast<T>( sin(radians) );
+      T cosinus = OpenTissue::utility::numeric_cast<T>( cos(radians) );
+      T sinus   = OpenTissue::utility::numeric_cast<T>( sin(radians) );
       return Matrix3x3<T>(
         cosinus,   value_traits::zero(),                   sinus,
         value_traits::zero(),    value_traits::one(),    value_traits::zero(),
@@ -329,8 +329,8 @@ namespace OpenTissue
       using std::cos;
       using std::sin;
 
-      T cosinus = boost::numeric_cast<T>( cos(radians) );
-      T sinus   = boost::numeric_cast<T>( sin(radians) );
+      T cosinus = OpenTissue::utility::numeric_cast<T>( cos(radians) );
+      T sinus   = OpenTissue::utility::numeric_cast<T>( sin(radians) );
 
       return Matrix3x3<T>(
         cosinus,                                      -sinus,       value_traits::zero(),
@@ -354,8 +354,8 @@ namespace OpenTissue
       using std::cos;
       using std::sin;
 
-      T cosinus = boost::numeric_cast<T>( cos(radians) );
-      T sinus   = boost::numeric_cast<T>( sin(radians) );
+      T cosinus = OpenTissue::utility::numeric_cast<T>( cos(radians) );
+      T sinus   = OpenTissue::utility::numeric_cast<T>( sin(radians) );
       Vector3<T> u = unit(axis);
 
       //Foley p.227 (5.76)
@@ -408,11 +408,11 @@ namespace OpenTissue
     }
 
     template<typename T>
-    inline bool is_orthonormal(Matrix3x3<T> const & M) 
-    {  
+    inline bool is_orthonormal(Matrix3x3<T> const & M)
+    {
       typedef typename Matrix3x3<T>::value_traits  value_traits;
 
-      return is_orthonormal(M, value_traits::zero()); 
+      return is_orthonormal(M, value_traits::zero());
     }
 
     template<typename T>
@@ -437,11 +437,11 @@ namespace OpenTissue
     }
 
     template<typename T>
-    inline bool is_zero(Matrix3x3<T> const & M) 
-    {  
+    inline bool is_zero(Matrix3x3<T> const & M)
+    {
       typedef typename Matrix3x3<T>::value_traits  value_traits;
 
-      return is_zero(M, value_traits::zero()); 
+      return is_zero(M, value_traits::zero());
     }
 
     template<typename T>
@@ -460,11 +460,11 @@ namespace OpenTissue
     }
 
     template<typename T>
-    inline bool is_symmetric(Matrix3x3<T> const & M) 
-    {  
+    inline bool is_symmetric(Matrix3x3<T> const & M)
+    {
       typedef typename Matrix3x3<T>::value_traits  value_traits;
 
-      return is_symmetric(M, value_traits::zero()); 
+      return is_symmetric(M, value_traits::zero());
     }
 
     template<typename T>
@@ -486,11 +486,11 @@ namespace OpenTissue
     }
 
     template<typename T>
-    inline bool is_diagonal(Matrix3x3<T> const & M) 
-    {  
+    inline bool is_diagonal(Matrix3x3<T> const & M)
+    {
       typedef typename Matrix3x3<T>::value_traits  value_traits;
 
-      return is_diagonal(M, value_traits::zero()); 
+      return is_diagonal(M, value_traits::zero());
     }
 
     template<typename T>
@@ -515,11 +515,11 @@ namespace OpenTissue
     }
 
     template<typename T>
-    inline bool is_identity(Matrix3x3<T> const & M) 
-    {  
+    inline bool is_identity(Matrix3x3<T> const & M)
+    {
       typedef typename Matrix3x3<T>::value_traits  value_traits;
 
-      return is_identity(M, value_traits::zero()); 
+      return is_identity(M, value_traits::zero());
     }
 
     template <typename T>
@@ -528,7 +528,7 @@ namespace OpenTissue
       return Matrix3x3<T>(
         ( v1( 0 ) * v2( 0 ) ), ( v1( 0 ) * v2( 1 ) ), ( v1( 0 ) * v2( 2 ) ),
         ( v1( 1 ) * v2( 0 ) ), ( v1( 1 ) * v2( 1 ) ), ( v1( 1 ) * v2( 2 ) ),
-        ( v1( 2 ) * v2( 0 ) ), ( v1( 2 ) * v2( 1 ) ), ( v1( 2 ) * v2( 2 ) ) 
+        ( v1( 2 ) * v2( 0 ) ), ( v1( 2 ) * v2( 1 ) ), ( v1( 2 ) * v2( 2 ) )
         );
     }
 
@@ -739,8 +739,8 @@ namespace OpenTissue
       //--- Changes a cross-product into a matrix multiplication.
       //--- Rewrites the component of a vector3_type cross-product as a matrix.
       //--- a x b = a*b = ba*
-      return Matrix3x3<T>(   
-        value_traits::zero(),                   -v(2),                     v(1),  
+      return Matrix3x3<T>(
+        value_traits::zero(),                   -v(2),                     v(1),
         v(2),     value_traits::zero(),                   -v(0),
         -v(1),                     v(0),    value_traits::zero()
         );

@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp> // Needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // Needed for OpenTissue::utility::numeric_cast
 
 #include <fstream>
 #include <stdexcept>
@@ -45,7 +45,7 @@ namespace OpenTissue
 
         typedef typename matrix_type::value_type  real_type;
         typedef typename matrix_type::size_type   size_type;
-        std::ifstream ifs;        
+        std::ifstream ifs;
         ifs.open( filename.c_str() );
         if ( !ifs.is_open() || ifs.bad() )
         {
@@ -53,9 +53,9 @@ namespace OpenTissue
           return false;
         }
         size_type m,n,nnz;
-        ifs >> m; ifs >> n; ifs >> nnz;       
+        ifs >> m; ifs >> n; ifs >> nnz;
         matrix_type M(m,n,nnz); // 2007-05-29 kenny: why not use A directly?
-        static real_type const tiny = boost::numeric_cast<real_type>(1e-10);
+        static real_type const tiny = OpenTissue::utility::numeric_cast<real_type>(1e-10);
         size_type i, j;
         while ( ifs.good() )
         {
@@ -63,7 +63,7 @@ namespace OpenTissue
           ifs >> j;
           real_type s;
           ifs >> s;
-          if( fabs(s) > tiny) 
+          if( fabs(s) > tiny)
             M(i,j) = s;
         }
         A = M;
@@ -91,7 +91,7 @@ namespace OpenTissue
         typedef typename vector_type::size_type  size_type;
 
         std::ifstream ifs;
-        
+
         ifs.open( filename.c_str() );
 
         if ( !ifs.is_open() || ifs.bad() )

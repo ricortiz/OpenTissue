@@ -18,6 +18,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 typedef double real_type;
 typedef ublas::compressed_matrix<real_type> matrix_type;
@@ -86,19 +87,19 @@ void do_test(F & f, nabla_F & nabla_f, vector_type & x, ProjectionOperator & P, 
   using namespace OpenTissue::math::big;
 
   size_type max_iterations       = 100;
-  real_type absolute_tolerance   = boost::numeric_cast<real_type>(1e-6);
-  real_type relative_tolerance   = boost::numeric_cast<real_type>(0.000000001);
-  real_type stagnation_tolerance = boost::numeric_cast<real_type>(0.000000001);
+  real_type absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(1e-6);
+  real_type relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
+  real_type stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.000000001);
   size_t status = 0;
   size_type iteration = 0;
-  real_type accuracy = boost::numeric_cast<real_type>(0.0);
-  real_type alpha = boost::numeric_cast<real_type>(0.0001);
-  real_type beta = boost::numeric_cast<real_type>(0.5);
+  real_type accuracy = OpenTissue::utility::numeric_cast<real_type>(0.0);
+  real_type alpha = OpenTissue::utility::numeric_cast<real_type>(0.0001);
+  real_type beta = OpenTissue::utility::numeric_cast<real_type>(0.5);
 
   OpenTissue::math::optimization::projected_steepest_descent(
     f
     , nabla_f
-    , x 
+    , x
     , P
     , max_iterations
     , absolute_tolerance
@@ -111,17 +112,17 @@ void do_test(F & f, nabla_F & nabla_f, vector_type & x, ProjectionOperator & P, 
     , beta
     );
 
-  std::cout << "status     = " 
-    << OpenTissue::math::optimization::get_error_message(status) 
+  std::cout << "status     = "
+    << OpenTissue::math::optimization::get_error_message(status)
     << std::endl;
-  std::cout << "absolute   = " 
-    << accuracy  
+  std::cout << "absolute   = "
+    << accuracy
     << std::endl;
-  std::cout << "iterations = " 
-    << iteration 
+  std::cout << "iterations = "
+    << iteration
     << std::endl;
-  std::cout << "x          = " 
-    << x 
+  std::cout << "x          = "
+    << x
     << std::endl;
 
   if(status==OpenTissue::math::optimization::ABSOLUTE_CONVERGENCE)
@@ -149,7 +150,7 @@ BOOST_AUTO_TEST_CASE(unconstrained_global_minimizer)
   //
   //   nabla Q(x) = 2 A x - b = 0
   //
-  // The stationary points are given by 
+  // The stationary points are given by
   //
   //  | 4 0| |x_1| + | -1| = 0
   //  | 0 4| |x_2|   | -2|
@@ -165,7 +166,7 @@ BOOST_AUTO_TEST_CASE(unconstrained_global_minimizer)
   b.resize(N,false);
 
   A(0,0) = 2.0;  A(0,1) = 0.0;
-  A(1,0) = 0.0;  A(1,1) = 2.0;  
+  A(1,0) = 0.0;  A(1,1) = 2.0;
 
   b(0) = -1.0;
   b(1) = -2.0;
@@ -221,7 +222,7 @@ BOOST_AUTO_TEST_CASE(constrained_global_minimizer)
   //
   //   nabla Q(x) = 2 A x - b = 0
   //
-  // The stationary points are given by 
+  // The stationary points are given by
   //
   //  | 4 0| |x_1| + | -1| = 0
   //  | 0 4| |x_2|   | -2|
@@ -237,7 +238,7 @@ BOOST_AUTO_TEST_CASE(constrained_global_minimizer)
   b.resize(N,false);
 
   A(0,0) = 2.0;  A(0,1) = 0.0;
-  A(1,0) = 0.0;  A(1,1) = 2.0;  
+  A(1,0) = 0.0;  A(1,1) = 2.0;
 
   b(0) = -1.0;
   b(1) = -2.0;

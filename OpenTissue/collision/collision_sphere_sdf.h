@@ -59,7 +59,7 @@ namespace OpenTissue
         return false;
 
       distance -= sphere.radius();
-      real_type tst = boost::numeric_cast<real_type>( envelope );
+      real_type tst = OpenTissue::utility::numeric_cast<real_type>( envelope );
       if(distance > tst)
         return false;
 

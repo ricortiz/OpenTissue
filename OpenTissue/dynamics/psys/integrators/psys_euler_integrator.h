@@ -29,7 +29,7 @@ namespace OpenTissue
         system.compute_forces();
         system.compute_accelerations();
 
-        real_type dt = boost::numeric_cast < real_type > ( timestep );
+        real_type dt = OpenTissue::utility::numeric_cast < real_type > ( timestep );
 
         particle_iterator p = system.particle_begin();
         particle_iterator end = system.particle_end();

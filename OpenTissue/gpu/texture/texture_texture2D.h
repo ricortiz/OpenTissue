@@ -13,7 +13,7 @@
 #include <OpenTissue/gpu/texture/texture_types.h>
 #include <OpenTissue/utility/gl/gl_check_errors.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <iostream>
 #include <cassert>
@@ -244,7 +244,7 @@ namespace OpenTissue
 
         if(flag)
         {
-          glTexParameteri( m_texture_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);        
+          glTexParameteri( m_texture_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
           glTexParameteri( m_texture_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
           OpenTissue::gl::gl_check_errors("GL_TEXTURE_MIN_FILTER = GL_LINEAR_MIPMAP_LINEAR");
 
@@ -327,7 +327,7 @@ namespace OpenTissue
 
     };
 
-    typedef boost::shared_ptr<Texture2D>  texture2D_pointer;
+    typedef std::shared_ptr<Texture2D>  texture2D_pointer;
 
   } // namespace texture
 } // namespace OpenTissue

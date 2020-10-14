@@ -6,7 +6,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <ctime>   // for std::time()
 #include <cstdlib> // for std::srand() and std::rand(), defaults to this if no boost!
@@ -14,7 +14,7 @@
 template<typename size_type, typename matrix_type>
 void matrix_setup(size_type bodies, size_type contacts, matrix_type & W, matrix_type & J)
 {
-  typedef matrix_type::value_type  real_type; 
+  typedef matrix_type::value_type  real_type;
 
   std::srand(static_cast<unsigned int>(std::time(0)));
 
@@ -44,7 +44,7 @@ void matrix_setup(size_type bodies, size_type contacts, matrix_type & W, matrix_
     size_type j = i*3;
 
     double rnd = rand()/(1.0*RAND_MAX);
-    size_type tmp = boost::numeric_cast<size_type>( bodies*rnd );
+    size_type tmp = OpenTissue::utility::numeric_cast<size_type>( bodies*rnd );
 
     size_type b1 = tmp%bodies;
     size_type b2 = (tmp+1)%bodies;

@@ -13,9 +13,7 @@
 #include <OpenTissue/core/math/math_constants.h>
 #include <OpenTissue/core/math/math_functions.h>
 #include <OpenTissue/core/math/math_value_traits.h>
-
-#include <boost/cast.hpp> //--- needed for boost::numeric_cast
-
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <string>
 #include <cmath>
@@ -35,7 +33,7 @@ namespace OpenTissue
 
     template <
       typename value_type_
-      //, typename value_traits_ = ValueTraits<value_type_> 
+      //, typename value_traits_ = ValueTraits<value_type_>
     >
     class Vector3
     {
@@ -61,16 +59,16 @@ namespace OpenTissue
 
 
       Vector3()
-        : x( value_traits::zero()  ) 
-        , y( value_traits::zero()  ) 
+        : x( value_traits::zero()  )
+        , y( value_traits::zero()  )
         , z( value_traits::zero()  )
       {}
 
-      Vector3( Vector3 const & v ) 
-        : x(v(0)) 
-        , y(v(1)) 
-        , z(v(2))  
-      {} 
+      Vector3( Vector3 const & v )
+        : x(v(0))
+        , y(v(1))
+        , z(v(2))
+      {}
 
       explicit Vector3( value_type const& val )
         : x( val )
@@ -78,11 +76,11 @@ namespace OpenTissue
         , z( val )
       {}
 
-      template <typename T1,typename T2,typename T3> 
+      template <typename T1,typename T2,typename T3>
       Vector3( T1 const & x_val, T2 const & y_val, T3 const & z_val )
-        : x( boost::numeric_cast<value_type>(x_val) ) 
-        , y( boost::numeric_cast<value_type>(y_val) ) 
-        , z( boost::numeric_cast<value_type>(z_val) ) 
+        : x( value_type(x_val) )
+        , y( value_type(y_val) )
+        , z( value_type(z_val) )
       {}
 
       ~Vector3()
@@ -200,10 +198,10 @@ namespace OpenTissue
       friend Vector3 fabs( Vector3 const & v )
       {
         using std::fabs;
-        return Vector3 ( 
-          boost::numeric_cast<value_type>( fabs( v(0) ) )
-          , boost::numeric_cast<value_type>( fabs( v(1) ) )
-          , boost::numeric_cast<value_type>( fabs( v(2) ) ) 
+        return Vector3 (
+          OpenTissue::utility::numeric_cast<value_type>( fabs( v(0) ) )
+          , OpenTissue::utility::numeric_cast<value_type>( fabs( v(1) ) )
+          , OpenTissue::utility::numeric_cast<value_type>( fabs( v(2) ) )
           );
       }
 
@@ -223,9 +221,9 @@ namespace OpenTissue
       {
         using std::floor;
         return Vector3(
-          boost::numeric_cast<value_type>( floor(v(0)) )
-          , boost::numeric_cast<value_type>( floor(v(1)) )
-          , boost::numeric_cast<value_type>( floor(v(2)) )
+          OpenTissue::utility::numeric_cast<value_type>( floor(v(0)) )
+          , OpenTissue::utility::numeric_cast<value_type>( floor(v(1)) )
+          , OpenTissue::utility::numeric_cast<value_type>( floor(v(2)) )
           );
       }
 
@@ -233,9 +231,9 @@ namespace OpenTissue
       {
         using std::ceil;
         return Vector3(
-          boost::numeric_cast<value_type>( ceil(v(0)) )
-          , boost::numeric_cast<value_type>( ceil(v(1)) )
-          , boost::numeric_cast<value_type>( ceil(v(2)) )
+          OpenTissue::utility::numeric_cast<value_type>( ceil(v(0)) )
+          , OpenTissue::utility::numeric_cast<value_type>( ceil(v(1)) )
+          , OpenTissue::utility::numeric_cast<value_type>( ceil(v(2)) )
           );
       }
 
@@ -287,7 +285,7 @@ namespace OpenTissue
       return Vector3<T> (
         floor( v(0) + half )
         , floor( v(1) + half )
-        , floor( v(2) + half ) 
+        , floor( v(2) + half )
         );
     }
 
@@ -296,7 +294,7 @@ namespace OpenTissue
     {
       return v(0) <= v(1) && v(0) < v(2) ? 0 : v(1) <= v(0) && v(1) < v(2) ? 1 : 2;
     }
-    
+
     template <typename T>
     inline typename Vector3<T>::index_type max_index(Vector3<T> const & v)
     {
@@ -338,16 +336,16 @@ namespace OpenTissue
     }
 
     template <typename T>
-    inline bool is_zero(Vector3<T> const & v) 
-    { 
+    inline bool is_zero(Vector3<T> const & v)
+    {
       typedef typename Vector3<T>::value_traits   value_traits;
-      return is_zero(v,value_traits::zero()); 
+      return is_zero(v,value_traits::zero());
     }
 
     template <typename T1,typename T2, typename T3>
     inline void random(Vector3<T1> & v, T2 const & lower, T3 const & upper)
     {
-      Random<T1> value(boost::numeric_cast<T1>(lower),boost::numeric_cast<T1>(upper));
+      Random<T1> value(OpenTissue::utility::numeric_cast<T1>(lower),OpenTissue::utility::numeric_cast<T1>(upper));
       v(0) = value();
       v(1) = value();
       v(2) = value();
@@ -357,18 +355,18 @@ namespace OpenTissue
     inline void random(Vector3<T> & v, Vector3<T> const & lower, Vector3<T> const & upper)
     {
       typedef typename Vector3<T>::value_traits   value_traits;
-      random(v,value_traits::zero(),value_traits::one());   
+      random(v,value_traits::zero(),value_traits::one());
       v(0) = (upper(0)-lower(0))*v(0) + lower(0);
       v(1) = (upper(1)-lower(0))*v(1) + lower(1);
       v(2) = (upper(2)-lower(2))*v(2) + lower(2);
     }
 
     template <typename T>
-    inline void random(Vector3<T> & v) 
-    {    
+    inline void random(Vector3<T> & v)
+    {
       typedef typename Vector3<T>::value_traits   value_traits;
 
-      random(v,value_traits::zero(),value_traits::one());   
+      random(v,value_traits::zero(),value_traits::one());
     }
 
     template <typename T>
@@ -387,20 +385,20 @@ namespace OpenTissue
     inline T length(Vector3<T> const & v)
     {
       using std::sqrt;
-      return boost::numeric_cast<T>( sqrt( dot(v,v) ) );
+      return OpenTissue::utility::numeric_cast<T>( sqrt( dot(v,v) ) );
     }
 
     template<typename T>
-    inline T sqr_length(Vector3<T> const & v) { return boost::numeric_cast<T>(v*v); }
+    inline T sqr_length(Vector3<T> const & v) { return OpenTissue::utility::numeric_cast<T>(v*v); }
 
     template<typename T>
     inline T norm(Vector3<T> const & v)   {    return length(v);  }
 
     template<typename T>
-    inline T norm_1(Vector3<T> const & v)   
+    inline T norm_1(Vector3<T> const & v)
     {
       using std::fabs;
-      using std::max;      
+      using std::max;
       return max( fabs(v(0)), max(  fabs(v(1)), fabs(v(2))  ) );
     }
 
@@ -435,7 +433,7 @@ namespace OpenTissue
       {
         return Vector3<T>( value_traits::zero() );
       }
-      T const inv = value_traits::one()/l; 
+      T const inv = value_traits::one()/l;
       return Vector3<T>( inv*v(0), inv*v(1), inv*v(2) );
     }
 
@@ -455,10 +453,10 @@ namespace OpenTissue
 
     template <typename T>
     inline void truncate(Vector3<T> & v)
-    { 
+    {
       typedef typename Vector3<T>::value_traits   value_traits;
 
-      truncate( v, value_traits::zero() ); 
+      truncate( v, value_traits::zero() );
     }
 
     /**

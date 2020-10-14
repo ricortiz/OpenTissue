@@ -49,7 +49,7 @@ namespace OpenTissue
       * This is nothing more than the directional derivative of f
       * taken at x and in the direction of dx.If we write
       *
-      *   gamma = alpha*nabla f(x)^T dx 
+      *   gamma = alpha*nabla f(x)^T dx
       *
       * then we can rephrase the test as follows
       *
@@ -66,13 +66,13 @@ namespace OpenTissue
       *
       * Using this in the original Armijo condition we have
       *
-      *    f( x(tau) ) < f(x) + alpha nabla f(x)^T( x(tau) - x)  
+      *    f( x(tau) ) < f(x) + alpha nabla f(x)^T( x(tau) - x)
       *
       * Next we will keep x(tau) feasible by doing a projection onto a the feasible region
       *
-      *    f( P( x(tau) ) ) < f(x) + alpha g(x)^T( P( x(tau) ) - x)  
+      *    f( P( x(tau) ) ) < f(x) + alpha g(x)^T( P( x(tau) ) - x)
       *
-      * where P is a projection operator, for instance it could be 
+      * where P is a projection operator, for instance it could be
       *
       *    P( x(tau) ) = max( min( x(tau), u), l )
       *
@@ -116,7 +116,7 @@ namespace OpenTissue
 
         typedef OpenTissue::math::ValueTraits<T>  value_traits;
 
-        T      const TOO_TINY              = ::boost::numeric_cast<T>(0.00001);
+        T      const TOO_TINY              = ::OpenTissue::utility::numeric_cast<T>(0.00001);
 
         status = OK;
 
@@ -170,7 +170,7 @@ namespace OpenTissue
 
         // Test for whether x_tau = x. If this is the
         // case then we can not possible make a line-search along
-        // the direction dx. 
+        // the direction dx.
         if(stagnation( x, x_tau, value_traits::zero() ) )
         {
           status = DESCEND_DIRECTION_IN_NORMAL_CONE;

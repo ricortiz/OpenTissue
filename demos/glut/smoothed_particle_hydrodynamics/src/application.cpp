@@ -27,14 +27,12 @@
 #include <OpenTissue/collision/spatial_hashing/spatial_hashing.h>
 #include <OpenTissue/utility/utility_fps_counter.h>
 #include <OpenTissue/utility/utility_runtime_type.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <vector>
 #include <list>
 #include <cmath>
 #include <string>
-
-#include <boost/cast.hpp> // we need boost::numeric_cast<>()
-
 
 using namespace OpenTissue::math;
 using namespace OpenTissue::math::detail;
@@ -42,7 +40,7 @@ using namespace OpenTissue::math::detail;
 
 /**
 *
-* 2007-05-21 kenny: 
+* 2007-05-21 kenny:
 *
 *    The compiler do not like it if these typedef's are moved inside the class
 *    definition. As far as I can tell it boils down to using a pointer as a
@@ -143,8 +141,8 @@ using namespace OpenTissue::math::detail;
 
 /**
 *
-* 2007-05-21: kenny: outstanding issues: 
-*                const-correctness, 
+* 2007-05-21: kenny: outstanding issues:
+*                const-correctness,
 *                OT-naming conventions is not used (ie. m_ on members, _type on types,
 *                prober placement of braces etc..),
 *                messy usage of math types and ad-hoc typedefs.
@@ -297,10 +295,10 @@ protected:
       const SPHTypes::real_type l = n*n;
 
       bool draw_sphere = false;
-      if (l >= mat->threshold() || l < 0.0025) 
+      if (l >= mat->threshold() || l < 0.0025)
       {
         // draw surface normals
-        if (draw_normals && l >= mat->threshold()) 
+        if (draw_normals && l >= mat->threshold())
         {
           const vector3_type sn = -0.05*unit(n);
           glColor3d(0.5, 0.5, 0.5);
@@ -312,26 +310,26 @@ protected:
         glColor3d(mat->red(), mat->green(), mat->blue());
         draw_sphere = draw_surface;
       }
-      else 
+      else
       {
         glColor3d(.5*mat->red(), .5*mat->green(), .5*mat->blue());
         draw_sphere = draw_inside;
       }
 
       // default behaviour
-      if (!(draw_surface || draw_inside)) 
+      if (!(draw_surface || draw_inside))
       {
         glColor3d(mat->red(), mat->green(), mat->blue());
         draw_sphere = true;
       }
 
-      if (draw_velocity) 
+      if (draw_velocity)
       {
         glEnable(GL_LIGHTING);
         const vector3_type vel = 0.05*p->velocity();
         OpenTissue::gl::DrawVector(pos, vel, 1, false);
       }
-      else if (draw_sphere) 
+      else if (draw_sphere)
       {
         glPushMatrix();
         glTranslated(pos[0], pos[1], pos[2]);
@@ -569,7 +567,7 @@ protected:
     //  sph->collisionSystem().addContainer(iDBb1); object = &DBb1;
     //  sph->collisionSystem().addContainer(iDBb2); object = &DBb2;
 
-    if (use_emitter) 
+    if (use_emitter)
     {
       emitter = &emitter2;
       emitter->batch() = 5;//7
@@ -578,7 +576,7 @@ protected:
       if (!sph->init(emitter2, particles))
         return false;
     }
-    else 
+    else
     {
       emitter = NULL;
       typedef std::vector<vector3_type> vectors;
@@ -587,14 +585,14 @@ protected:
       const SPHTypes::real_type dist = 1./45.;
       const SPHTypes::real_type off = -.14;
       size_t k = 1, j = 1, i = 1, p = particles;
-      while (p--) 
+      while (p--)
       {
         positions.push_back(vector3_type(off+i*dist, off+j*dist, off+k*dist));
         velocities.push_back(vector3_type(0.,0.,0.));
-        if (++i > 12) 
+        if (++i > 12)
         {
           i = 1;
-          if (++j > 12) 
+          if (++j > 12)
           {
             j = 1;
             ++k;
@@ -641,7 +639,7 @@ public:
   void do_display()
   {
 
-    if (obstacles) 
+    if (obstacles)
     {
       glEnable(GL_COLOR_MATERIAL);
       glEnable(GL_LIGHTING);
@@ -657,11 +655,11 @@ public:
     }
 
 
-    if (use_emitter && emitter) 
+    if (use_emitter && emitter)
     {
       glDisable(GL_COLOR_MATERIAL);
       glDisable(GL_LIGHTING);
-      if (emitter->active()) 
+      if (emitter->active())
       {
         if (emitter->running())
           glColor3d(0.1, 0.9, 0.1);
@@ -714,7 +712,7 @@ public:
 
 
     const DefaultSystem::fluid_material* mat = sph?sph->material():NULL;
-    if (sph) 
+    if (sph)
     {
 
       if (render)
@@ -724,7 +722,7 @@ public:
 
 
       fps.frame(); // probe both sim + vis
-      if (osd) 
+      if (osd)
       {
         glDisable(GL_LIGHTING);
         std::stringstream ss;
@@ -742,7 +740,7 @@ public:
         ost.str("");
         ost << "Particles: " << (mat?mat->particles():0.);
         putText(16, this->height()-90, 0.15, 0.0, 0.05, ost.str());
-      }  
+      }
     }
   }
 
@@ -857,14 +855,14 @@ public:
         break;
       }
     case '+':
-      if (sph) 
+      if (sph)
       {
         sph->collisionSystem().clear();
         sph->collisionSystem().addContainer(iDBb2); object = &DBb2;
       }
       break;
     case '-':
-      if (sph) 
+      if (sph)
       {
         sph->collisionSystem().clear();
         sph->collisionSystem().addContainer(iDBb1); object = &DBb1;
@@ -921,7 +919,7 @@ public:
     {
       emitter->execute();
     }
-    if (waves) 
+    if (waves)
     {
       vector3_type ext = DBb2.ext();
       vector3_type cen = DBb2.center();
@@ -938,17 +936,17 @@ public:
 
   void do_shutdown(){}
 
-  void mouse_down(double cur_x,double cur_y,bool shift,bool ctrl, bool alt,bool left,bool middle,bool right) 
+  void mouse_down(double cur_x,double cur_y,bool shift,bool ctrl, bool alt,bool left,bool middle,bool right)
   {
     if( !bScaleObstacle && middle && ctrl)
     {
-      yScale = boost::numeric_cast<int>(cur_y);
+      yScale = OpenTissue::utility::numeric_cast<int>(cur_y);
       bScaleObstacle = true;
     }
     else if( !bPanObstacle && left && shift && ctrl)
     {
       bPanObstacle = true;
-      ScreenToWorld(xPan, yPan, zPan, boost::numeric_cast<int>(cur_x), boost::numeric_cast<int>(cur_y));
+      ScreenToWorld(xPan, yPan, zPan, OpenTissue::utility::numeric_cast<int>(cur_x), OpenTissue::utility::numeric_cast<int>(cur_y));
     }
     else
     {
@@ -956,26 +954,26 @@ public:
     }
   }
 
-  void mouse_move(double cur_x,double cur_y) 
+  void mouse_move(double cur_x,double cur_y)
   {
-    
-    if (bPanObstacle) 
+
+    if (bPanObstacle)
     {
       double x, y, z;
-      ScreenToWorld(x, y, z, boost::numeric_cast<int>(cur_x), boost::numeric_cast<int>(cur_y));
+      ScreenToWorld(x, y, z, OpenTissue::utility::numeric_cast<int>(cur_x), OpenTissue::utility::numeric_cast<int>(cur_y));
       object->translate(this->pan_sensitivity()*vector3_type(x-xPan,y-yPan,z-zPan));
       xPan = x;
       yPan = y;
       zPan = z;
     }
-    else if (bScaleObstacle) 
+    else if (bScaleObstacle)
     {
       const GLdouble scale = cur_y - yScale;
       if (scale > 0)
         object->scale(1.02);
       else if (scale < 0)
         object->scale(0.98);
-      yScale = boost::numeric_cast<int>(cur_y);
+      yScale = OpenTissue::utility::numeric_cast<int>(cur_y);
     }
     else
     {
@@ -983,16 +981,16 @@ public:
     }
   }
 
-  void mouse_up(double cur_x,double cur_y,bool shift,bool ctrl, bool alt, bool left,bool middle,bool right) 
+  void mouse_up(double cur_x,double cur_y,bool shift,bool ctrl, bool alt, bool left,bool middle,bool right)
   {
     if( bScaleObstacle)
     {
-      yScale = boost::numeric_cast<int>(cur_y);
+      yScale = OpenTissue::utility::numeric_cast<int>(cur_y);
       bScaleObstacle = false;
     }
     else if(  bPanObstacle )
     {
-      ScreenToWorld(xPan, yPan, zPan, boost::numeric_cast<int>(cur_x), boost::numeric_cast<int>(cur_y));
+      ScreenToWorld(xPan, yPan, zPan, OpenTissue::utility::numeric_cast<int>(cur_x), OpenTissue::utility::numeric_cast<int>(cur_y));
       bPanObstacle = false;
     }
     else

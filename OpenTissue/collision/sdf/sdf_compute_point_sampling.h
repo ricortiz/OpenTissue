@@ -11,7 +11,7 @@
 
 #include <OpenTissue/core/containers/mesh/mesh.h>
 
-#include <boost/cast.hpp> //--- Needed for boost::numerical_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for boost::numerical_cast
 
 #include <list>
 
@@ -81,7 +81,7 @@ namespace OpenTissue
       //--- long flat edges are linearly sub-samplet, to help catch edge-face intersections.
 
 
-      real_type tmp = boost::numeric_cast<real_type>( edge_resolution );
+      real_type tmp = OpenTissue::utility::numeric_cast<real_type>( edge_resolution );
       real_type threshold = max(tmp, sqrt( phi.dx()*phi.dx() + phi.dy()*phi.dy() + phi.dz()*phi.dz() ));
 
       for(halfedge_iterator h = mesh.halfedge_begin();h!=mesh.halfedge_end();++h)
@@ -144,7 +144,7 @@ namespace OpenTissue
               face_type * neighbor = &(*h->get_twin_iterator()->get_face_iterator());
               bool unseen = !neighbor->m_tag;
               // TODO 2007-02-08: polymesh specific, bad idea
-              bool coplanar = is_planar(*h);  
+              bool coplanar = is_planar(*h);
               if(unseen && coplanar)
               {
                 neighbor->m_tag = 1;

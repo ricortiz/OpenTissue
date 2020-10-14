@@ -61,8 +61,8 @@ namespace OpenTissue
         , contact_point_container & contacts
         )
       {
-        annotated_bv_ptr bvA = boost::static_pointer_cast<annotated_bv_type>(bvA_);
-        annotated_bv_ptr bvB = boost::static_pointer_cast<annotated_bv_type>(bvB_);
+        annotated_bv_ptr bvA = std::static_pointer_cast<annotated_bv_type>(bvA_);
+        annotated_bv_ptr bvB = std::static_pointer_cast<annotated_bv_type>(bvB_);
 
         geometry_type * A = &(*(bvA->geometry_begin()));
         geometry_type * B = &(*(bvB->geometry_begin()));
@@ -209,7 +209,7 @@ namespace OpenTissue
 
           cp.m_a0 = t;
           cp.m_a1 = 0;
-          cp.m_a2 = 0;        
+          cp.m_a2 = 0;
           cp.m_b0 = w1;
           cp.m_b1 = w2;
           cp.m_b2 = w3;

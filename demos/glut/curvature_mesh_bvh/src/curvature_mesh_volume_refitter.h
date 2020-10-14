@@ -12,7 +12,7 @@
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh.h>
 #include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_compute_face_normal.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 template<typename bvh_type_>
 class CurvatureMeshVolumeRefitter
@@ -21,7 +21,7 @@ public:
 
   typedef          bvh_type_                          bvh_type;
   typedef typename bvh_type::volume_type              volume_type;
-  
+
   typedef typename volume_type::math_types            math_types;
   typedef typename math_types::real_type              real_type;
   typedef typename math_types::vector3_type           vector3_type;
@@ -48,7 +48,7 @@ public:
     pmax = -pmin;
     if(bv->is_leaf())
     {
-      annotated_bv_ptr annotated_bv = boost::static_pointer_cast<annotated_bv_type>(bv);
+      annotated_bv_ptr annotated_bv = std::static_pointer_cast<annotated_bv_type>(bv);
 
       geometry_type geometry = *(annotated_bv->geometry_begin());
 

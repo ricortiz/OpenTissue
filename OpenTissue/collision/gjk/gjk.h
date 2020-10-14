@@ -29,7 +29,7 @@
 
 
 
-#include <boost/cast.hpp> //--- needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- needed for OpenTissue::utility::numeric_cast
 
 namespace OpenTissue
 {
@@ -108,9 +108,9 @@ namespace OpenTissue
         public:
 
           GJK()
-            : m_rel_error(  boost::numeric_cast<real_type>(1e-6)  )
-            , m_abs_error(  boost::numeric_cast<real_type>(1e-10) )
-            , m_abs_error2( boost::numeric_cast<real_type>(1e-20) ) 
+            : m_rel_error(  OpenTissue::utility::numeric_cast<real_type>(1e-6)  )
+            , m_abs_error(  OpenTissue::utility::numeric_cast<real_type>(1e-10) )
+            , m_abs_error2( OpenTissue::utility::numeric_cast<real_type>(1e-20) )
           {}
 
         public:

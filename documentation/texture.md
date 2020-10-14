@@ -17,7 +17,7 @@ A channel is like a color component, the image data structure thus allows you to
 
 In some cases it can be beneficial to use boost smart pointers, thus you may want to define the type
 <pre>
-typedef boost::smart_ptr<image_type> image_pointer;
+typedef std:;shared_ptr<image_type> image_pointer;
 </pre>
 Now you can create a new image like this
 <pre>

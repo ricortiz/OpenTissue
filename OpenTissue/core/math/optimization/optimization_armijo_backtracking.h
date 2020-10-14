@@ -48,7 +48,7 @@ namespace OpenTissue
       * This is nothing more than the directional derivative of f
       * taken at x and in the direction of dx.If we write
       *
-      *   gamma = alpha*nabla f(x)^T dx 
+      *   gamma = alpha*nabla f(x)^T dx
       *
       * then we can rephrase the test as follows
       *
@@ -94,7 +94,7 @@ namespace OpenTissue
 
         typedef OpenTissue::math::ValueTraits<T>  value_traits;
 
-        T const TOO_TINY = ::boost::numeric_cast<T>(0.00001);
+        T const TOO_TINY = ::OpenTissue::utility::numeric_cast<T>(0.00001);
 
         status = OK;
 

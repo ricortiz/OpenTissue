@@ -16,6 +16,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 typedef OpenTissue::math::default_math_types		  			                 math_types;
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_cases)
 {
   using std::fabs;
 
-  real_type const too_tiny = boost::numeric_cast<real_type>(10e-15);
+  real_type const too_tiny = OpenTissue::utility::numeric_cast<real_type>(10e-15);
 
   // Create some skeleton to test with
   skeleton_type skeleton;
@@ -78,14 +79,14 @@ BOOST_AUTO_TEST_CASE(test_cases)
   b[2]->relative().T().clear();
   for(size_t j=0u;j<3u;++j)
   {
-    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[2]),  j, value_traits::pi_half() );    
+    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[2]),  j, value_traits::pi_half() );
     b[2]->box_limits().min_limit(j) = -value_traits::pi_quarter();
     b[2]->box_limits().max_limit(j) =  value_traits::pi_quarter();
   }
   b[2]->relative().T().clear();
   for(size_t j=0u;j<3u;++j)
   {
-    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  j, value_traits::zero() ); 
+    OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  j, value_traits::zero() );
     b[3]->box_limits().min_limit(j) = -value_traits::pi_half();
     b[3]->box_limits().max_limit(j) =  value_traits::pi_half();
   }
@@ -95,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_cases)
   OpenTissue::kinematics::inverse::get_joint_parameters( skeleton, theta );
   OpenTissue::kinematics::inverse::set_joint_parameters( skeleton, theta );
 
-  // Create some chains 
+  // Create some chains
   std::vector<chain_type> chains;
   chains.resize( 2 );
   chains[0].init( b[0], b[2] );
@@ -130,10 +131,10 @@ BOOST_AUTO_TEST_CASE(test_cases)
   chains[1].y_local()  =  math_types::vector3_type(   value_traits::zero(), value_traits::one(), value_traits::zero()  );
 
   // Set up some controlled relative transformation
-  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  0u, value_traits::zero() );    
-  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  1u, value_traits::pi_half() );    
-  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  2u, value_traits::pi() );    
-  
+  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  0u, value_traits::zero() );
+  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  1u, value_traits::pi_half() );
+  OpenTissue::kinematics::inverse::ACCESSOR::unsynch_set_theta( *(b[3]),  2u, value_traits::pi() );
+
   // We use get/set- joint paramters to make sure everything is initialized
   OpenTissue::kinematics::inverse::get_joint_parameters( skeleton, theta );
   OpenTissue::kinematics::inverse::set_joint_parameters( skeleton, theta );

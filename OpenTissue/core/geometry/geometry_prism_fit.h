@@ -69,7 +69,7 @@ namespace OpenTissue
       using std::max;
       using std::fabs;
       using std::sqrt;
-      using boost::numeric_cast;
+      using OpenTissue::utility::numeric_cast;
 
       assert(begin!=end || !"prism_fit(): beging was equal to end");
 

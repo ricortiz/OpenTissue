@@ -15,7 +15,7 @@
 #include <OpenTissue/core/containers/mesh/mesh.h>
 #include <OpenTissue/core/containers/grid/grid.h>
 
-#include <boost/cast.hpp> //--- Needed for boost::numerical_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for boost::numerical_cast
 
 #include <cmath>
 #include <iostream>
@@ -67,13 +67,13 @@ namespace OpenTissue
             return;
 
           //--- Initialize
-          std::fill(voxels.begin(),voxels.end(), boost::numeric_cast<T>(0) );
+          std::fill(voxels.begin(),voxels.end(), OpenTissue::utility::numeric_cast<T>(0) );
           m_pixels.resize( voxels.I()*voxels.J()*4 );
 
           glPushAttrib(GL_ALL_ATTRIB_BITS);
           gl::gl_check_errors("voxelizer(): push all atrribs");
 
-          int w = voxels.I(); 
+          int w = voxels.I();
           int h = voxels.J();
 
           bool fbo_support = true;
@@ -88,7 +88,7 @@ namespace OpenTissue
             m_fbo.attach_render_buffer(GL_STENCIL_ATTACHMENT_EXT, m_stencil);
             gl::gl_check_errors("voxelizer(): attach stencil buffer");
             m_fbo.attach_render_buffer(GL_DEPTH_ATTACHMENT_EXT, m_stencil);//--- experiment with packed depth and stencil buffer
-            gl::gl_check_errors("voxelizer(): attach stencil buffer");      
+            gl::gl_check_errors("voxelizer(): attach stencil buffer");
             m_fbo.attach_render_buffer(GL_COLOR_ATTACHMENT0_EXT, m_color);
             gl::gl_check_errors("voxelizer(): attach color buffer");
             m_fbo.is_valid();
@@ -122,10 +122,10 @@ namespace OpenTissue
           mesh::compute_mesh_maximum_coord(mesh,vmax);
 
           //--- Now we are ready for clipping and scanconverting
-          int kmin = boost::numeric_cast<int>((vmin(2) - voxels.min_coord(2))/voxels.dz()) - 1;
+          int kmin = OpenTissue::utility::numeric_cast<int>((vmin(2) - voxels.min_coord(2))/voxels.dz()) - 1;
           kmin = max(kmin,0);
-          int kmax = boost::numeric_cast<int>((vmax(2) - voxels.min_coord(2))/voxels.dz()) + 1;
-          kmax = min(kmax,boost::numeric_cast<int>(voxels.K()));
+          int kmax = OpenTissue::utility::numeric_cast<int>((vmax(2) - voxels.min_coord(2))/voxels.dz()) + 1;
+          kmax = min(kmax,OpenTissue::utility::numeric_cast<int>(voxels.K()));
 
           for(int k=kmin;k<kmax;++k)
             clip(&mesh, voxels, k, vmin, vmax);
@@ -243,8 +243,8 @@ namespace OpenTissue
         {
           gl::gl_check_errors("extract_voxels::clip(): on entry");
 
-          int w = boost::numeric_cast<int>( voxels.I() );
-          int h = boost::numeric_cast<int>( voxels.J() );
+          int w = OpenTissue::utility::numeric_cast<int>( voxels.I() );
+          int h = OpenTissue::utility::numeric_cast<int>( voxels.J() );
 
           glFinish();
           gl::gl_check_errors("voxelizer::clip(): glFinish");

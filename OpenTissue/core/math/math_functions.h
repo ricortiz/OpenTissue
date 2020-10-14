@@ -10,9 +10,11 @@
 #include <OpenTissue/configuration.h>
 
 #include <OpenTissue/core/math/math_constants.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <boost/numeric/conversion/bounds.hpp>
-#include <boost/cast.hpp>
+
+#include <cassert>
 #include <cmath>
 
 
@@ -25,7 +27,7 @@ namespace OpenTissue
    * - fac (faculty)
    * - sgn (sign function)
    * - sinc
-   */	
+   */
   namespace math
   {
 
@@ -95,7 +97,7 @@ namespace OpenTissue
     template<typename T>
     inline T fac(unsigned long n)
     {
-      // TODO what about implicit type conversions? This could have been done more elegangtly using partial specialization  
+      // TODO what about implicit type conversions? This could have been done more elegangtly using partial specialization
       unsigned long val = 1;
       for(; n > 0; val *= n--);
       return T(val);
@@ -128,8 +130,8 @@ namespace OpenTissue
       using std::fabs;
       using std::sin;
 
-      static T const tiny   = boost::numeric_cast<T>(1.0e-4);
-      static T const factor = boost::numeric_cast<T>(0.166666666666666666667);
+      static T const tiny   = OpenTissue::utility::numeric_cast<T>(1.0e-4);
+      static T const factor = OpenTissue::utility::numeric_cast<T>(0.166666666666666666667);
 
       //--- if |x| < 1e-4 then use a taylor series expansion. this two term expansion
       //--- is actually accurate to one LS bit within this range if double precision
@@ -154,7 +156,7 @@ namespace OpenTissue
     }
 
   }  // namespace math
-  
+
 }  // namespace OpenTissue
 
 // #define OPENTISSUE_CORE_MATH_MATH_FUNCTIONS_H

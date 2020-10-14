@@ -11,7 +11,7 @@
 
 #include <OpenTissue/core/math/math_value_traits.h>
 #include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_compute_edge_direction.h>
-#include <boost/cast.hpp> //--- Needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for OpenTissue::utility::numeric_cast
 
 
 namespace OpenTissue
@@ -29,7 +29,7 @@ namespace OpenTissue
      * @param avg_length  Upon return this argument holds the average length of the edges.
      */
     template<typename mesh_type, typename real_type>
-    inline void compute_minmax_edge_length( 
+    inline void compute_minmax_edge_length(
         mesh_type const & mesh
       , real_type & min_length
       , real_type & max_length
@@ -53,7 +53,7 @@ namespace OpenTissue
 
         OpenTissue::polymesh::compute_edge_direction( *(e->get_halfedge0_iterator()), u);
 
-        real_type edge_length = boost::numeric_cast<real_type>( sqrt( inner_prod( u,u) ) );
+        real_type edge_length = OpenTissue::utility::numeric_cast<real_type>( sqrt( inner_prod( u,u) ) );
         avg_length += edge_length;
         min_length = (edge_length < min_length)?edge_length: min_length;
         max_length = (edge_length > max_length)?edge_length: max_length;

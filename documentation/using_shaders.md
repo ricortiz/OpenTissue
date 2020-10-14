@@ -62,7 +62,7 @@ the Application class.
 class Application
 {
 public:
-  typedef boost::shared_ptr<MyShader> shader_pointer;
+  typedef std::shared_ptr<MyShader> shader_pointer;
   ...
 protected:
   shader_pointer  m_shader;

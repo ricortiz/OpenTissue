@@ -14,7 +14,7 @@
 #include <OpenTissue/core/math/math_functions.h> // Needed for clamp
 #include <OpenTissue/core/math/math_is_number.h> // Needed for is_number
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 
 #include <cmath>  // Needed for cos, atan2, and asin
 #include <cassert>
@@ -63,21 +63,21 @@ namespace OpenTissue
       {
         if ( m20 > -value_traits::one() )
         {
-          rz = boost::numeric_cast<real_type>( atan2(m10,m00) );
-          ry = boost::numeric_cast<real_type>( asin(-m20)     );
-          rx = boost::numeric_cast<real_type>( atan2(m21,m22) );
+          rz = OpenTissue::utility::numeric_cast<real_type>( atan2(m10,m00) );
+          ry = OpenTissue::utility::numeric_cast<real_type>( asin(-m20)     );
+          rx = OpenTissue::utility::numeric_cast<real_type>( atan2(m21,m22) );
           return true;
         }
 
         // WARNING.  Not unique.  ZA - XA = -atan2(r01,r02)
-        rz = boost::numeric_cast<real_type>( - atan2(m01,m02) );
+        rz = OpenTissue::utility::numeric_cast<real_type>( - atan2(m01,m02) );
         ry = value_traits::pi_2();
         rx = value_traits::zero();
         return false;
       }
 
       // WARNING.  Not unique.  ZA + XA = atan2(-r01,-r02)
-      rz = boost::numeric_cast<real_type>( atan2(-m01,-m02) );
+      rz = OpenTissue::utility::numeric_cast<real_type>( atan2(-m01,-m02) );
       ry = value_traits::pi_2();
       rx = value_traits::zero();
       return false;
@@ -145,15 +145,15 @@ namespace OpenTissue
       //
       // Multipling once
       //
-      //  | u_x |   |  cos(phi) -sin(phi) 0 | |  sin(psi) |  
-      //  | u_y | = |  sin(phi)  cos(phi) 0 | |   0       | 
-      //  | u_z |   |  0         0        1 | |  cos(psi) |  
+      //  | u_x |   |  cos(phi) -sin(phi) 0 | |  sin(psi) |
+      //  | u_y | = |  sin(phi)  cos(phi) 0 | |   0       |
+      //  | u_z |   |  0         0        1 | |  cos(psi) |
       //
       // Multipling twice
       //
-      //  | u_x |   |  cos(phi)  sin(psi) |  
-      //  | u_y | = |  sin(phi)  sin(psi) | 
-      //  | u_z |   |  cos(psi)           |  
+      //  | u_x |   |  cos(phi)  sin(psi) |
+      //  | u_y | = |  sin(phi)  sin(psi) |
+      //  | u_z |   |  cos(psi)           |
       //
       // From the third equation we solve
       //
@@ -166,7 +166,7 @@ namespace OpenTissue
       assert(u_z <= value_traits::one() || !"ZYZ_euler_angles(): u_z was too big");
       assert(u_z >= -value_traits::one() || !"ZYZ_euler_angles(): u_z was too small");
 
-      psi = boost::numeric_cast<T>( acos(u_z)   );
+      psi = OpenTissue::utility::numeric_cast<T>( acos(u_z)   );
       assert(is_number(psi) || !"ZYZ_euler_angles(): psi was not an number encountered");
       assert(psi <= value_traits::pi() || !"ZYZ_euler_angles(): psi was too big");
       assert(psi >= value_traits::zero() || !"ZYZ_euler_angles(): psi was too small");
@@ -190,11 +190,11 @@ namespace OpenTissue
       // aligned.
       //
       //
-      T const too_small = boost::numeric_cast<T>( 0.0001 );
+      T const too_small = OpenTissue::utility::numeric_cast<T>( 0.0001 );
       if(psi<too_small)
       {
         //
-        // Our solution is to use another clever test vector 
+        // Our solution is to use another clever test vector
         //
         vector3_type const i = vector3_type(value_traits::one(),value_traits::zero(),value_traits::zero());
         vector3_type const w = Q.rotate(i);
@@ -203,7 +203,7 @@ namespace OpenTissue
         T const w_y = w(1);
         assert(is_number(w_x) || !"ZYZ_euler_angles(): w_x was not an number encountered");
         assert(is_number(w_y) || !"ZYZ_euler_angles(): w_y not an number encountered");
-        phi = boost::numeric_cast<T>( atan2(w_y,w_x) );
+        phi = OpenTissue::utility::numeric_cast<T>( atan2(w_y,w_x) );
         assert(is_number(phi) || !"ZYZ_euler_angles(): phi was not an number encountered");
         assert(phi <=  value_traits::pi() || !"ZYZ_euler_angles(): phi was too big");
         assert(phi >= -value_traits::pi() || !"ZYZ_euler_angles(): phi was too small");
@@ -220,7 +220,7 @@ namespace OpenTissue
         T const u_y = u(1);
         assert(is_number(u_x) || !"ZYZ_euler_angles(): u_x was not an number encountered");
         assert(is_number(u_y) || !"ZYZ_euler_angles(): u_y not an number encountered");
-        phi = boost::numeric_cast<T>( atan2(u_y,u_x) );
+        phi = OpenTissue::utility::numeric_cast<T>( atan2(u_y,u_x) );
         assert(is_number(phi) || !"ZYZ_euler_angles(): phi was not an number encountered");
         assert(phi <=  value_traits::pi() || !"ZYZ_euler_angles(): phi was too big");
         assert(phi >= -value_traits::pi() || !"ZYZ_euler_angles(): phi was too small");
@@ -228,7 +228,7 @@ namespace OpenTissue
 
 
       //
-      // So now we have 
+      // So now we have
       //
       //   Qzy =~ Rz( phi )*Ry( psi );
       //
@@ -269,7 +269,7 @@ namespace OpenTissue
       T const w_y = w(1);
       assert(is_number(w_x) || !"ZYZ_euler_angles(): w_x was not an number encountered");
       assert(is_number(w_y) || !"ZYZ_euler_angles(): w_y not an number encountered");
-      theta = boost::numeric_cast<T>( atan2(w_y,w_x) );
+      theta = OpenTissue::utility::numeric_cast<T>( atan2(w_y,w_x) );
       assert(is_number(theta) || !"ZYZ_euler_angles(): phi was not an number encountered");
       assert(theta <=  value_traits::pi() || !"ZYZ_euler_angles(): phi was too big");
       assert(theta >= -value_traits::pi() || !"ZYZ_euler_angles(): phi was too small");

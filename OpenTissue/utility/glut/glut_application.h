@@ -11,7 +11,7 @@
 
 #include <OpenTissue/utility/gl/gl_util.h>
 
-#include<boost/shared_ptr.hpp>
+#include<memory>
 
 namespace OpenTissue
 {
@@ -80,25 +80,25 @@ namespace OpenTissue
     public:
 
       virtual char const * get_title() const=0;
-      
+
       virtual void action(unsigned char choice)=0;
 
       virtual void special_action(int choice)=0;
 
       virtual void reshape(){};
-      
+
       virtual void init_right_click_menu(int main_menu, void menu(int entry))=0;
-      
+
       virtual void init()=0;
-      
+
       virtual void run()=0;
-      
+
       virtual void shutdown()=0;
 
       virtual void mouse_down(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right)=0;
-      
+
       virtual void mouse_up(double cur_x,double cur_y,bool shift,bool ctrl,bool alt,bool left,bool middle,bool right)=0;
-      
+
       virtual void mouse_move(double cur_x,double cur_y)=0;
 
       /**
@@ -109,12 +109,12 @@ namespace OpenTissue
       * screen capturing and movie making.
       */
       virtual void display()=0;
-      
+
       /**
       * Initializes the openGL state.
       */
       virtual void init_gl_state()=0;
-      
+
       /**
       * Sets up default lighting. It is assumed that the
       * lighting is set up the modelview space (ie. fixed
@@ -122,7 +122,7 @@ namespace OpenTissue
       *
       */
       virtual void setup_lights()=0;
-      
+
       /**
       * Intenden to Set up a default projection and initialize the modelview
       * transformation. Upon return the modelview matrix stack should be left
@@ -133,14 +133,14 @@ namespace OpenTissue
 
     /**
     * The application framwork GLUT bindings talk to the application by
-    * using a pointer to a Application base class. 
+    * using a pointer to a Application base class.
     *
     * End users will create their own applications by making a derived
     * class from the Application and then letting the init_glut_application
     * function return a base-class pointer to an instance of this derived
     * class.
     */
-    typedef boost::shared_ptr<Application> instance_pointer;
+    typedef std::shared_ptr<Application> instance_pointer;
 
   } // namespace glut
 } // namespace OpenTissue

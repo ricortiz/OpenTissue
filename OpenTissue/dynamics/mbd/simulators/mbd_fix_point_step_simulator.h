@@ -11,7 +11,7 @@
 
 #include <OpenTissue/dynamics/mbd/interfaces/mbd_simulator_interface.h>
 
-#include <boost/cast.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 namespace OpenTissue
 {
@@ -23,7 +23,7 @@ namespace OpenTissue
     * Does not work with First Order Physics.
     */
     template< typename mbd_types >
-    class FixPointStepSimulator 
+    class FixPointStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -61,7 +61,7 @@ namespace OpenTissue
 
       void run(real_type const & time_step)
       {
-        real_type m_epsilon_fix = boost::numeric_cast<real_type>(10e-4);
+        real_type m_epsilon_fix = OpenTissue::utility::numeric_cast<real_type>(10e-4);
 
         m_all = this->get_configuration()->get_all_body_group();
 

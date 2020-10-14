@@ -17,6 +17,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 template<typename matrix_type,typename vector_type>
 void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector_type const & y)
@@ -27,7 +28,7 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
   typedef typename matrix_type::value_type real_type;
   typedef typename matrix_type::size_type  size_type;
 
-  real_type const tol = boost::numeric_cast<real_type>(0.01);
+  real_type const tol = OpenTissue::utility::numeric_cast<real_type>(0.01);
 
   OpenTissue::math::big::lu(A,x,b);
   for(size_type i = 0; i < x.size();++i)
@@ -36,19 +37,19 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
 
   {
     matrix_type invA;
-  
+
     OpenTissue::math::big::lu_invert(A,invA);
-  
+
     size_type m = A.size1();
     size_type n = A.size2();
     matrix_type I;
     I.resize(m,n,false);
     ublas::noalias(I) = ublas::prod(A,invA);
-  
+
     size_type K = min (m, n );
     for(size_type i = 0; i < K;++i)
       BOOST_CHECK_CLOSE( real_type( I(i,i) ), real_type( 1.0 ), tol );
-  
+
     for(size_type i = 0; i < I.size1(); ++i)
       for(size_type j = 0; j < I.size2(); ++j)
         if(i!=j)
@@ -58,19 +59,19 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
 
   {
     matrix_type invA;
-  
+
     OpenTissue::math::big::lu_invert(A,invA);
-  
+
     size_type m = A.size1();
     size_type n = A.size2();
     matrix_type I;
     I.resize(m,n,false);
     ublas::noalias(I) = ublas::prod(A,invA);
-  
+
     size_type K = min (m, n );
     for(size_type i = 0; i < K;++i)
       BOOST_CHECK_CLOSE( real_type( I(i,i) ), real_type( 1.0 ), tol );
-  
+
     for(size_type i = 0; i < I.size1(); ++i)
       for(size_type j = 0; j < I.size2(); ++j)
         if(i!=j)
@@ -185,7 +186,7 @@ BOOST_AUTO_TEST_CASE(random_test_case)
 
     OpenTissue::math::Random<double> value(0.0,1.0);
     for(size_t i=0;i<R.size1();++i)
-    { 
+    {
       b(i) = value();
       x(i) = value();
       y(i) = value();

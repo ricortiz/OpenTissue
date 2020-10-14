@@ -18,7 +18,7 @@
 #include <OpenTissue/core/geometry/geometry_compute_signed_distance_to_triangle.h>
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_angle_weighted_vertex_normals.h>
 
-#include <boost/cast.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <cassert>
 #include <cmath>
@@ -106,7 +106,7 @@ namespace OpenTissue
         compute_face_normal( *(h->get_twin_iterator()->get_face_iterator()),ne_k);
       ++h;
 
-      vector3_type const & p_j  = h->get_origin_iterator()->m_coord;  
+      vector3_type const & p_j  = h->get_origin_iterator()->m_coord;
       vector3_type const & nv_j  = h->get_origin_iterator()->m_normal;
       if(!h->get_twin_iterator()->get_face_handle().is_null())
         compute_face_normal( *(h->get_twin_iterator()->get_face_iterator()),ne_i);
@@ -151,20 +151,20 @@ namespace OpenTissue
 
       for(int n=0;n<5;++n)
       {
-        slicer_type slicer( 
+        slicer_type slicer(
             tetrahedra[n].p0()
           , tetrahedra[n].p1()
           , tetrahedra[n].p2()
-          , tetrahedra[n].p3() 
+          , tetrahedra[n].p3()
           );
 
-        vector3_type min_coord; 
-        vector3_type max_coord; 
+        vector3_type min_coord;
+        vector3_type max_coord;
         OpenTissue::geometry::compute_tetrahedron_aabb(tetrahedra[n],min_coord,max_coord);
 
         //--- Determine the z value to start slicing (min) and the z-value to stop slicing (max)
-        int k_min = boost::numeric_cast<int>(ceil(  (min_coord(2) - min_z)/dz ));
-        int k_max = boost::numeric_cast<int>(floor( (max_coord(2) - min_z)/dz ));
+        int k_min = OpenTissue::utility::numeric_cast<int>(ceil(  (min_coord(2) - min_z)/dz ));
+        int k_max = OpenTissue::utility::numeric_cast<int>(floor( (max_coord(2) - min_z)/dz ));
 
         for(int k = k_min;k<=k_max;++k)
         {
@@ -201,7 +201,7 @@ namespace OpenTissue
               int i = pixel.x();
               int j = pixel.y();
               //--- compute corresponding world coordinates of pixel
-              vector3_type p ( 
+              vector3_type p (
                   i*dx + min_x
                 , j*dy + min_y
                 , k*dz + min_z
@@ -213,11 +213,11 @@ namespace OpenTissue
 
               // store signed distance into phi at location  (i,j,k)
               if(
-                ( fabs(value) <= thickness ) 
-                && 
-                ( fabs(value) < fabs( phi(i,j,k) ) ) 
+                ( fabs(value) <= thickness )
+                &&
+                ( fabs(value) < fabs( phi(i,j,k) ) )
                 )
-                phi(i,j,k) = boost::numeric_cast<value_type>( value );
+                phi(i,j,k) = OpenTissue::utility::numeric_cast<value_type>( value );
               ++pixel;
             }
           }
@@ -290,7 +290,7 @@ namespace OpenTissue
       face_halfedge_circulator h(*face);
       vector3_type const & p_i  = h->get_origin_iterator()->m_coord;
       ++h;
-      vector3_type const & p_j  = h->get_origin_iterator()->m_coord;  
+      vector3_type const & p_j  = h->get_origin_iterator()->m_coord;
       ++h;
       vector3_type const & p_k  = h->get_origin_iterator()->m_coord;
 
@@ -323,20 +323,20 @@ namespace OpenTissue
 
       for(int n=0;n<5;++n)
       {
-        slicer_type slicer( 
+        slicer_type slicer(
             tetrahedra[n].p0()
           , tetrahedra[n].p1()
           , tetrahedra[n].p2()
-          , tetrahedra[n].p3() 
+          , tetrahedra[n].p3()
           );
 
-        vector3_type min_coord; 
-        vector3_type max_coord; 
+        vector3_type min_coord;
+        vector3_type max_coord;
         compute_tetrahedron_aabb(tetrahedra[n],min_coord,max_coord);
 
         //--- Determine the z value to start slicing (min) and the z-value to stop slicing (max)
-        int k_min = boost::numeric_cast<int>(ceil(  (min_coord(2) - min_z)/dz ));
-        int k_max = boost::numeric_cast<int>(floor( (max_coord(2) - min_z)/dz ));
+        int k_min = OpenTissue::utility::numeric_cast<int>(ceil(  (min_coord(2) - min_z)/dz ));
+        int k_max = OpenTissue::utility::numeric_cast<int>(floor( (max_coord(2) - min_z)/dz ));
 
         for(int k = k_min;k<=k_max;++k)
         {
@@ -373,7 +373,7 @@ namespace OpenTissue
               int i = pixel.x();
               int j = pixel.y();
               //--- compute corresponding world coordinates of pixel
-              vector3_type p ( 
+              vector3_type p (
                   i*dx + min_x
                 , j*dy + min_y
                 , k*dz + min_z
@@ -384,9 +384,9 @@ namespace OpenTissue
 
               // store signed distance into phi at location  (i,j,k)
               if(
-                ( value <= thickness ) && ( value < phi(i,j,k) ) 
+                ( value <= thickness ) && ( value < phi(i,j,k) )
                 )
-                  phi(i,j,k) = boost::numeric_cast<value_type>( value );
+                  phi(i,j,k) = OpenTissue::utility::numeric_cast<value_type>( value );
               ++pixel;
             }
           }

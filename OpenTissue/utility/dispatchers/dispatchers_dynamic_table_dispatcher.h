@@ -11,7 +11,7 @@
 
 #include <OpenTissue/utility/dispatchers/dispatchers_unbound_dispatch_function.h>
 #include <boost/multi_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -125,10 +125,10 @@ namespace OpenTissue
 
       private:
 
-        typedef boost::shared_ptr<FunctorBase>    FunctorPtr;
+        typedef std::shared_ptr<FunctorBase>    FunctorPtr;
         typedef boost::multi_array<FunctorPtr, 2> FunctorTableType;
 
-        FunctorTableType m_functor_table;          
+        FunctorTableType m_functor_table;
 
       public:
 
@@ -199,13 +199,13 @@ namespace OpenTissue
           boost::multi_array_types::size_type max_idx = max(idx1, idx2);
 
           // Range check
-          if (max_idx >= m_functor_table.shape()[0]) 
+          if (max_idx >= m_functor_table.shape()[0])
             throw UnboundDispatchFunction();
 
           FunctorPtr f = m_functor_table[idx1][idx2];
 
           // Sanity check the pointer
-          if (f.get()==0) 
+          if (f.get()==0)
             throw UnboundDispatchFunction();
 
           return f->operator()(t1, t2, t3);
@@ -299,7 +299,7 @@ namespace OpenTissue
 
       private:
 
-        typedef boost::shared_ptr<FunctorBase>    FunctorPtr;
+        typedef std::shared_ptr<FunctorBase>    FunctorPtr;
         typedef boost::multi_array<FunctorPtr, 2> FunctorTableType;
 
         FunctorTableType m_functor_table;
@@ -346,7 +346,7 @@ namespace OpenTissue
           if (Mirrored)
           {
             m_functor_table[idx2][idx1].reset(new Functor<T1,T2,true>(f));
-          } 
+          }
           m_functor_table[idx1][idx2].reset(new Functor<T1,T2,false>(f));
         }
 
@@ -371,13 +371,13 @@ namespace OpenTissue
           boost::multi_array_types::size_type max_idx = max(idx1, idx2);
 
           // Range check
-          if (max_idx >= m_functor_table.shape()[0]) 
+          if (max_idx >= m_functor_table.shape()[0])
             throw UnboundDispatchFunction();
 
           FunctorPtr f = m_functor_table[idx1][idx2];
 
           // Sanity check the pointer
-          if (f.get()==0) 
+          if (f.get()==0)
             throw UnboundDispatchFunction();
 
           return f->operator()(t1, t2);
@@ -389,5 +389,5 @@ namespace OpenTissue
 } // namespace OpenTissue
 
 // OPENTISSUE_UTILITY_DISPATCHERS_DISPATCHERS_DYNAMIC_TABLE_DISPATCHER_H
-#endif 
+#endif
 

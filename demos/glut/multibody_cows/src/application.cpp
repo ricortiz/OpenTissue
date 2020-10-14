@@ -15,6 +15,7 @@
 #include <OpenTissue/dynamics/mbd/math/mbd_optimized_ublas_math_policy.h>
 #include <OpenTissue/dynamics/mbd/mbd.h>
 #include <OpenTissue/utility/utility_timer.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 #include <OpenTissue/dynamics/mbd/util/mbd_draw_body.h>
 #include <OpenTissue/dynamics/mbd/util/mbd_draw_contacts.h>
 #include <OpenTissue/core/geometry/geometry_compute_box_mass_properties.h>
@@ -124,8 +125,8 @@ protected:
     m_timestep = 0.01;
     m_cur = 0;
     m_framecount = 0;
-    m_max_frames = boost::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
-    m_inbetween = boost::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
+    m_max_frames = OpenTissue::utility::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
+    m_inbetween = OpenTissue::utility::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
   }
 
   void increment_timestep()
@@ -133,8 +134,8 @@ protected:
     m_timestep *= 10.0;
     m_cur = 0;
     m_framecount = 0;
-    m_max_frames = boost::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
-    m_inbetween =  boost::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
+    m_max_frames = OpenTissue::utility::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
+    m_inbetween =  OpenTissue::utility::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
   }
 
   void decrement_timestep()
@@ -142,8 +143,8 @@ protected:
     m_timestep /= 10.0;
     m_cur = 0;
     m_framecount = 0;
-    m_max_frames = boost::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
-    m_inbetween =  boost::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
+    m_max_frames = OpenTissue::utility::numeric_cast<size_type>( std::floor( m_running_time / m_timestep ) );
+    m_inbetween =  OpenTissue::utility::numeric_cast<size_type>( std::floor( 0.1 / m_timestep ) );
   }
 
   void setup_bowling()

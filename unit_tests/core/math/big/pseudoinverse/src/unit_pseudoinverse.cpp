@@ -17,6 +17,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 
@@ -29,9 +30,9 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
   typedef typename matrix_type::value_type real_type;
   typedef typename matrix_type::size_type  size_type;
 
-  real_type const tol = boost::numeric_cast<real_type>(0.01);
+  real_type const tol = OpenTissue::utility::numeric_cast<real_type>(0.01);
 
-  matrix_type invA;  
+  matrix_type invA;
   OpenTissue::math::big::svd_moore_penrose_pseudoinverse(A,invA);
   {
     ublas::noalias(x) = ublas::prod( invA, b);

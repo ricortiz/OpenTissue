@@ -27,7 +27,7 @@ namespace OpenTissue
     * This implementation is based on the paper:
     *
     *    Meyer, M., Desbrun, M., Schrˆder, P., AND Barr, A. H. Discrete Differential Geometry Operators for Triangulated 2-Manifolds, 2002. VisMath.
-    * 
+    *
     *
     * @param v         A reference to the vertex at which the curvature normal should be computed.
     * @param Kh        Upon return this argument holds the computed vertex curvature normal.
@@ -49,7 +49,7 @@ namespace OpenTissue
 
       static real_type const epsilon = math::machine_precision<real_type>();
       static real_type const zero    = real_type(); //--- by standard default constructed integral types is zero
-      static real_type const two     = boost::numeric_cast<real_type>(2.0); 
+      static real_type const two     = OpenTissue::utility::numeric_cast<real_type>(2.0);
 
       if(is_boundary(v))
       {
@@ -79,9 +79,9 @@ namespace OpenTissue
       //    real_type d_left  = unit(nbr-left)*unit(p-left);
       //    real_type d_right = unit(nbr-right)*unit(p-right);
       //    real_type a_left  = acos(    min(one, max(-one, d_left ))  );
-      //    real_type a_right = acos(    min(one, max(-one, d_right))  );						
-      //    real_type w = 1.0/tan(a_left) + 1.0/tan(a_right);						
-      //    Kh += w * (p-nbr);						
+      //    real_type a_right = acos(    min(one, max(-one, d_right))  );
+      //    real_type w = 1.0/tan(a_left) + 1.0/tan(a_right);
+      //    Kh += w * (p-nbr);
       //  }
       //}
       //{
@@ -93,9 +93,9 @@ namespace OpenTissue
       //    area += compute_area_mixed(p,pi,pj);
       //  }
       //}
-      //--- 
+      //---
       //---  Orignally we have
-      //--- 
+      //---
       //---                  p                                                                                //
       //---                 /|\                                                                               //
       //---                / | \                                                                              //
@@ -104,16 +104,16 @@ namespace OpenTissue
       //---                \ | /                                                                              //
       //---                 \|/                                                                               //
       //---                 p_k                                                                               //
-      //--- 
+      //---
       //---  But we could just as easily re-write this as
-      //---         
+      //---
       //---                  p                                                                                      //
       //---                 /|\                                                                                     //
       //---                / | \                                                                                    //
       //---      alpha_j  /  |  \ beta_i        K_p =  1/A_p * sum_i ( cot(alpha_j)(p-p_j) + cot(beta_i))*(p-p_i) ) //
       //---              /---+---\                                                                                  //
       //---            p_i        p_j                                                                               //
-      //--- 
+      //---
       //---  which is the forumula we have implemented below
       vertex_halfedge_circulator h(v),hend;
       for(;h!=hend;++h)
@@ -127,9 +127,9 @@ namespace OpenTissue
         real_type cotan_beta  = OpenTissue::geometry::cot( pj,  p,  pi );
         Kh += (cotan_alpha*(p-pj)) + (cotan_beta*(p-pi));
       }
-      if (area > epsilon) 
+      if (area > epsilon)
         Kh /= two*area;  //--- hmmm, I thinnk there is a bug here, it should read: Kh /= four*area;???
-      else 
+      else
       {
         //std::cout << "compute_vertex_mean_curvature_normal(): zero area clamping" << std::endl;
         Kh.clear();

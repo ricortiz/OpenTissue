@@ -234,7 +234,7 @@ class Application
 protected:
   ...
 
-  boost::shared_ptr< render_type > m_render;
+  std::shared_ptr< render_type > m_render;
   ...
 };
 </pre>

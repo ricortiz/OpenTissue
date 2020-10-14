@@ -64,9 +64,9 @@ namespace OpenTissue
       mesh::compute_mesh_maximum_coord(mesh,max_coord);
 
       //--- Compute ``best'' resolution for this mesh
-      size_t res_x = boost::numeric_cast<size_t>( ceil(   (max_coord(0)-min_coord(0))/ delta  ) - 1 );
-      size_t res_y = boost::numeric_cast<size_t>( ceil(   (max_coord(1)-min_coord(1))/ delta  ) - 1 );
-      size_t res_z = boost::numeric_cast<size_t>( ceil(   (max_coord(2)-min_coord(2))/ delta  ) - 1 );
+      size_t res_x = OpenTissue::utility::numeric_cast<size_t>( ceil(   (max_coord(0)-min_coord(0))/ delta  ) - 1 );
+      size_t res_y = OpenTissue::utility::numeric_cast<size_t>( ceil(   (max_coord(1)-min_coord(1))/ delta  ) - 1 );
+      size_t res_z = OpenTissue::utility::numeric_cast<size_t>( ceil(   (max_coord(2)-min_coord(2))/ delta  ) - 1 );
       size_t resolution1 = max(res_x,max(res_y,res_z));
       std::cout << "mesh2phi(): needed resolution = " << resolution1 << std::endl;
 
@@ -139,7 +139,7 @@ namespace OpenTissue
       typedef typename math_types::vector3_type                     vector3_type;
       typedef typename math_types::real_type                        real_type;
 
-      real_type band = boost::numeric_cast<real_type>(bandsize);
+      real_type band = OpenTissue::utility::numeric_cast<real_type>(bandsize);
       if(band<=value_traits::zero())
         throw std::invalid_argument("mesh2phi() bandsize must be positive");
 

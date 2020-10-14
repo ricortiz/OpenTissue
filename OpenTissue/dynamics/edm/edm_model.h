@@ -43,17 +43,17 @@ namespace OpenTissue
       typedef std::map<particle_type const *, Forces>      EDMLocalForces;
       typedef typename ublas::compressed_matrix<real_type> EDMMatrix;
       typedef typename ublas::vector<real_type>            EDMVector;
-      
+
     private:
-      
+
       virtual void compute_stiffness(EDMMatrix & K) const = 0;
       virtual void compute_surface_normals() = 0;
       virtual size_t particle_count() const = 0;
       virtual particle_type const & get_particle(size_t idx) const = 0;
       virtual particle_type & get_particle(size_t idx) = 0;
-      
+
     protected:
-      
+
       // particles are placed in their respective class types
       Forces  m_Fs;       ///< external forces acting on all particles
       EDMLocalForces  m_LFs; ///< specified external forces acting on a single particle
@@ -63,11 +63,11 @@ namespace OpenTissue
       vector3_type *  m_rest;
       vector3_type *  m_init;
       size_t  m_max_nodes;
-      
+
     private:
-      
+
       model_id_type  m_type;  // only for safe casting!
-      
+
     public:
 
       Model(model_id_type type)
@@ -321,7 +321,7 @@ namespace OpenTissue
     * @param val      Value to be zeroized.
     * @param epsilon  Threshold value for numerical instabilities while assembling the stiffness matrix.
     */
-    // 2009-03-11 kenny: argh, very ugly static cast, why not create an overloaded 2 argument version then use boost::numeric_cast to initialize a local constant used for calling the three-argument version? 
+    // 2009-03-11 kenny: argh, very ugly static cast, why not create an overloaded 2 argument version then use OpenTissue::utility::numeric_cast to initialize a local constant used for calling the three-argument version?
     template<typename real_type>
     inline real_type zeroize(real_type const & val, real_type const & epsilon = static_cast<real_type>(1./8192))
     {

@@ -15,6 +15,7 @@
 #include <boost/test/unit_test_suite.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
 
 
@@ -34,7 +35,7 @@ BOOST_AUTO_TEST_CASE(test_cases)
 {
   using std::fabs;
 
-  real_type const tol      = boost::numeric_cast<real_type>(0.1);
+  real_type const tol      = OpenTissue::utility::numeric_cast<real_type>(0.1);
 
   // Create some skeleton to test with
   skeleton_type skeleton;
@@ -47,8 +48,8 @@ BOOST_AUTO_TEST_CASE(test_cases)
   //
   //            |  hinge
   //            b0
-  //    slider /  
-  //          b1  
+  //    slider /
+  //          b1
   //    ball  |
   //          b2
   //
@@ -62,10 +63,10 @@ BOOST_AUTO_TEST_CASE(test_cases)
   real_type    const theta        = value_traits::pi_half();
 
   b0->type() = bone_traits::hinge_type;
-  b0->bind_pose().T() = vector3_type(value_traits::zero(), value_traits::one(), value_traits::zero() );    
+  b0->bind_pose().T() = vector3_type(value_traits::zero(), value_traits::one(), value_traits::zero() );
   b0->bind_pose().Q().Ru( hinge_angle, hinge_axis );
 
-  b1->type() = bone_traits::slider_type; 
+  b1->type() = bone_traits::slider_type;
   b1->bind_pose().T() = slider_axis*slider_value;
   b1->bind_pose().Q().identity();
 

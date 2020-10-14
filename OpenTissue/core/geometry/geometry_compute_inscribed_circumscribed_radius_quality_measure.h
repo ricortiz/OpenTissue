@@ -15,7 +15,7 @@
 #include <OpenTissue/core/geometry/geometry_circumscribed_sphere.h>
 #include <OpenTissue/core/geometry/geometry_compute_inscribed_sphere.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <cmath>
 #include <cassert>
@@ -40,8 +40,8 @@ namespace OpenTissue
     * @return The computed quality measure.
     */
     template<typename vector3_type>
-    inline typename vector3_type::value_type   
-      compute_inscribed_circumscribed_radius_quality_measure ( 
+    inline typename vector3_type::value_type
+      compute_inscribed_circumscribed_radius_quality_measure (
           vector3_type const & p0
         , vector3_type const & p1
         , vector3_type const & p2
@@ -67,7 +67,7 @@ namespace OpenTissue
         r_in = -r_in;
       }
 
-      real_type quality = boost::numeric_cast<real_type>(3.0) * (r_in / r_out);
+      real_type quality = OpenTissue::utility::numeric_cast<real_type>(3.0) * (r_in / r_out);
       assert( is_number( r_out )             || !"circumscribed radius was not a number"                   );
       assert( r_out >= value_traits::zero()  || !"circumscribed radius must be non-negative"               );
       assert( is_number( r_in )              || !"circumscribed radius was not a number"                   );

@@ -11,7 +11,7 @@
 
 #include <OpenTissue/core/math/math_constants.h>
 
-#include <boost/cast.hpp>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 namespace OpenTissue
 {
@@ -47,8 +47,8 @@ namespace OpenTissue
         }
       }
 
-      min_value = boost::numeric_cast<real_type2>(m);
-      max_value = boost::numeric_cast<real_type2>(M);
+      min_value = OpenTissue::utility::numeric_cast<real_type2>(m);
+      max_value = OpenTissue::utility::numeric_cast<real_type2>(M);
     }
 
   } //End of namespace mbd

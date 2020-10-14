@@ -15,7 +15,7 @@
 #include <OpenTissue/core/geometry/geometry_triangle.h>
 #include <OpenTissue/collision/intersect/intersect_triangle_triangle.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 template<typename bvh_type_>
 class CurvatureMeshCollisionPolicy
@@ -86,8 +86,8 @@ public:
   {
     //--- This is terrible in-efficient....but it serves for demonstration purpose
 
-    annotated_bv_ptr bvA = boost::static_pointer_cast<annotated_bv_type>(A);
-    annotated_bv_ptr bvB = boost::static_pointer_cast<annotated_bv_type>(B);
+    annotated_bv_ptr bvA = std::static_pointer_cast<annotated_bv_type>(A);
+    annotated_bv_ptr bvB = std::static_pointer_cast<annotated_bv_type>(B);
 
     face_type * face_A = *(bvA->geometry_begin());
     face_type * face_B = *(bvB->geometry_begin());

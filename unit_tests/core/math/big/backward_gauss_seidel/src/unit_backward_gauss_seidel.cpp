@@ -13,6 +13,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 template<typename solver_type, typename matrix_type,typename vector_type>
@@ -21,7 +22,7 @@ void test(matrix_type const & A, vector_type & x, vector_type const & b, vector_
   typedef typename matrix_type::value_type real_type;
   typedef typename matrix_type::size_type  size_type;
 
-  real_type tol = boost::numeric_cast<real_type>(0.001);
+  real_type tol = OpenTissue::utility::numeric_cast<real_type>(0.001);
 
   solver_type S;
 

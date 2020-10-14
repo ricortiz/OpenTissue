@@ -78,10 +78,10 @@ namespace OpenTissue
               }
             }
 
-            std::for_each( 
+            std::for_each(
               dst.begin()
               , dst.end()
-              , boost::lambda::_1 *=  boost::lambda::make_const(  1.0/pow(static_cast<double>(size),3) ) 
+              , [](value_type &d){ d *= 1.0/pow(static_cast<double>(size),3); }
               );
     }
 

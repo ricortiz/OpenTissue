@@ -12,7 +12,7 @@
 #include <OpenTissue/core/math/math_constants.h>
 
 
-#include <boost/cast.hpp> //--- Needed for boost::numeric_cast 
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for OpenTissue::utility::numeric_cast
 
 #include <valarray>
 #include <vector>
@@ -45,7 +45,7 @@ namespace OpenTissue
         real_type x    = real_type(); //--- default construction on integral types means zero!!!
         value_type sum = real_type(); //--- default construction on integral types means zero!!!
 
-        size_t size = boost::numeric_cast<size_t>(  G.size() );
+        size_t size = OpenTissue::utility::numeric_cast<size_t>(  G.size() );
 
         if ( ( size % 2 ) == 0 )
         {
@@ -53,14 +53,14 @@ namespace OpenTissue
           std::cout << "compute_gaussian_kernel(): Oups, size of gaussian kernel was even!!!" << std::endl;
         }
 
-        real_type center = boost::numeric_cast<real_type>(   floor( size / 2.0 )  );
+        real_type center = OpenTissue::utility::numeric_cast<real_type>(   floor( size / 2.0 )  );
 
         //--- We calculate the unnormalized Gaussian in the interval -ms:ms,
         //--- where m = (G.size()-1)/2;  We assume G.size() is uneven.
         for ( size_t i = 0; i < size; ++i )
         {
           x = i - center;
-          G[ i ] = boost::numeric_cast<value_type>(  exp( - ( x * x ) / ( 2.0 * s * s ) ) );
+          G[ i ] = OpenTissue::utility::numeric_cast<value_type>(  exp( - ( x * x ) / ( 2.0 * s * s ) ) );
           sum += G[ i ];
         }
 
@@ -101,8 +101,8 @@ namespace OpenTissue
         }
 
         //--- Now we allocate space for a gaussian on the interval -2s:2s.
-        int N = boost::numeric_cast<int>( ceil( 4 * s ) + 1 );
-        int N_half = boost::numeric_cast<int>( N/2.0);
+        int N = OpenTissue::utility::numeric_cast<int>( ceil( 4 * s ) + 1 );
+        int N_half = OpenTissue::utility::numeric_cast<int>( N/2.0);
         std::valarray<real_type> G( N );
         compute_gaussian_kernel( G, s );
 
@@ -158,10 +158,10 @@ namespace OpenTissue
 
                 //--- Void-values should not effect the convolution!!!
                 if ( input[ idx2 ] != OpenTissue::math::detail::highest<value_type>() )
-                  sum += boost::numeric_cast<real_type>(   input[ idx2 ] * G[ a ]  );
+                  sum += OpenTissue::utility::numeric_cast<real_type>(   input[ idx2 ] * G[ a ]  );
               }
               //--- Finally we update the destination image with the result of the convolution.
-              output[ idx ] = boost::numeric_cast<value_type>(sum);
+              output[ idx ] = OpenTissue::utility::numeric_cast<value_type>(sum);
             }
           }
         }
@@ -234,9 +234,9 @@ namespace OpenTissue
       assert( dst.I() == src.I() || !"gaussian_convolution(): dst and src have differnet I dimension");
       assert( dst.J() == src.J() || !"gaussian_convolution(): dst and src have differnet I dimension");
       assert( dst.K() == src.K() || !"gaussian_convolution(): dst and src have differnet I dimension");
-      int xdim = boost::numeric_cast< int>( src.I() );
-      int ydim = boost::numeric_cast< int>( src.J() );
-      int zdim = boost::numeric_cast< int>( src.K() );
+      int xdim = OpenTissue::utility::numeric_cast< int>( src.I() );
+      int ydim = OpenTissue::utility::numeric_cast< int>( src.J() );
+      int zdim = OpenTissue::utility::numeric_cast< int>( src.K() );
       detail::convolution3D( dst.data(), src.data(), xdim, ydim, zdim, sx, sy, sz );
     }
 

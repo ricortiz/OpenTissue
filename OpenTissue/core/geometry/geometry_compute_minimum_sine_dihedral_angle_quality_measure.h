@@ -13,7 +13,7 @@
 #include <OpenTissue/core/math/math_basic_types.h>
 #include <OpenTissue/core/geometry/geometry_tetrahedron.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <cmath>
 #include <cassert>
@@ -32,9 +32,9 @@ namespace OpenTissue
     * signed area of the triangle opposing the k'th vertex. V is the signed
     * volume of the tetrahedron.
     *
-    * As described in the paper: 
-    * 
-    *      What Is a Good Linear Finite element? Interpolation, Conditioning, Anisotropy, and Quality Measures (Preprint) 
+    * As described in the paper:
+    *
+    *      What Is a Good Linear Finite element? Interpolation, Conditioning, Anisotropy, and Quality Measures (Preprint)
     *
     * by Jonathan Shewchuk.
     *
@@ -46,8 +46,8 @@ namespace OpenTissue
     * @return The computed quality measure.
     */
     template<typename vector3_type>
-    inline typename vector3_type::value_type   
-      compute_minimum_sine_dihedral_angle_quality_measure ( 
+    inline typename vector3_type::value_type
+      compute_minimum_sine_dihedral_angle_quality_measure (
           vector3_type const & p0
         , vector3_type const & p1
         , vector3_type const & p2
@@ -62,7 +62,7 @@ namespace OpenTissue
       typedef typename math_types::value_traits                   value_traits;
       typedef Tetrahedron<math_types>                             tetrahedron_type;
 
-      real_type const sqr2_mul_9_div_8 = boost::numeric_cast<real_type>( 1.5909902576697319299018998147359 );
+      real_type const sqr2_mul_9_div_8 = OpenTissue::utility::numeric_cast<real_type>( 1.5909902576697319299018998147359 );
 
       vector3_type e_01 = (p0-p1);
       vector3_type e_12 = (p1-p2);

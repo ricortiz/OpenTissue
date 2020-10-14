@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp> //--- Needed for boost::numeric_cast 
+#include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for OpenTissue::utility::numeric_cast
 
 #include <iostream>
 #include <cmath>
@@ -72,8 +72,8 @@ namespace OpenTissue
       typedef typename grid_type::index_iterator  iterator;
 
       internal_type unused  = phi.unused();
-      internal_type inside_ = boost::numeric_cast<internal_type>( inside );
-      internal_type outside_ = boost::numeric_cast<internal_type>( outside );
+      internal_type inside_ = OpenTissue::utility::numeric_cast<internal_type>( inside );
+      internal_type outside_ = OpenTissue::utility::numeric_cast<internal_type>( outside );
 
       size_t block   = offset + spacing;
       iterator   begin   = phi.begin();
@@ -110,8 +110,8 @@ namespace OpenTissue
       typedef typename grid_type::index_iterator  iterator;
 
       internal_type unused  = phi.unused();
-      internal_type inside_ = boost::numeric_cast<internal_type>( inside );
-      internal_type outside_ = boost::numeric_cast<internal_type>( outside );
+      internal_type inside_ = OpenTissue::utility::numeric_cast<internal_type>( inside );
+      internal_type outside_ = OpenTissue::utility::numeric_cast<internal_type>( outside );
 
       size_t block   = offset + spacing;
       iterator   begin   = phi.begin();

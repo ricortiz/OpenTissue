@@ -11,6 +11,7 @@
 #include <OpenTissue/collision/gjk/gjk.h>
 #include <OpenTissue/core/geometry/geometry_obb.h>
 #include <OpenTissue/utility/utility_timer.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 /**
@@ -26,9 +27,9 @@ void old_implementation()
   typedef math_types::coordsys_type                        coordsys_type;
   typedef math_types::real_type                            real_type;
 
-  vector3_type p_a;                   
+  vector3_type p_a;
   vector3_type p_b;
-  OpenTissue::gjk::obsolete::detail::GJK<vector3_type > gjk;          
+  OpenTissue::gjk::obsolete::detail::GJK<vector3_type > gjk;
   OpenTissue::geometry::OBB<math_types> A;
   OpenTissue::geometry::OBB<math_types> B;
   A.init(2.0,2.0,2.0);
@@ -70,9 +71,9 @@ void new_implementation()
   supportB.half_extent() = vector3_type(1.0,1.0,1.0);
 
   size_t    const max_iterations       = 100u;
-  real_type const absolute_tolerance   = boost::numeric_cast<real_type>(10e-6);
-  real_type const relative_tolerance   = boost::numeric_cast<real_type>(10e-6);
-  real_type const stagnation_tolerance = boost::numeric_cast<real_type>(10e-15);
+  real_type const absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-6);
+  real_type const relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-6);
+  real_type const stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(10e-15);
 
   transformation_type transformA;
   transformation_type transformB;

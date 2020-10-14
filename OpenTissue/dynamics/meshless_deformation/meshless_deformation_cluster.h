@@ -14,7 +14,7 @@
 #include <OpenTissue/core/math/big/big_lu.h>
 
 #include <boost/iterator/indirect_iterator.hpp>
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <list>
 
@@ -266,7 +266,7 @@ namespace OpenTissue
           using std::min;
 
           static real_type const third = value_traits::one()/value_traits::three();
-          static real_type const tiny  = boost::numeric_cast<real_type>(10e-7);
+          static real_type const tiny  = OpenTissue::utility::numeric_cast<real_type>(10e-7);
 
           particle_iterator begin = m_particles.begin();
           particle_iterator end   = m_particles.end();

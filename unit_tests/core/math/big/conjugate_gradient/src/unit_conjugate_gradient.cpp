@@ -16,6 +16,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 
 
@@ -25,11 +26,11 @@ void test(matrix_type const & A, vector_type  & x, vector_type const & b, vector
   typedef typename matrix_type::value_type real_type;
   typedef typename matrix_type::size_type  size_type;
 
-  real_type const tol = boost::numeric_cast<real_type>(1.0);
+  real_type const tol = OpenTissue::utility::numeric_cast<real_type>(1.0);
 
   solver_type S;
 
-  real_type epsilon = boost::numeric_cast<real_type>(10e-10);
+  real_type epsilon = OpenTissue::utility::numeric_cast<real_type>(10e-10);
   size_t max_iterations = 100;
   size_t iterations;
 
@@ -160,10 +161,10 @@ BOOST_AUTO_TEST_CASE(random_test_case)
 
     matrix_type A;
     A.resize(N,N,false);
-    
+
     vector_type x;
     x.resize(N,false);
-    
+
     vector_type b;
     b.resize(N,false);
 
@@ -175,7 +176,7 @@ BOOST_AUTO_TEST_CASE(random_test_case)
 
     OpenTissue::math::Random<double> value(0.0,1.0);
     for(size_t i=0;i<R.size1();++i)
-    { 
+    {
       b(i) = value();
       x(i) = value();
       y(i) = value();

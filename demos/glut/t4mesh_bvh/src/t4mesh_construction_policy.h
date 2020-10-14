@@ -11,12 +11,12 @@
 
 #include <OpenTissue/collision/bvh/bvh.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <vector>
 
 template<typename bvh_type_>
-class T4MeshConstructionPolicy 
+class T4MeshConstructionPolicy
   : public OpenTissue::bvh::DefaultPriorityBottomUpPolicy<bvh_type_>
 {
 public:
@@ -41,9 +41,9 @@ protected:
 
 public:
 
-  void set_coords(coord_container & coords) 
-  { 
-    m_coords = &coords; 
+  void set_coords(coord_container & coords)
+  {
+    m_coords = &coords;
   }
 
   template<typename geometry_iterator>

@@ -99,7 +99,7 @@ namespace OpenTissue
       //--- For the Separation axis test, we need the absolute matrix of
       //--- R_ba, a small threshold is added to each entry to combat
       //--- problems with numerical precision and roundoff.
-      real_type eps = boost::numeric_cast<real_type>(1e-15);
+      real_type eps = OpenTissue::utility::numeric_cast<real_type>(1e-15);
       real_type Q00 = fabs(R_ba(0,0))+eps;
       real_type Q01 = fabs(R_ba(0,1))+eps;
       real_type Q02 = fabs(R_ba(0,2))+eps;

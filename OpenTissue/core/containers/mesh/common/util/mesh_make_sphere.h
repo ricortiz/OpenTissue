@@ -53,15 +53,15 @@ namespace OpenTissue
       //--- Create a profile
       std::vector<  vector3_type > profile(segments+1);
 
-      real_type delta_angle = boost::numeric_cast<real_type>(   value_traits::pi()/segments);
+      real_type delta_angle = OpenTissue::utility::numeric_cast<real_type>(   value_traits::pi()/segments);
       real_type angle       = delta_angle;
 
       profile[0] = vector3_type(value_traits::zero(),value_traits::zero(),-radius);
-      
+
       for(unsigned int s=1;s<segments;++s)
       {
-        real_type cosinus = boost::numeric_cast<real_type>( cos(angle) );
-        real_type sinus   = boost::numeric_cast<real_type>( sin(angle) );
+        real_type cosinus = OpenTissue::utility::numeric_cast<real_type>( cos(angle) );
+        real_type sinus   = OpenTissue::utility::numeric_cast<real_type>( sin(angle) );
 
         profile[s](0) = - sinus*radius;
         profile[s](1) =  value_traits::zero();

@@ -18,6 +18,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/test_tools.hpp>
 #include <OpenTissue/utility/utility_pop_boost_filter.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 
 #include <cmath>
 
@@ -42,9 +43,9 @@ BOOST_AUTO_TEST_CASE(case_by_case_testing)
   OpenTissue::gjk::Sphere<math_types> const supportB;
 
   size_t    const max_iterations       = 100u;
-  real_type const absolute_tolerance   = boost::numeric_cast<real_type>(10e-6);
-  real_type const relative_tolerance   = boost::numeric_cast<real_type>(10e-6);
-  real_type const stagnation_tolerance = boost::numeric_cast<real_type>(10e-15);
+  real_type const absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-6);
+  real_type const relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-6);
+  real_type const stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(10e-15);
 
   // Two unit-spheres placed ontop of each other
   {
@@ -244,9 +245,9 @@ BOOST_AUTO_TEST_CASE(random_test)
   OpenTissue::gjk::Sphere<math_types> const supportB;
 
   size_t    const max_iterations       = 100u;
-  real_type const absolute_tolerance   = boost::numeric_cast<real_type>(10e-6);
-  real_type const relative_tolerance   = boost::numeric_cast<real_type>(10e-10);
-  real_type const stagnation_tolerance = boost::numeric_cast<real_type>(0.0);
+  real_type const absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-6);
+  real_type const relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-10);
+  real_type const stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.0);
 
   for(size_t i=0;i<100u;++i)
   {
@@ -382,9 +383,9 @@ BOOST_AUTO_TEST_CASE(cylinder_test)
   OpenTissue::gjk::Cylinder<math_types> const supportB;
 
   size_t    const max_iterations       = 1000u;
-  real_type const absolute_tolerance   = boost::numeric_cast<real_type>(0.0);
-  real_type const relative_tolerance   = boost::numeric_cast<real_type>(10e-10); // Don't be to over agressive!
-  real_type const stagnation_tolerance = boost::numeric_cast<real_type>(0.0);
+  real_type const absolute_tolerance   = OpenTissue::utility::numeric_cast<real_type>(0.0);
+  real_type const relative_tolerance   = OpenTissue::utility::numeric_cast<real_type>(10e-10); // Don't be to over agressive!
+  real_type const stagnation_tolerance = OpenTissue::utility::numeric_cast<real_type>(0.0);
 
   real_type rad_x = value_traits::zero();
   real_type rad_z = value_traits::zero();

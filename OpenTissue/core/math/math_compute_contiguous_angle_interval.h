@@ -16,6 +16,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cmath>
+#include <cassert>
 
 namespace OpenTissue
 {
@@ -45,7 +46,7 @@ namespace OpenTissue
     *
     * The supplied angles can be given in any sort of interval as long as
     * the width of the interval is no longer than 2 pi ( one full rotation). Typically
-    * one would supply values from either -pi..pi or 0..2pi intervals. 
+    * one would supply values from either -pi..pi or 0..2pi intervals.
     *
     * @param begin      An iterator to the first angle value
     * @param end        An iterator to one past the last angle value
@@ -53,7 +54,7 @@ namespace OpenTissue
     * @param theta_max  Upon return this value holds the ending value of the contiguous angle interval.
     */
     template<typename iterator_type>
-    inline void compute_contiguous_angle_interval( 
+    inline void compute_contiguous_angle_interval(
       iterator_type const & begin
       , iterator_type const & end
       , typename iterator_type::value_type & theta_min
@@ -103,7 +104,7 @@ namespace OpenTissue
       //T mx = value_traits::zero();
       //T my = value_traits::zero();
       //for(iterator_type theta = begin; theta != end; ++ theta)
-      //{        
+      //{
       //  T const c = cos( *theta );
       //  T const s = sin( *theta );
       //  mx += c;
@@ -114,7 +115,7 @@ namespace OpenTissue
       //assert( is_number(norm) || !"compute_contiguous_angle_interval(): NaN encountered");
 
       //if(norm<= value_traits::zero())
-      //  throw std::logic_error("insufficient angle samples to determine a mean angle"); 
+      //  throw std::logic_error("insufficient angle samples to determine a mean angle");
 
       //mx /= norm;
       //my /= norm;
@@ -122,10 +123,10 @@ namespace OpenTissue
       //assert( is_number(mx) || !"compute_contiguous_angle_interval(): NaN encountered");
       //assert( is_number(my) || !"compute_contiguous_angle_interval(): NaN encountered");
 
-      while(theta_min < value_traits::zero()) 
+      while(theta_min < value_traits::zero())
         theta_min += two_pi;
 
-      while(theta_max < theta_min) 
+      while(theta_max < theta_min)
         theta_max += two_pi;
 
       assert( theta_min <= theta_max || !"compute_contiguous_angle_interval(): invalid interval");

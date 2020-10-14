@@ -10,7 +10,7 @@
 #include <OpenTissue/configuration.h>
 
 #include <OpenTissue/utility/gl/gl.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -19,7 +19,7 @@ namespace OpenTissue
   {
 
     /**
-    * Render Buffer. 
+    * Render Buffer.
     * This class encapsulates the render buffer OpenGL object described in the
     * frame buffer object (FBO) OpenGL spec. See the official spec at:
     * http://oss.sgi.com/projects/ogl-sample/registry/EXT/framebuffer_object.txt
@@ -27,7 +27,7 @@ namespace OpenTissue
     *
     * A "render buffer" is a chunk of GPU memory used by frame buffer objects to
     * represent "traditional" framebuffer memory (depth, stencil, and color buffers).
-    * By "traditional," we mean that the memory cannot be bound as a texture. 
+    * By "traditional," we mean that the memory cannot be bound as a texture.
     * With respect to GPU shaders, Render buffer memory is "write-only." Framebuffer
     * operations such as alpha blending, depth test, alpha test, stencil test, etc.
     * read from this memory in post-fragement-shader (ROP) operations.
@@ -40,9 +40,9 @@ namespace OpenTissue
     * beginning with: RGB, RGBA, DEPTH_COMPONENT
     *
     * or a stencil buffer format (not currently supported  in NVIDIA drivers as of 7/1/05).
-    * STENCIL_INDEX1_EXT 
-    * STENCIL_INDEX4_EXT     
-    * STENCIL_INDEX8_EXT     
+    * STENCIL_INDEX1_EXT
+    * STENCIL_INDEX4_EXT
+    * STENCIL_INDEX8_EXT
     * STENCIL_INDEX16_EXT
     *
     * This implementation was inspired by the ideas in the FBO class from
@@ -61,7 +61,7 @@ namespace OpenTissue
       *
       * @return    The unused identifier.
       */
-      static GLuint create_buffer_id() 
+      static GLuint create_buffer_id()
       {
         GLuint id = 0;
         glGenRenderbuffersEXT(1, &id);
@@ -92,14 +92,14 @@ namespace OpenTissue
 
     public:
 
-      void bind() 
-      {	
+      void bind()
+      {
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_buffer_id);
         gl::gl_check_errors("RenderBuffer::bind(): glBindRenderbufferEXT");
       }
-      void unbind() 
-      {	
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0); 
+      void unbind()
+      {
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
         gl::gl_check_errors("RenderBuffer::unbind(): glBindRenderbufferEXT");
       }
 
@@ -113,7 +113,7 @@ namespace OpenTissue
       void set(GLenum internal_format, int width, int height)
       {
         int max_size = Renderbuffer::get_max_size();
-        if (width > max_size || height > max_size ) 
+        if (width > max_size || height > max_size )
         {
           std::cerr << "Renderbuffer.set(): " << "Size too big (" << width << ", " << height << ")" << std::endl;
           return;
@@ -123,7 +123,7 @@ namespace OpenTissue
         glGetIntegerv( GL_RENDERBUFFER_BINDING_EXT, &tmp );
         gl::gl_check_errors("RenderBuffer::set(): glGetIntegerv");
         GLuint saved_id = static_cast<GLuint>(tmp);
-        if (saved_id != m_buffer_id) 
+        if (saved_id != m_buffer_id)
         {
           bind();
         }
@@ -131,7 +131,7 @@ namespace OpenTissue
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, internal_format, width, height );
         gl::gl_check_errors("RenderBuffer::set(): glRenderbufferStorageEXT");
         //--- Guarded unbind
-        if (saved_id != m_buffer_id) 
+        if (saved_id != m_buffer_id)
         {
           unbind();
         }
@@ -162,7 +162,7 @@ namespace OpenTissue
 
     };
 
-    typedef boost::shared_ptr<Renderbuffer>  renderbuffer_pointer;
+    typedef std::shared_ptr<Renderbuffer>  renderbuffer_pointer;
 
     /**
     * Create Depth Buffer.
@@ -178,7 +178,7 @@ namespace OpenTissue
       buffer.reset(
         new Renderbuffer()
         );
-      buffer->set(GL_DEPTH_COMPONENT24,width, height);    
+      buffer->set(GL_DEPTH_COMPONENT24,width, height);
       return buffer;
     }
 
@@ -195,7 +195,7 @@ namespace OpenTissue
       renderbuffer_pointer buffer;
       buffer.reset(
         new Renderbuffer()
-        );   
+        );
       buffer->set(GL_STENCIL_INDEX16_EXT,width, height);
       return buffer;
     }
@@ -214,7 +214,7 @@ namespace OpenTissue
       renderbuffer_pointer buffer;
       buffer.reset(
         new Renderbuffer()
-        );       
+        );
       //GL_DEPTH24_STENCIL8_EXT OR DEPTH_STENCIL_EXT?
       buffer->set(GL_DEPTH24_STENCIL8_EXT,width, height);
       return buffer;

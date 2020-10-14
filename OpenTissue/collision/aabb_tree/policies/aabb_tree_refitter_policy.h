@@ -53,7 +53,7 @@ namespace aabb_tree
       M = vector3_type( math::detail::lowest<real_type>() );
       if(bv->is_leaf())
       {
-        annotated_bv_ptr annotated_bv = boost::static_pointer_cast<annotated_bv_type>(bv);
+        annotated_bv_ptr annotated_bv = std::static_pointer_cast<annotated_bv_type>(bv);
 
         geometry_type * geometry = &(*(annotated_bv->geometry_begin()));
         vector3_type p0 = geometry->m_p0->position();

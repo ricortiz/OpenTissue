@@ -9,7 +9,7 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <OpenTissue/core/math/math_is_number.h>  
+#include <OpenTissue/core/math/math_is_number.h>
 #include <OpenTissue/core/math/math_functions.h>  // Needed for clamp
 #include <OpenTissue/collision/gjk/gjk_compute_closest_points.h>
 
@@ -76,7 +76,7 @@ namespace OpenTissue
           get_axis_angle(
               prod( T_to.Q(), conj( T_from.Q() ) )   // Change in orientation from ``from'' to ''to'', ie. R = T_to * T_from^{-1}
             , n
-            , theta 
+            , theta
             );
           omega = (theta/ delta_tau)*n;
         }
@@ -87,7 +87,7 @@ namespace OpenTissue
         * @param X      The current coordinate transformation of the object.
         * @param tau    The time step into the future where the coordinate transformation of the object should be computed.
         * @param v      The current linear velocity of the object.
-        * @param omega  The current angular velocity of the object. 
+        * @param omega  The current angular velocity of the object.
         *
         * @return       Upon return this argument holds the coordinate transformation of the object at time tau.
         */
@@ -153,9 +153,9 @@ namespace OpenTissue
           OpenTissue::gjk::VoronoiSimplexSolverPolicy const simplex_solver_policy = OpenTissue::gjk::VoronoiSimplexSolverPolicy();
 
           size_t const max_iterations       = 100u;
-          T      const absolute_tolerance   = boost::numeric_cast<T>(10e-6);
-          T      const relative_tolerance   = boost::numeric_cast<T>(10e-6);
-          T      const stagnation_tolerance = boost::numeric_cast<T>(10e-15);
+          T      const absolute_tolerance   = OpenTissue::utility::numeric_cast<T>(10e-6);
+          T      const relative_tolerance   = OpenTissue::utility::numeric_cast<T>(10e-6);
+          T      const stagnation_tolerance = OpenTissue::utility::numeric_cast<T>(10e-15);
           size_t       iterations           = 0u;
           size_t       status               = 0u;
           T            distance             = value_traits::infinity();

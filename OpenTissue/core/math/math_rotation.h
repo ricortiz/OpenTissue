@@ -26,7 +26,7 @@ namespace OpenTissue
 
   template<
       typename value_type_
-      //, typename value_traits_ = ValueTraits<value_type_> 
+      //, typename value_traits_ = ValueTraits<value_type_>
     >
     class Rotation
     {
@@ -58,7 +58,7 @@ namespace OpenTissue
     public:
 
       Rotation()
-        : m_angle(value_traits::zero()) 
+        : m_angle(value_traits::zero())
         , m_axis(value_traits::zero(),value_traits::zero(),value_traits::one())
       {}
 
@@ -80,8 +80,8 @@ namespace OpenTissue
         using std::acos;
         using std::sin;
 
-        value_type teta     = boost::numeric_cast<value_type>( acos( q.s() ) );
-        value_type sin_teta = boost::numeric_cast<value_type>( sin(teta)     );
+        value_type teta     = OpenTissue::utility::numeric_cast<value_type>( acos( q.s() ) );
+        value_type sin_teta = OpenTissue::utility::numeric_cast<value_type>( sin(teta)     );
         m_angle = value_traits::two()*teta;
         if(sin_teta)
           m_axis = unit( q.v() / sin_teta );

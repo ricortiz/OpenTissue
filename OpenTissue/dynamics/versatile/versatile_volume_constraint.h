@@ -39,7 +39,7 @@ namespace OpenTissue
 
         void initialize(node_type & ni,node_type & nj,node_type & nk,node_type & nm)
         {
-          real_type const six = boost::numeric_cast<real_type>(6.0);
+          real_type const six = OpenTissue::utility::numeric_cast<real_type>(6.0);
 
           m_ni = & ni;
           m_nj = & nj;
@@ -55,7 +55,7 @@ namespace OpenTissue
 
         void apply()const
         {
-          real_type const six = boost::numeric_cast<real_type>(6.0);
+          real_type const six = OpenTissue::utility::numeric_cast<real_type>(6.0);
 
           vector3_type e_mj = (m_nm->m_coord - m_nj->m_coord);
           vector3_type e_kj = (m_nk->m_coord - m_nj->m_coord);
@@ -86,7 +86,7 @@ namespace OpenTissue
 
         real_type compute_internal_energy()
         {
-          real_type const six = boost::numeric_cast<real_type>(6.0);
+          real_type const six = OpenTissue::utility::numeric_cast<real_type>(6.0);
 
           vector3_type e_ki = (m_nk->m_coord - m_ni->m_coord);
           vector3_type e_mi = (m_nm->m_coord - m_ni->m_coord);

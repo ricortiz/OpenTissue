@@ -8,7 +8,7 @@
 
 #include <OpenTissue/dynamics/mbd/interfaces/mbd_force_interface.h>
 
-#include <boost/cast.hpp>  // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>  // needed for OpenTissue::utility::numeric_cast
 
 namespace OpenTissue
 {
@@ -16,7 +16,7 @@ namespace OpenTissue
   {
 
     template<typename mbd_types>
-    class Damping 
+    class Damping
       : public ForceInterface<mbd_types>
     {
     public:
@@ -33,8 +33,8 @@ namespace OpenTissue
     public:
 
       Damping()
-        : m_linear_viscosity(boost::numeric_cast<real_type>( .001) )
-        , m_angular_viscosity(boost::numeric_cast<real_type>( .001 ) )
+        : m_linear_viscosity(OpenTissue::utility::numeric_cast<real_type>( .001) )
+        , m_angular_viscosity(OpenTissue::utility::numeric_cast<real_type>( .001 ) )
       {}
 
       virtual ~Damping(){}
@@ -106,4 +106,4 @@ namespace OpenTissue
   } // namespace mbd
 } // namespace OpenTissue
 // OPENTISSUE_DYNAMICS_MBD_UTIL_FORCES_MBD_DAMPING_H
-#endif 
+#endif

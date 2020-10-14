@@ -18,7 +18,7 @@
 #include <OpenTissue/core/math/math_value_traits.h>
 #include <OpenTissue/core/math/math_is_number.h>
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 
 #include <vector>
 #include <stdexcept>
@@ -43,11 +43,11 @@ namespace OpenTissue
         * @param s   Upon return this argument holds the value of sin(theta), where theta is the angle the vector needs to be rotated around the z-axis.
         */
         template<typename value_type>
-        inline void get_rotation ( 
+        inline void get_rotation (
           value_type const & a
           , value_type const & b
           , value_type       & c
-          , value_type       & s 
+          , value_type       & s
           )
         {
           using std::sqrt;
@@ -61,7 +61,7 @@ namespace OpenTissue
           //
           // Find the rotation theta that rotates [a b]^T into [ r 0]^T, that is find cos(theta) = c and sin(theta) such that
           //
-          //    | r |   |  c s | |  a  | 
+          //    | r |   |  c s | |  a  |
           //    | 0 | = | -s c | |  b  |
           //
           // In order to be a rotation we must also fulfill the constraint c^2+s^2 = 1. From the last row we get
@@ -71,9 +71,9 @@ namespace OpenTissue
           // This suggest we could choose c = a and and s = b, but we also need the unity constraint, so we have
           //
           //    r= sqrt{a^2+b^2}
-          //         
+          //
           //    c = a/r
-          //            
+          //
           //    s = b/r
           //
           //  Observe that we can make the simple rewriting
@@ -105,7 +105,7 @@ namespace OpenTissue
           //
           //if (b = 0){
           //  c = copysign(1,a);
-          //  s = 0; 
+          //  s = 0;
           //  r = fabs(a)
           //} else if (a = 0) {
           //  c = 0;
@@ -130,17 +130,17 @@ namespace OpenTissue
           // that is not available, x*sng(y), using the signum function, is an alternative.
           //
 
-          if ( b == value_traits::zero() )  
+          if ( b == value_traits::zero() )
           {
-            c = (a>0) ? value_traits::one() : -value_traits::one(); 
+            c = (a>0) ? value_traits::one() : -value_traits::one();
             s = value_traits::zero();
           }
-          else if ( a == value_traits::zero() )  
+          else if ( a == value_traits::zero() )
           {
             c = value_traits::zero();
-            s = (b>0) ? value_traits::one() : - value_traits::one(); 
+            s = (b>0) ? value_traits::one() : - value_traits::one();
           }
-          else if ( fabs( b ) > fabs( a ) )  
+          else if ( fabs( b ) > fabs( a ) )
           {
             value_type t = a / b;
             value_type u = sqrt ( value_traits::one() + t*t );
@@ -148,7 +148,7 @@ namespace OpenTissue
             s = value_traits::one() / u;
             c = t * s;
           }
-          else //if ( abs ( a ) > abs ( b ) )  
+          else //if ( abs ( a ) > abs ( b ) )
           {
             value_type t = b / a;
             value_type u = sqrt ( value_traits::one() + t*t );
@@ -162,7 +162,7 @@ namespace OpenTissue
           assert( c <=  value_traits::one() || !"get_rotation(): illegal value of c");
           assert( c >= -value_traits::one() || !"get_rotation(): illegal value of c");
           assert( s <=  value_traits::one() || !"get_rotation(): illegal value of s");
-          assert( s >= -value_traits::one() || !"get_rotation(): illegal value of s");          
+          assert( s >= -value_traits::one() || !"get_rotation(): illegal value of s");
           assert( fabs( (c*c+s*s) - value_traits::one() ) < math::working_precision<value_type>() || !"get_rotation(): Not a valid rotation");
         }
 
@@ -175,11 +175,11 @@ namespace OpenTissue
         * @param s   This argument holds the value of sin(theta), where theta is the angle the vector needs to be rotated around the z-axis.
         */
         template<typename value_type>
-        inline void set_rotation ( 
+        inline void set_rotation (
           value_type & a
           , value_type & b
           , value_type const & c
-          , value_type const & s 
+          , value_type const & s
           )
         {
           using std::fabs;
@@ -219,7 +219,7 @@ namespace OpenTissue
         *
         * The Arnoldi method results in the factorization
         *
-        *   A V_M = V_{M+1} H_{M} 
+        *   A V_M = V_{M+1} H_{M}
         *
         * Where H_{M} is a Hessenberg matrix of dimension (M+1 \times M). The
         * columns of V_M+1 is an orthonormal basis for the Krylow
@@ -278,7 +278,7 @@ namespace OpenTissue
         */
         template<typename size_type, typename matrix_type, typename vector_type>
         inline void hessenberg_matrix_transform(
-          size_type j          
+          size_type j
           , matrix_type & H
           , vector_type & g
           , vector_type & c
@@ -310,19 +310,19 @@ namespace OpenTissue
           }
 
           // Next we need to find the rotation that wil transform
-          // the H_{j+1,j} element into zero. 
+          // the H_{j+1,j} element into zero.
           value_type a = H(j,j);
           value_type b = H(j+1,j);
           get_rotation ( a, b, c[j], s[j] );
 
           // Hereafter we apply the new rotation, because of the structure of
-          // H and the rotation we only need to apply this rotation to the new row and column of H. 
+          // H and the rotation we only need to apply this rotation to the new row and column of H.
           a = H(   j, j );
           b = H( j+1, j );
           set_rotation ( a, b, c[j], s[j] );
 
-          assert( a > value_traits::zero()                        || !"hessenberg_matrix_transform(): invalid rotation, diagonal should be positive?"); 
-          assert( fabs(b) < math::working_precision<value_type>() || !"hessenberg_matrix_transform(): invalid rotation, lower diagonal is nonzero?"); 
+          assert( a > value_traits::zero()                        || !"hessenberg_matrix_transform(): invalid rotation, diagonal should be positive?");
+          assert( fabs(b) < math::working_precision<value_type>() || !"hessenberg_matrix_transform(): invalid rotation, lower diagonal is nonzero?");
 
           //
           // See Proporsition 6.9 part 1 in the book of Saad (page 169 in second edition)
@@ -339,17 +339,17 @@ namespace OpenTissue
 
         /**
         *  Test if basis is orthonormal.
-        *  This method is only used for internal testing purpose. 
+        *  This method is only used for internal testing purpose.
         *
         * @param m         The number of vectors in the basis for the preconditioned Krylov
-        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } . 
+        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } .
         *                  That is the indices of the basis vectors range from v_0 to v_{m-1}.
         * @param v         The vectors for the basis of the Krylow subspace.
         */
         template<typename size_type, typename vector_type>
-        inline bool is_orthonormal ( 
+        inline bool is_orthonormal (
           size_type m
-          , std::vector<vector_type> const & v 
+          , std::vector<vector_type> const & v
           )
         {
           using std::fabs;
@@ -360,7 +360,7 @@ namespace OpenTissue
           assert( m>0         || !"is_orthonormal(): m was out of range");
           assert( m<=v.size() || !"is_orthonormal(): m was out of range");
 
-          value_type const precision = ::boost::numeric_cast<value_type>(10e-6);
+          value_type const precision = ::OpenTissue::utility::numeric_cast<value_type>(10e-6);
 
           for ( size_type i = 0; i < m; ++i )
           {
@@ -381,15 +381,15 @@ namespace OpenTissue
 
         /**
         *  Test if matrix is upper triangular.
-        *  This method is only used for internal testing purpose. 
+        *  This method is only used for internal testing purpose.
         *
         * @param m         The number of vectors in the basis for the preconditioned Krylov
-        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } . 
+        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } .
         *                  That is the indices of the basis vectors range from v_0 to v_{m-1}.
         * @param H         The matrix that should be tested.
         */
         template<typename size_type, typename matrix_type>
-        inline bool is_upper_triangular ( 
+        inline bool is_upper_triangular (
           size_type m
           , matrix_type const & H
           )
@@ -413,11 +413,11 @@ namespace OpenTissue
 
         /**
         *  Update the current iterate.
-        *  This method computes 
+        *  This method computes
         *
         *    x = x_0 + V_M y
         *
-        *  where 
+        *  where
         *
         *    y = arg min \norm { b - A x}
         *            y
@@ -427,7 +427,7 @@ namespace OpenTissue
         *                  return this argument holds the updated value of the
         *                  iterate x.
         * @param m         The number of vectors in the basis for the preconditioned Krylov
-        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } . 
+        *                  subspace: K_m = span{r_0, M^{-1} A r_0,...,( M^{-1} A )^{m-1} r_0, } .
         *                  That is the indices of the basis vectors range from v_0 to v_{m-1}.
         * @param H         The Hessenberg matrix transformed into triangular form. The triangular
         *                  form consist of the m \times m submatrix of H.
@@ -437,12 +437,12 @@ namespace OpenTissue
         * @param v         The vectors for the basis of the Krylow subspace.
         */
         template<typename size_type, typename vector_type, typename matrix_type>
-        inline void update ( 
+        inline void update (
           vector_type & x
           , size_type m
           , matrix_type & H
           , vector_type const & g
-          , std::vector<vector_type> const & v 
+          , std::vector<vector_type> const & v
           )
         {
           assert( m>0                         || !"update(): m was out of range");
@@ -450,7 +450,7 @@ namespace OpenTissue
           assert( is_orthonormal( m, v )      || !"update(): basis where not orthonormal?");
           assert( is_upper_triangular( m, H ) || !"update(): H where not upper triangular?");
 
-          vector_type y;       
+          vector_type y;
           OpenTissue::math::big::backsolve( m, H, y, g);
 
           for ( size_type j = 0; j < m; ++j )
@@ -461,7 +461,7 @@ namespace OpenTissue
 
       /**
       *  GMRES  Generalized Minimum Residual Method.
-      * GeneralizedMinimalResidualSolver solves the non-symmetric linear 
+      * GeneralizedMinimalResidualSolver solves the non-symmetric linear
       * system Ax = b using the Generalized Minimal Residual method
       *  See:
       *      http://en.wikipedia.org/wiki/GMRES
@@ -471,10 +471,10 @@ namespace OpenTissue
       *
       * We will try to use the same default values as the GMRES method implemented in Matlab. If a value is zero then it is
       * assumed that the parameter were left unspecified by end-user.
-      *  
+      *
       *
       * From the Matlab help:
-      * 
+      *
       *    X = GMRES(A,B) attempts to solve the system of linear equations A*X = B for
       *    X.  The N-by-N coefficient matrix A must be square and the right hand side
       *    column vector B must have length N.  A may be a function returning A*X. This
@@ -485,7 +485,7 @@ namespace OpenTissue
       *
       *    GMRES(A,B,RESTART,TOL) specifies the tolerance of the method.  If TOL is []
       *    then GMRES uses the default, 1e-6.
-      * 
+      *
       *    GMRES(A,B,RESTART,TOL,MAXIT) specifies the maximum number of outer
       *    iterations. Note: the total number of iterations is RESTART*MAXIT. If MAXIT
       *    is [] then GMRES uses the default, MIN(N/RESTART,10). If RESTART is N or []
@@ -512,13 +512,13 @@ namespace OpenTissue
       inline void gmres(
         matrix_type const & A
         , vector_type & x
-        , vector_type const & b 
-        , typename vector_type::size_type const & max_iterations         
-        , typename vector_type::size_type const & max_restart_iterations 
-        , typename vector_type::value_type const & tolerance                   
+        , vector_type const & b
+        , typename vector_type::size_type const & max_iterations
+        , typename vector_type::size_type const & max_restart_iterations
+        , typename vector_type::value_type const & tolerance
         , typename vector_type::value_type & relative_residual_error
         , typename vector_type::size_type & used_inner_iterations
-        , typename vector_type::size_type & used_outer_iterations     
+        , typename vector_type::size_type & used_outer_iterations
         , typename vector_type::size_type & status
         , preconditioner_type const & P
         )
@@ -531,12 +531,12 @@ namespace OpenTissue
         typedef typename vector_type::size_type                      size_type;
         typedef          OpenTissue::math::ValueTraits<value_type>   value_traits;
 
-        static size_type const ten = ::boost::numeric_cast<size_type>(10);
+        static size_type const ten = ::OpenTissue::utility::numeric_cast<size_type>(10);
 
         size_type  const & N       = b.size();
         size_type  const & R       = max_restart_iterations;
         size_type  const & M       = max_iterations;
-        value_type const & eps     = tolerance>0 ? tolerance : boost::numeric_cast<value_type>( 1e-6 );
+        value_type const & eps     = tolerance>0 ? tolerance : OpenTissue::utility::numeric_cast<value_type>( 1e-6 );
         bool       const restarted = R!=N && R>0;
         size_type        maxit     = M;
 
@@ -544,7 +544,7 @@ namespace OpenTissue
         {
           if (restarted)
           {
-            size_type  const fraction  = ::boost::numeric_cast<size_type>( ceil( value_traits::one()*N / R ) );
+            size_type  const fraction  = ::OpenTissue::utility::numeric_cast<size_type>( ceil( value_traits::one()*N / R ) );
 
             maxit = min( fraction, ten);
           }
@@ -597,13 +597,13 @@ namespace OpenTissue
         size_type   k_min      = 0;         // "Outer" iteration at which xmin was computed.
         size_type   j_min      = 0;         // "Inner" iteration at which xmin was computed.
 
-        status     = 1;        
+        status     = 1;
 
         // create data container for keeping vectors for the basis of the preconditioned Krylov subspace K_M
-        std::vector<vector_type> v; 
-        v.resize(inner + 1);       
+        std::vector<vector_type> v;
+        v.resize(inner + 1);
 
-        // Allocate space for all other temporary data 
+        // Allocate space for all other temporary data
         vector_type tmp( N );               // Allocate space for temporary vector.
         matrix_type H( inner+1, inner );    // Get space for Hessenberg matrix
         vector_type g( inner+1 );           // Allocate space for the right hand side vector of the least squares sub problem.
@@ -631,7 +631,7 @@ namespace OpenTissue
 
           size_type used_inner = 0;  // Auxiliary variable used to keep track of how many loops we did = #number of vectors in Krylov subspace
 
-          for (size_type j = 0; j < inner; ++j ) 
+          for (size_type j = 0; j < inner; ++j )
           {
             ++used_inner;
 
@@ -652,7 +652,7 @@ namespace OpenTissue
             }
             value_type h_jp1j = ublas::norm_2( w );
             v[j+1].resize(N);
-            v[j+1]   = w/h_jp1j; 
+            v[j+1]   = w/h_jp1j;
             H(j+1,j) = h_jp1j;
             //
             // kenny: if H(j+1,j) is zero then we should make an early exit
@@ -708,18 +708,18 @@ namespace OpenTissue
 
           // Update iterate x
           //
-          // At this point we have generated the vectors 
+          // At this point we have generated the vectors
           //
           //  v_0, ..., v_{j+1}
           //
           // So the total number of generated vectors are |j+2| vectors.
           // The vector v_{j+1} is not needed, so we have |j+1| vectors
-          // in the basis for the Krylov subspace. 
+          // in the basis for the Krylov subspace.
           //
           detail::update ( x, used_inner, H, g, v );
 
           // Check for convergence
-          residual(A, x, b, r);           
+          residual(A, x, b, r);
           norm_r = ublas::norm_2 ( r );
 
           if(norm_r < norm_r_min)
@@ -756,13 +756,13 @@ namespace OpenTissue
       inline void gmres(
         matrix_type const & A
         , vector_type & x
-        , vector_type const & b 
-        , typename vector_type::size_type const & max_iterations         
-        , typename vector_type::size_type const & max_restart_iterations 
-        , typename vector_type::value_type const & tolerance                   
+        , vector_type const & b
+        , typename vector_type::size_type const & max_iterations
+        , typename vector_type::size_type const & max_restart_iterations
+        , typename vector_type::value_type const & tolerance
         , typename vector_type::value_type & relative_residual_error
         , typename vector_type::size_type & used_inner_iterations
-        , typename vector_type::size_type & used_outer_iterations     
+        , typename vector_type::size_type & used_outer_iterations
         , typename vector_type::size_type & status
         )
       {
@@ -775,19 +775,19 @@ namespace OpenTissue
       inline void gmres(
         matrix_type const & A
         , vector_type & x
-        , vector_type const & b 
-        , typename vector_type::size_type const & max_iterations         
-        , typename vector_type::size_type const & max_restart_iterations 
-        , typename vector_type::value_type const & tolerance                   
+        , vector_type const & b
+        , typename vector_type::size_type const & max_iterations
+        , typename vector_type::size_type const & max_restart_iterations
+        , typename vector_type::value_type const & tolerance
         )
       {
         typename vector_type::value_type relative_residual_error;
         typename vector_type::size_type used_inner_iterations;
-        typename vector_type::size_type used_outer_iterations;    
+        typename vector_type::size_type used_outer_iterations;
         typename vector_type::size_type status;
-        
+
         IdentityPreconditioner preconditioner;
-        
+
         gmres( A,x,b,max_iterations,max_restart_iterations,tolerance, relative_residual_error, used_inner_iterations, used_outer_iterations, status, preconditioner);
       }
 
@@ -796,12 +796,12 @@ namespace OpenTissue
       inline void gmres(
         matrix_type const & A
         , vector_type & x
-        , vector_type const & b 
+        , vector_type const & b
         )
       {
         typedef OpenTissue::math::ValueTraits< typename vector_type::value_type> value_traits;
 
-        typename vector_type::size_type  max_iterations          = 0; 
+        typename vector_type::size_type  max_iterations          = 0;
         typename vector_type::size_type  max_restart_iterations  = 0;
         typename vector_type::value_type tolerance               = value_traits::zero();
         typename vector_type::value_type relative_residual_error = value_traits::zero();
@@ -831,13 +831,13 @@ namespace OpenTissue
         void operator()(
           matrix_type const & A
           , vector_type & x
-          , vector_type const & b 
-          , typename vector_type::size_type const & max_iterations         
-          , typename vector_type::size_type const & max_restart_iterations 
-          , typename vector_type::value_type const & tolerance                   
+          , vector_type const & b
+          , typename vector_type::size_type const & max_iterations
+          , typename vector_type::size_type const & max_restart_iterations
+          , typename vector_type::value_type const & tolerance
           , typename vector_type::value_type & relative_residual_error
           , typename vector_type::size_type & used_inner_iterations
-          , typename vector_type::size_type & used_outer_iterations     
+          , typename vector_type::size_type & used_outer_iterations
           , typename vector_type::size_type & status
           , preconditioner_type const & P
           ) const
@@ -849,13 +849,13 @@ namespace OpenTissue
         void operator()(
           matrix_type const & A
           , vector_type & x
-          , vector_type const & b 
-          , typename vector_type::size_type const & max_iterations         
-          , typename vector_type::size_type const & max_restart_iterations 
-          , typename vector_type::value_type const & tolerance                   
+          , vector_type const & b
+          , typename vector_type::size_type const & max_iterations
+          , typename vector_type::size_type const & max_restart_iterations
+          , typename vector_type::value_type const & tolerance
           , typename vector_type::value_type & relative_residual_error
           , typename vector_type::size_type & used_inner_iterations
-          , typename vector_type::size_type & used_outer_iterations     
+          , typename vector_type::size_type & used_outer_iterations
           , typename vector_type::size_type & status
           ) const
         {
@@ -866,10 +866,10 @@ namespace OpenTissue
         void operator()(
           matrix_type const & A
           , vector_type & x
-          , vector_type const & b 
-          , typename vector_type::size_type const & max_iterations         
-          , typename vector_type::size_type const & max_restart_iterations 
-          , typename vector_type::value_type const & tolerance                   
+          , vector_type const & b
+          , typename vector_type::size_type const & max_iterations
+          , typename vector_type::size_type const & max_restart_iterations
+          , typename vector_type::value_type const & tolerance
           ) const
         {
           gmres(A,x,b,max_iterations,max_restart_iterations,tolerance);
@@ -879,7 +879,7 @@ namespace OpenTissue
         void operator()(
           matrix_type const & A
           , vector_type & x
-          , vector_type const & b 
+          , vector_type const & b
           ) const
         {
           gmres(A,x,b);

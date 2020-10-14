@@ -75,13 +75,13 @@ namespace OpenTissue
           vector3_type const & pm = query.m()->m_coord;
           vector3_type const & p  = data.m_coord;
 
-          real_type const delta = boost::numeric_cast<real_type>( 10e-5 );
+          real_type const delta = OpenTissue::utility::numeric_cast<real_type>( 10e-5 );
 
           real_type lower = - delta;
           real_type upper = value_traits::one() + delta;
           result_type result;
 
-          
+
           OpenTissue::geometry::barycentric_algebraic(pi,pj,pk,pm,p,result.m_w0,result.m_w1,result.m_w2,result.m_w3);
           if(
             (result.m_w0>lower)&&(result.m_w0<upper)

@@ -9,11 +9,11 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <OpenTissue/core/math/big/big_types.h>  
-#include <OpenTissue/core/math/big/big_lu.h>  
-#include <OpenTissue/core/math/big/big_svd.h>  
+#include <OpenTissue/core/math/big/big_types.h>
+#include <OpenTissue/core/math/big/big_lu.h>
+#include <OpenTissue/core/math/big/big_svd.h>
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 #include <stdexcept>
 
 namespace OpenTissue
@@ -33,10 +33,10 @@ namespace OpenTissue
       *                 inversion method to be used.
       */
       template<class matrix_type, typename invert_functor>
-      inline void moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA, invert_functor const & invert) 
+      inline void moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA, invert_functor const & invert)
       {
         typedef typename matrix_type::size_type                size_type;
-        typedef typename matrix_type::value_type               value_type;     
+        typedef typename matrix_type::value_type               value_type;
         typedef ublas::vector<value_type>                      vector_type;
 
         if(A.size1() <= 0 || A.size2() <= 0)
@@ -102,9 +102,9 @@ namespace OpenTissue
        * @param invA  Upon return holds the pseudoinverse of A.
        */
       template<class matrix_type>
-      inline void lu_moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA) 
+      inline void lu_moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA)
       {
-        moore_penrose_pseudoinverse( A, invA, &lu_invert<matrix_type> ); 
+        moore_penrose_pseudoinverse( A, invA, &lu_invert<matrix_type> );
       }
 
       /**
@@ -114,9 +114,9 @@ namespace OpenTissue
        * @param invA  Upon return holds the pseudoinverse of A.
        */
       template<class matrix_type>
-      inline void svd_moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA) 
+      inline void svd_moore_penrose_pseudoinverse(matrix_type const & A, matrix_type& invA)
       {
-        moore_penrose_pseudoinverse( A, invA, &svd_invert<matrix_type> ); 
+        moore_penrose_pseudoinverse( A, invA, &svd_invert<matrix_type> );
       }
 
     } // namespace big

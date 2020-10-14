@@ -26,7 +26,7 @@ namespace OpenTissue
     inline typename grid_type::value_type value_at_point(grid_type const & grid, vector3_type const & point )
     {
       typedef typename grid_type::value_type      value_type;
-      typedef typename vector3_type::value_type  real_type;
+      typedef typename vector3_type::value_type   real_type;
 
       //const static value_type infty  = grid.infinity();
       const static value_type unused = grid.unused();
@@ -64,9 +64,9 @@ namespace OpenTissue
       if ( cnt_unused == 8 )
         return unused;
 
-      real_type s = ( point(0) - ( i0*grid.dx() + grid.min_coord(0) ) ) / grid.dx();
-      real_type t = ( point(1) - ( j0*grid.dy() + grid.min_coord(1) ) ) / grid.dy();
-      real_type u = ( point(2) - ( k0*grid.dz() + grid.min_coord(2) ) ) / grid.dz();
+      real_type s = utility::numeric_cast<real_type>(( point(0) - ( i0*grid.dx() + grid.min_coord(0) ) ) / grid.dx());
+      real_type t = utility::numeric_cast<real_type>(( point(1) - ( j0*grid.dy() + grid.min_coord(1) ) ) / grid.dy());
+      real_type u = utility::numeric_cast<real_type>(( point(2) - ( k0*grid.dz() + grid.min_coord(2) ) ) / grid.dz());
       return OpenTissue::math::trillinear( d000, d001, d010, d011, d100, d101, d110, d111, s, t, u );
     }
 

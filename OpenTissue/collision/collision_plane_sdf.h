@@ -25,7 +25,7 @@ namespace OpenTissue
     * @param wcsP       The world location of the plane geometry.
     * @param plane      The object A geometry ( a plane).
     * @param wcsG       The world location of the signed distance field geometry.
-    * @param geometry   The object B geometry (signed distance field). 
+    * @param geometry   The object B geometry (signed distance field).
     * @param contacts   Upon return holds all the contact points between the two object. By convention contact normals alway point from plane object towards sdf object.
     * @param envelope   The size of the collision envelope, default value is 0.01. Whenever objects are within this distance then contact points will be generated.
     *
@@ -61,7 +61,7 @@ namespace OpenTissue
       const_point_iterator end = geometry.m_sampling.end();
       const_point_iterator p   = geometry.m_sampling.begin();
 
-      real_type tst = boost::numeric_cast<real_type>( envelope ); 
+      real_type tst = OpenTissue::utility::numeric_cast<real_type>( envelope );
 
       for (;p!=end;++p)
       {

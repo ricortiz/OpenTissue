@@ -9,18 +9,18 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <cassert>
 
-namespace OpenTissue 
+namespace OpenTissue
 {
   namespace scan_conversion
   {
     namespace detail
     {
       template<typename vector3_type>
-      class RigdeIterator 
+      class RigdeIterator
       {
       protected:
 
@@ -68,7 +68,7 @@ namespace OpenTissue
 
       public:
 
-        RigdeIterator() 
+        RigdeIterator()
           : m_valid(false)
         {}
 
@@ -102,9 +102,9 @@ namespace OpenTissue
           this->initialize(v1,n1,v2,n2);
         }
 
-        RigdeIterator(RigdeIterator const& iter) 
-        {  
-          (*this) = iter; 
+        RigdeIterator(RigdeIterator const& iter)
+        {
+          (*this) = iter;
         }
 
         RigdeIterator const & operator=(RigdeIterator const & iter)
@@ -140,7 +140,7 @@ namespace OpenTissue
         bool operator++()
         {
           this->m_valid = this->update_vertex();
-          if (this->m_valid) 
+          if (this->m_valid)
           {
             this->m_valid = this->update_normal();
           }
@@ -153,7 +153,7 @@ namespace OpenTissue
           vector3_type const & v1
           , vector3_type const & n1
           , vector3_type const & v2
-          , vector3_type const & n2        
+          , vector3_type const & n2
           )
         {
           this->m_valid = true;
@@ -164,7 +164,7 @@ namespace OpenTissue
           // We scan-convert from low y-values to high y-values
           // Interchange the end points if necessary.
           // That secures that Dy is always positive.
-          if (V1(1) <= V2(1)) 
+          if (V1(1) <= V2(1))
           {
             this->m_start_vertex   = V1;
             this->m_current_normal = n1;
@@ -172,7 +172,7 @@ namespace OpenTissue
             this->m_end_vertex     = V2;
             this->m_end_normal     = n2;
           }
-          if (V1(1) > V2(1)) 
+          if (V1(1) > V2(1))
           {
             this->m_start_vertex   = V2;
             this->m_current_normal = n2;
@@ -180,18 +180,18 @@ namespace OpenTissue
             this->m_end_vertex     = V1;
             this->m_end_normal     = n1;
           }
-          if (V1(1) == V2(1)) 
+          if (V1(1) == V2(1))
           {
             // Horizontal edge_type, throw it away, because we draw triangles/polygons - not edges.
-            // Horizontal Edges in triangles/polygons are thrown away, because the left and right 
+            // Horizontal Edges in triangles/polygons are thrown away, because the left and right
             // edges will handle Xstart and Xstop. See Foley.
             this->m_valid = false;
           }
 
-          this->m_start_x = boost::numeric_cast<int>( this->m_start_vertex(0) );
-          this->m_start_y = boost::numeric_cast<int>( this->m_start_vertex(1) );
-          this->m_end_x   = boost::numeric_cast<int>( this->m_end_vertex(0)  );
-          this->m_end_y   = boost::numeric_cast<int>( this->m_end_vertex(1)  );
+          this->m_start_x = OpenTissue::utility::numeric_cast<int>( this->m_start_vertex(0) );
+          this->m_start_y = OpenTissue::utility::numeric_cast<int>( this->m_start_vertex(1) );
+          this->m_end_x   = OpenTissue::utility::numeric_cast<int>( this->m_end_vertex(0)  );
+          this->m_end_y   = OpenTissue::utility::numeric_cast<int>( this->m_end_vertex(1)  );
 
           // Kenny: I optimized this!!!
           //this->m_dx = this->m_end_x - this->m_start_x;
@@ -213,7 +213,7 @@ namespace OpenTissue
           // If it is an edge with a positive slope, let the the Accumulator be equal to Dx
           // that will make a right shift the first time, which must be done.
           // Else, initialize the Accumulator to +1, because if a and d are integers
-          // then a >= d ==> a + 1 > d, and that is what is needed if we only have 
+          // then a >= d ==> a + 1 > d, and that is what is needed if we only have
           // the the > operator
           this->m_accumulator = (0 <= this->m_step_x) ? this->m_dy : 1;
           this->m_denominator = this->m_dy;
@@ -226,31 +226,31 @@ namespace OpenTissue
 
         bool update_vertex()
         {
-          if (this->m_current_y >= this->m_end_y) 
+          if (this->m_current_y >= this->m_end_y)
           {
             this->m_valid = false;
           }
-          else 
+          else
           {
             this->m_accumulator += this->m_dx;
-            while (this->m_accumulator > this->m_denominator) 
+            while (this->m_accumulator > this->m_denominator)
             {
               this->m_current_x += this->m_step_x;
               this->m_accumulator -= this->m_denominator;
             }
             this->m_current_y += this->m_step_y;
           }
-          if (this->m_current_y >= this->m_end_y) 
+          if (this->m_current_y >= this->m_end_y)
           {
             if (!this->m_has_multiple_edges)
               this->m_valid = false;
-            else 
+            else
             {
               this->initialize(
                 this->m_end_vertex
                 , this->m_end_normal
                 , this->m_next_vertex
-                , this->m_next_normal          
+                , this->m_next_normal
                 );
               this->m_has_multiple_edges = false;
             }

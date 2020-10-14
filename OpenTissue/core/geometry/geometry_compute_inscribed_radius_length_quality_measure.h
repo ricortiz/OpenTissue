@@ -13,7 +13,7 @@
 #include <OpenTissue/core/math/math_basic_types.h>
 #include <OpenTissue/core/geometry/geometry_compute_inscribed_sphere.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <cmath>
 #include <cassert>
@@ -45,8 +45,8 @@ namespace OpenTissue
     *
     */
     template<typename vector3_type>
-    inline typename vector3_type::value_type   
-      compute_inscribed_radius_length_quality_measure ( 
+    inline typename vector3_type::value_type
+      compute_inscribed_radius_length_quality_measure (
           vector3_type const & p0
         , vector3_type const & p1
         , vector3_type const & p2
@@ -74,7 +74,7 @@ namespace OpenTissue
 
       r_in = (r_in<0) ? 0 : r_in;
 
-      real_type const fraction = boost::numeric_cast<real_type>( 2.0 * sqrt ( 6.0 ) );
+      real_type const fraction = OpenTissue::utility::numeric_cast<real_type>( 2.0 * sqrt ( 6.0 ) );
       real_type quality =  fraction * r_in / l_max;
       assert( is_number( l_max )             || !"maximum edge length was not a number"                   );
       assert( l_max >= value_traits::zero()  || !"maximum edge length must be non-negative"               );

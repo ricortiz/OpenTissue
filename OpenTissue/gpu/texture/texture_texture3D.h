@@ -13,7 +13,7 @@
 #include <OpenTissue/core/math/math_power2.h>
 #include <OpenTissue/gpu/texture/texture_types.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <iostream>
 #include <cassert>
@@ -643,7 +643,7 @@ namespace OpenTissue
 
     };
 
-    typedef boost::shared_ptr<Texture3D>  texture3D_pointer;
+    typedef std::shared_ptr<Texture3D>  texture3D_pointer;
 
   } // namespace texture
 } // namespace OpenTissue

@@ -19,7 +19,7 @@ namespace OpenTissue
 
     /**
     * Top Down Splitting for building a sphere BVH for the sample
-    * points in the signed distance field geomtery.  
+    * points in the signed distance field geomtery.
     */
     template<typename bvh_type>
     class TopDownPolicy
@@ -180,7 +180,7 @@ namespace OpenTissue
       {
         if(partition.annotated())
         {
-          annotated_bv_ptr A = boost::static_pointer_cast<annotated_bv_type>(bv);
+          annotated_bv_ptr A = std::static_pointer_cast<annotated_bv_type>(bv);
 
           A->insert( m_geometry[partition.m_left] );
         }

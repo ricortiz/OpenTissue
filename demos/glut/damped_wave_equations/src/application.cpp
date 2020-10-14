@@ -14,6 +14,7 @@
 #include <OpenTissue/dynamics/swe/swe_damped_wave_equation.h>
 #include <OpenTissue/utility/utility_fps_counter.h>
 #include <OpenTissue/utility/utility_timer.h>
+#include <OpenTissue/utility/utility_numeric_cast.h>
 #include <OpenTissue/core/math/math_vector3.h>
 #include <OpenTissue/core/math/math_matrix3x3.h>
 #include <OpenTissue/core/math/math_quaternion.h>
@@ -333,7 +334,7 @@ public:
       m_sync.start();
       m_dwe.simulate(m_timestep);
       if ((m_status&AUTOMATION) && ++m_cur_rate >= m_drop_rate) {
-        const int drops = boost::numeric_cast<int>(m_drop_percentage*1000);
+        const int drops = OpenTissue::utility::numeric_cast<int>(m_drop_percentage*1000);
         if (rand()%1000 >= 1000-drops)
           drop(0.1);
         else

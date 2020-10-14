@@ -9,10 +9,10 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <OpenTissue/core/math/big/big_types.h>  
-#include <OpenTissue/core/math/math_value_traits.h>  
+#include <OpenTissue/core/math/big/big_types.h>
+#include <OpenTissue/core/math/math_value_traits.h>
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 #include <stdexcept>
 #include <cmath>
 
@@ -39,12 +39,12 @@ namespace OpenTissue
       * @param iterations        Upon return this argument holds the number of used iterations.
       */
       template<typename matrix_type, typename vector_type>
-      inline void conjugate_gradient( 
+      inline void conjugate_gradient(
         matrix_type const & A
         , vector_type & x
         , vector_type const & b
         , size_t const & max_iterations
-        , typename vector_type::value_type const & epsilon 
+        , typename vector_type::value_type const & epsilon
         , size_t & iterations
         )
       {
@@ -108,7 +108,7 @@ namespace OpenTissue
           ublas::noalias( g ) = r + beta * g;
 
           ++iterations;
-        }       
+        }
       }
 
       /**
@@ -120,7 +120,7 @@ namespace OpenTissue
       * @param iterations        Upon return this argument holds the number of used iterations.
       */
       template<typename matrix_type, typename vector_type>
-      inline void conjugate_gradient( 
+      inline void conjugate_gradient(
         matrix_type const & A
         , vector_type & x
         , vector_type const & b
@@ -128,7 +128,7 @@ namespace OpenTissue
         )
       {
         typedef typename vector_type::value_type  value_type;
-        value_type epsilon = boost::numeric_cast<value_type>(10e-6);
+        value_type epsilon = OpenTissue::utility::numeric_cast<value_type>(10e-6);
         conjugate_gradient(A,x,b,15u,epsilon,iterations);
       }
 
@@ -140,14 +140,14 @@ namespace OpenTissue
       * @param b                 The right hand side vector.
       */
       template<typename matrix_type, typename vector_type>
-      inline void conjugate_gradient( 
+      inline void conjugate_gradient(
         matrix_type const & A
         , vector_type & x
         , vector_type const & b
         )
       {
         typedef typename vector_type::value_type  value_type;
-        value_type epsilon = boost::numeric_cast<value_type>(10e-4);
+        value_type epsilon = OpenTissue::utility::numeric_cast<value_type>(10e-4);
         size_t iterations;
         conjugate_gradient(A,x,b,15u,epsilon,iterations);
       }
@@ -165,12 +165,12 @@ namespace OpenTissue
       public:
 
         template<typename matrix_type, typename vector_type>
-        void operator() ( 
+        void operator() (
           matrix_type const & A
           , vector_type & x
           , vector_type const & b
           , size_t const & max_iterations
-          , typename vector_type::value_type const & epsilon 
+          , typename vector_type::value_type const & epsilon
           , size_t & iterations
           )
         {
@@ -178,7 +178,7 @@ namespace OpenTissue
         }
 
         template<typename matrix_type, typename vector_type>
-        void operator()( 
+        void operator()(
           matrix_type const & A
           , vector_type & x
           , vector_type const & b
@@ -188,7 +188,7 @@ namespace OpenTissue
         }
 
         template<typename matrix_type, typename vector_type>
-        void operator()( 
+        void operator()(
           matrix_type const & A
           , vector_type & x
           , vector_type const & b

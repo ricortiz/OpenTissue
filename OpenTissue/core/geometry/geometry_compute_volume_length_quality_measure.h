@@ -13,7 +13,7 @@
 #include <OpenTissue/core/math/math_basic_types.h>
 #include <OpenTissue/core/geometry/geometry_tetrahedron.h>
 
-#include <boost/cast.hpp> // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <cmath>
 #include <cassert>
@@ -42,8 +42,8 @@ namespace OpenTissue
     * @return The computed quality measure.
     */
     template<typename vector3_type>
-    inline typename vector3_type::value_type   
-      compute_volume_length_quality_measure ( 
+    inline typename vector3_type::value_type
+      compute_volume_length_quality_measure (
           vector3_type const & p0
         , vector3_type const & p1
         , vector3_type const & p2
@@ -77,9 +77,9 @@ namespace OpenTissue
 
       tetrahedron_type T(p0,p1,p2,p3);
 
-      real_type const exponent = boost::numeric_cast<real_type>( 2.0 / 3.0 );
-      real_type base = boost::numeric_cast<real_type>( 3.0 * fabs( T.volume() ) );
-      real_type nominator = boost::numeric_cast<real_type>(12.0 * pow (base , exponent ));
+      real_type const exponent = OpenTissue::utility::numeric_cast<real_type>( 2.0 / 3.0 );
+      real_type base = OpenTissue::utility::numeric_cast<real_type>( 3.0 * fabs( T.volume() ) );
+      real_type nominator = OpenTissue::utility::numeric_cast<real_type>(12.0 * pow (base , exponent ));
       real_type quality = nominator / denom;
       assert( is_number( base )                  || !"base was not a number"          );
       assert( base >= value_traits::zero()       || !"base must be non-negative"      );

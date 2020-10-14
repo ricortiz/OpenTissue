@@ -12,7 +12,7 @@
 #include <OpenTissue/core/math/math_precision.h>
 #include <OpenTissue/core/math/math_is_number.h>
 
-#include <boost/cast.hpp>             // needed for boost::numeric_cast
+#include <OpenTissue/utility/utility_numeric_cast.h>             // needed for OpenTissue::utility::numeric_cast
 
 #include <cassert>
 #include <cmath>                      // needed for std::fabs
@@ -32,7 +32,7 @@ namespace OpenTissue
         * @param b      The right hand side vector of A x = b.  Note b is of dimension at least m.
         */
         template<typename size_type, typename matrix_type, typename vector_type>
-        inline void backsolve ( 
+        inline void backsolve (
           size_type m
           , matrix_type const & A
           , vector_type & x
@@ -75,7 +75,7 @@ namespace OpenTissue
           x.resize(b.size(), false);
           x = b;
 
-          int k = ::boost::numeric_cast<int>(m);
+          int k = ::OpenTissue::utility::numeric_cast<int>(m);
 
           for ( int i = k - 1; i >= 0; --i)
           {
