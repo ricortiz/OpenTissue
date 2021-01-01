@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -21,7 +23,7 @@ namespace OpenTissue
       *
       * Further it is assumed that the vector library used provides a vector
       * proxy function called subrange, which is capable of returning a
-      * vector range. (see for instance in Boost uBLAS for an example). 
+      * vector range. (see for instance in Boost uBLAS for an example).
       *
       * @param group        The group corresponding to the A-matrix.
       *
@@ -33,32 +35,30 @@ namespace OpenTissue
       */
       template<typename group_type,typename matrix_type>
       void get_jacobian_matrix(
-        group_type const & group  
-        , size_t const & m  
-        , matrix_type& J 
+        std::shared_ptr<group_type> const group
+        , size_t const & m
+        , matrix_type & J
         )
       {
         typedef typename group_type::math_policy                                math_policy;
-        typedef typename group_type::const_indirect_constraint_iterator         const_indirect_constraint_iterator;
-        typedef typename group_type::const_indirect_contact_iterator            const_indirect_contact_iterator;
-        typedef typename group_type::const_indirect_body_iterator               const_indirect_body_iterator;
         typedef typename math_policy::matrix_range                              matrix_range;
         typedef typename matrix_type::size_type                                 size_type;
 
-        size_type n = group.size_bodies();
+        size_type n = group->size_bodies();
 
         math_policy::resize(J,m,6*n);
 
         J.clear();
 
         size_type tag = 0;
-        for(const_indirect_body_iterator body = group.body_begin();body!=group.body_end();++body)
+        for(auto body : group->bodies())
         {
           assert(body->is_active() || !"get_jacobian(): body was not active");
           body->m_tag = tag++;
         }
 
-        for(const_indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+
+        for(auto constraint : group->constraints())
         {
           if(constraint->is_active())
           {
@@ -67,7 +67,7 @@ namespace OpenTissue
 
             size_type start_column = 6*constraint->get_body_A()->m_tag;
             size_type end_column   = start_column + 3;
-	    matrix_range linear_matrix_range_A = math_policy::subrange(J,start_row,end_row,start_column,end_column);
+            matrix_range linear_matrix_range_A = math_policy::subrange(J,start_row,end_row,start_column,end_column);
             constraint->get_linear_jacobian_A( linear_matrix_range_A );
 
             start_column += 3;
@@ -86,7 +86,7 @@ namespace OpenTissue
             constraint->get_angular_jacobian_B(angular_matrix_range_B);
           }
         }
-        for(const_indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+        for(auto contact : group->contacts())
         {
           if(contact->is_active())
           {
@@ -110,7 +110,7 @@ namespace OpenTissue
 
             start_column += 3;
             end_column   += 3;
-            matrix_range angular_matrix_range_B = math_policy::subrange(J,start_row,end_row,start_column,end_column); 
+            matrix_range angular_matrix_range_B = math_policy::subrange(J,start_row,end_row,start_column,end_column);
             contact->get_angular_jacobian_B( angular_matrix_range_B );
           }
         }

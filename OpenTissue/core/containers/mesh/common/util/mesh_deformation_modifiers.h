@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -21,38 +22,31 @@ namespace OpenTissue
   {
 
     template<typename mesh_type,typename vector3_type>
-    void translate(mesh_type & mesh,vector3_type const & translation)
+    void translate(std::shared_ptr<mesh_type> mesh,  vector3_type const & translation)
     {
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
         v->m_coord += translation;
     }
 
     template<typename mesh_type,typename matrix3x3_type>
-    void rotate(mesh_type & mesh,matrix3x3_type const & R)
+    void rotate(std::shared_ptr<mesh_type> mesh, matrix3x3_type const & R)
     {
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+
+      for(auto v : mesh->vertices())
         v->m_coord = R*v->m_coord;
     }
 
     template<typename mesh_type,typename real_type>
-    void uniform_scale(mesh_type & mesh,real_type const & s)
+    void uniform_scale(std::shared_ptr<mesh_type> mesh, real_type const & s)
     {
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
         v->m_coord = v->m_coord*s;
     }
 
     template<typename mesh_type,typename real_type>
-    void scale(mesh_type & mesh,real_type const & sx,real_type const & sy,real_type const & sz)
+    void scale(std::shared_ptr<mesh_type> mesh, real_type const & sx, real_type const & sy, real_type const & sz)
     {
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
       {
         v->m_coord(0) = v->m_coord(0)*sx;
         v->m_coord(1) = v->m_coord(1)*sy;
@@ -61,15 +55,13 @@ namespace OpenTissue
     }
 
     template<typename mesh_type,typename vector3_type>
-    void scale(mesh_type & mesh,vector3_type const & s) { mesh::scale(mesh,s(0),s(1),s(2));  }
+    void scale(std::shared_ptr<mesh_type> mesh, vector3_type const & s) { mesh::scale(mesh, s(0),s(1),s(2));  }
 
     template<typename mesh_type,typename vector3_type, typename real_type>
-    void twist(mesh_type & mesh,vector3_type const & direction, real_type const & pitch)
+    void twist(std::shared_ptr<mesh_type> mesh, vector3_type const & direction, real_type const & pitch)
     {
       OpenTissue::math::Matrix3x3<real_type> R;
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
       {
         real_type projection = v->m_coord * direction;
         real_type radian = projection/pitch;
@@ -79,13 +71,11 @@ namespace OpenTissue
     }
 
     template<typename mesh_type,typename vector3_type, typename real_type>
-    void bend(mesh_type & mesh,vector3_type const & axis,vector3_type const & direction, real_type const & radius)
+    void bend(std::shared_ptr<mesh_type> mesh, vector3_type const & axis,vector3_type const & direction, real_type const & radius)
     {
       OpenTissue::math::Matrix3x3<real_type> R;
       real_type circum = 2*math::detail::pi<real_type>()*radius;
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
       {
         real_type projection = v->m_coord * direction;
         real_type radian = projection/circum;
@@ -95,7 +85,7 @@ namespace OpenTissue
     }
 
     template<typename mesh_type,typename vector3_type, typename real_type>
-    void spherical_bend(mesh_type & mesh,vector3_type const & normal, real_type const & radius)
+    void spherical_bend(std::shared_ptr<mesh_type> mesh, vector3_type const & normal, real_type const & radius)
     {
       OpenTissue::math::Matrix3x3<real_type> R;
       real_type circum = 2*math::detail::pi<real_type>()*radius;
@@ -103,9 +93,7 @@ namespace OpenTissue
 
       orthonormal_vectors(axis1,axis2,normal);
 
-      typename mesh_type::vertex_iterator end = mesh.vertex_end();
-      typename mesh_type::vertex_iterator   v = mesh.vertex_begin();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
       {
         real_type proj1 = v->m_coord*axis1;
         real_type proj2 = v->m_coord*axis2;

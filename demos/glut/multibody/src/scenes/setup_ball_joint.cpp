@@ -57,7 +57,7 @@ void setup_ball_joint(Data & data)
   data.m_ball.connect(data.m_socket_A,data.m_socket_B);
 
   data.m_ball.set_frames_per_second(value_traits::one()/timestep);
-  
+
   data.m_ball.set_error_reduction_parameter(0.8);
 
   //--- Setup a reach cone pyramid

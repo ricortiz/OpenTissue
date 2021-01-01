@@ -11,6 +11,8 @@
 
 #include <OpenTissue/collision/collision_sphere_sphere.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -42,7 +44,7 @@ namespace OpenTissue
            , sphere_type & sphereB
            , collision_info_type & info
            )
-        { 
+        {
           coordsys_type BtoWCS;
           coordsys_type AtoWCS;
           vector3_type r_a;
@@ -58,13 +60,13 @@ namespace OpenTissue
 
           vector3_type p,n;
           real_type distance;
-          
+
           info.get_contacts()->clear();
-          
+
           if( OpenTissue::collision::sphere_sphere(AtoWCS.T(),sphereA.radius(),BtoWCS.T(),sphereB.radius(), info.get_envelope() ,p,n,distance) )
           {
-            contact_type contact;
-            contact.init( info.get_body_A(), info.get_body_B(), p, n, distance, info.get_material() );
+            auto contact = std::make_shared<contact_type>();
+            contact->init( info.get_body_A(), info.get_body_B(), p, n, distance, info.get_material() );
             info.get_contacts()->push_back(contact);
             return (distance < -info.get_envelope() );
           }

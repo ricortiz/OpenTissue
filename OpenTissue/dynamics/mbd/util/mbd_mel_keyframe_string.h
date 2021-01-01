@@ -28,19 +28,19 @@ namespace OpenTissue
       * std::cout << mbd::mel::keyframe_string(configuration.body_begin(),configuration.body_end(),simulator.get_time())  << std::endl;
       *
       */
-      template< typename indirect_body_iterator, typename real_type_>
-      std::string keyframe_string(indirect_body_iterator begin,indirect_body_iterator end,real_type_ const & time)
+      template< typename body_ptr_container, typename real_type_>
+      std::string keyframe_string(body_ptr_container const & bodies,real_type_ const & time)
       {
-        typedef typename indirect_body_iterator::value_type   body_type;
-        typedef typename body_type::vector3_type              vector3_type;
-        typedef typename body_type::quaternion_type           quaternion_type;
-        typedef typename body_type::matrix3x3_type            matrix3x3_type;
-        typedef typename body_type::real_type                 real_type;
-        typedef typename body_type::value_traits              value_traits;
-
+        typedef typename body_ptr_container::value_type body_ptr_type;
+        typedef typename body_ptr_type::element_type    body_type;
+        typedef typename body_type::vector3_type        vector3_type;
+        typedef typename body_type::quaternion_type     quaternion_type;
+        typedef typename body_type::matrix3x3_type      matrix3x3_type;
+        typedef typename body_type::real_type           real_type;
+        typedef typename body_type::value_traits        value_traits;
         std::stringstream stream;
 
-        for(indirect_body_iterator body=begin;body!=end;++body)
+        for(auto body : bodies)
         {
           // TODO: Only works for SingleGroupAnalysis. Should be encapsulated in SFNIAE
           if(!body->is_active())

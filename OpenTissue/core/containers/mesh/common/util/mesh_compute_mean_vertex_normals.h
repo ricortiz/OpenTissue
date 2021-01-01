@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -19,7 +20,7 @@ namespace OpenTissue
   {
 
     template<typename mesh_type>
-    void compute_mean_vertex_normals(mesh_type & mesh)
+    void compute_mean_vertex_normals(std::shared_ptr<mesh_type> & mesh)
     {
       typedef typename mesh_type::math_types              math_types;
       typedef typename math_types::value_traits           value_traits;
@@ -30,19 +31,15 @@ namespace OpenTissue
       typedef typename mesh_type::face_iterator           face_iterator;
       typedef typename mesh_type::face_vertex_circulator  face_vertex_circulator;
       {
-        vertex_iterator end = mesh.vertex_end();
-        vertex_iterator v   = mesh.vertex_begin();
-        for(;v!=end;++v)
+        for(auto v : mesh->vertices())
           v->m_normal.clear();
       }
       {
-        face_iterator end = mesh.face_end();
-        face_iterator   f = mesh.face_begin();
-        for(;f!=end;++f)
+        for(auto f : mesh->faces())
         {
-          face_vertex_circulator i ( *f ),vend;
-          face_vertex_circulator j ( *f );
-          face_vertex_circulator k ( *f );
+          face_vertex_circulator i (f),vend;
+          face_vertex_circulator j (f);
+          face_vertex_circulator k (f);
           ++j; ++k;++k;
           for(;i!=vend;++i,++j,++k)
           {
@@ -54,9 +51,7 @@ namespace OpenTissue
         }
       }
       {
-        vertex_iterator end = mesh.vertex_end();
-        vertex_iterator v   = mesh.vertex_begin();
-        for(;v!=end;++v)
+        for(auto v : mesh->vertices())
           v->m_normal = normalize(v->m_normal);
       }
     }

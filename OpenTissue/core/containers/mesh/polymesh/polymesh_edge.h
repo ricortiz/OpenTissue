@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -28,13 +30,13 @@ namespace OpenTissue
     private:
 
       edge_handle      m_self;
-      mesh_type     *  m_owner;
+      std::shared_ptr<mesh_type> m_owner;
       halfedge_handle  m_halfedge0;
       halfedge_handle  m_halfedge1;
 
     public:
 
-      PolyMeshEdge() 
+      PolyMeshEdge()
         : m_self()
         , m_owner(0)
         , m_halfedge0()
@@ -44,7 +46,7 @@ namespace OpenTissue
     public:
 
       edge_handle       get_handle() const { return m_self; }
-      mesh_type     *   get_owner() const { return m_owner; }
+      std::shared_ptr<mesh_type> get_owner() const { return m_owner; }
 
       halfedge_handle   get_halfedge0_handle() const { return m_halfedge0; }
       halfedge_iterator get_halfedge0_iterator() const { return m_owner->get_halfedge_iterator(m_halfedge0); }
@@ -57,7 +59,7 @@ namespace OpenTissue
 
       friend class polymesh_core_access;
       void set_handle(edge_handle e) { m_self = e; }
-      void set_owner(mesh_type * owner) { m_owner = owner; }
+      void set_owner(std::shared_ptr<mesh_type> owner) { m_owner = owner; }
       void set_halfedge0_handle(halfedge_handle h) { m_halfedge0 = h; }
       void set_halfedge1_handle(halfedge_handle h) { m_halfedge1 = h; }
 

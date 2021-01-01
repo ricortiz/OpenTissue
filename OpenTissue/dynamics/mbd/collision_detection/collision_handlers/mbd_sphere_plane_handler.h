@@ -11,6 +11,8 @@
 
 #include <OpenTissue/collision/collision_sphere_plane.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -65,8 +67,8 @@ namespace OpenTissue
           info.get_contacts()->clear();
           if(OpenTissue::collision::sphere_plane(AtoWCS,BtoWCS,sphere,plane,info.get_envelope(),p,n,distance))
           {
-            contact_type contact;
-            contact.init( info.get_body_B(), info.get_body_A(), p, n, distance, info.get_material() );
+            auto contact = std::make_shared<contact_type>();
+            contact->init( info.get_body_B(), info.get_body_A(), p, n, distance, info.get_material() );
             info.get_contacts()->push_back(contact);
             return (  distance  <   -info.get_envelope()  );
           }

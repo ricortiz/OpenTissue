@@ -21,9 +21,10 @@ namespace OpenTissue
     * joint to ensure that the modelling is consistent.
     */
     template< typename mbd_types >
-    class JointInterface 
+    class JointInterface
       : public mbd_types::identifier_type
       , public mbd_types::constraint_type
+      , public std::enable_shared_from_this<JointInterface<mbd_types>>
     {
     public:
 
@@ -64,18 +65,20 @@ namespace OpenTissue
         this->m_bodyA = m_socketA->get_body();
         this->m_bodyB = m_socketB->get_body();
 
-        this->m_bodyA->m_joints.push_back(this);
-        this->m_bodyB->m_joints.push_back(this);
+        auto shared_this = this->shared_from_this();
+        this->m_bodyA->m_joints.push_back(shared_this);
+        this->m_bodyB->m_joints.push_back(shared_this);
 
         calibration();
       }
 
       void disconnect()
       {
+        auto shared_this = this->shared_from_this();
         if(this->m_bodyA)
-          this->m_bodyA->m_joints.remove(this);
+          this->m_bodyA->m_joints.remove(shared_this);
         if(this->m_bodyB)
-          this->m_bodyB->m_joints.remove(this);
+          this->m_bodyB->m_joints.remove(shared_this);
         m_socketA = 0;
         m_socketB = 0;
         this->m_bodyA = 0;
@@ -92,9 +95,9 @@ namespace OpenTissue
       */
       virtual void calibration()=0;
 
-      void clear() 
-      { 
-        disconnect(); 
+      void clear()
+      {
+        disconnect();
       }
 
     };

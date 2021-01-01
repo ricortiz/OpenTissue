@@ -13,6 +13,7 @@
 #include <OpenTissue/core/containers/grid/util/grid_value_at_point.h>
 
 #include <cassert>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -20,7 +21,7 @@ namespace OpenTissue
   {
 
     template<typename types>
-    class GridForceField 
+    class GridForceField
       : public types::force_type
     {
     public:
@@ -28,12 +29,12 @@ namespace OpenTissue
       typedef typename types::math_types          math_types;
       typedef typename math_types::real_type      real_type;
       typedef typename math_types::vector3_type   vector3_type;
-      typedef typename types::system_type         system_type;   
+      typedef typename types::system_type         system_type;
       typedef OpenTissue::grid::Grid<vector3_type,math_types>        grid_type;
 
     protected:
 
-      grid_type * m_field;   ///< The force field
+      std::shared_ptr<grid_type> m_field;   ///< The force field
 
     public:
 
@@ -64,20 +65,20 @@ namespace OpenTissue
           if( p->inv_mass() <= 0 )
             continue;
           p->force() += OpenTissue::grid::value_at_point(*m_field, p->position() );
-        }        
+        }
       }
 
     public:
 
-      void init( grid_type const & field )
+      void init(std::shared_ptr<grid_type> field)
       {
-        if(field.empty())
+        if(field->empty())
         {
           std::cerr << " GridForceField::init(...): field was empty, did you forget to initialize it?" << std::endl;
-          m_field = 0;
+          m_field = nullptr;
           return;
         }
-        m_field = const_cast<grid_type *>( &field );
+        m_field = field;
       }
 
     };

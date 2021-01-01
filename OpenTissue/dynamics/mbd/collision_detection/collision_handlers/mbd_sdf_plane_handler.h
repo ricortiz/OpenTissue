@@ -42,7 +42,7 @@ namespace OpenTissue
 
         typedef typename mbd_types::collision_info_type   collision_info_type;
 
-       
+
         static bool test(
              sdf_geometry_type & sdf
            ,  plane_type & plane
@@ -65,8 +65,8 @@ namespace OpenTissue
           info.get_contacts()->clear();
 
           bool collision = OpenTissue::collision::plane_sdf(BtoWCS, plane, AtoWCS, sdf, *( info.get_contacts() ), info.get_envelope() );
-          
-          for(typename contact_container::iterator cp = info.get_contacts()->begin();cp!=info.get_contacts()->end();++cp)
+
+          for(auto cp : *info.get_contacts())
           {
             cp->init( info.get_body_B(), info.get_body_A(), cp->m_p, cp->m_n, cp->m_distance, info.get_material() );
           }

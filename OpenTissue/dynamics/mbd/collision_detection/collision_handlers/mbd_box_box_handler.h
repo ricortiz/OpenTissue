@@ -57,23 +57,23 @@ namespace OpenTissue
           info.get_body_B()->get_orientation( Q_b );
           BtoWCS = coordsys_type( r_b, Q_b );
           AtoWCS = coordsys_type( r_a, Q_a );
-          
+
           vector3_type p[16];
           vector3_type n;
           real_type distance[16];
 
           matrix3x3_type RA(AtoWCS.Q());
           matrix3x3_type RB(BtoWCS.Q());
-          
-          size_t cnt = OpenTissue::collision::box_box_improved(AtoWCS.T(),RA,boxA.ext(),BtoWCS.T(),RB,boxB.ext(),info.get_envelope(),p,n,distance);                 
-          
-          info.get_contacts()->clear();          
+
+          size_t cnt = OpenTissue::collision::box_box_improved(AtoWCS.T(),RA,boxA.ext(),BtoWCS.T(),RB,boxB.ext(),info.get_envelope(),p,n,distance);
+
+          info.get_contacts()->clear();
           if(cnt>0)
           {
             for(size_t i=0;i<cnt;++i)
             {
-              contact_type contact;
-              contact.init( info.get_body_A(), info.get_body_B(), p[i], n, distance[i], info.get_material() );
+              auto contact = std::make_shared<contact_type>();
+              contact->init( info.get_body_A(), info.get_body_B(), p[i], n, distance[i], info.get_material() );
               info.get_contacts()->push_back(contact);
             }
             return ( distance[0] <  -info.get_envelope() );

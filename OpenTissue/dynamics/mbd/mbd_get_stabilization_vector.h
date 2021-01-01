@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -24,9 +26,9 @@ namespace OpenTissue
       *
       *  \vec y = A \vec x + \vec b
       *
-      * Where $\vec y$ measures the relative velocities of the constraints, and 
+      * Where $\vec y$ measures the relative velocities of the constraints, and
       * vector x is a Lagrange multiplier vector. Thus, one have
-      * 
+      *
       *  \vec b^{\prime} = \vec b + \vec b_{text{stabilization}}
       *
       * And the linear relation then becomes
@@ -43,7 +45,7 @@ namespace OpenTissue
       *
       * Further it is assumed that the vector library used provides a vector
       * proxy function called subrange, which is capable of returning a
-      * vector range. (see for instance in Boost uBLAS for an example). 
+      * vector range. (see for instance in Boost uBLAS for an example).
       *
       * @param group        The group corresponding to the A-matrix.
       * @param m            The number of active constraints in the group (i.e. the
@@ -53,21 +55,19 @@ namespace OpenTissue
       *                     instance be used for constraint stabilization.
       */
       template<typename group_type,typename vector_type>
-      void get_stabilization_vector(   
-          group_type const & group  
-        , size_t const & m  
+      void get_stabilization_vector(
+        std::shared_ptr<group_type> group
+        , size_t const & m
         , vector_type & b
         )
       {
-        typedef typename group_type::math_policy                         math_policy;
-        typedef typename group_type::const_indirect_constraint_iterator  const_indirect_constraint_iterator;
-        typedef typename group_type::const_indirect_contact_iterator     const_indirect_contact_iterator;
-        typedef typename vector_type::size_type                          size_type;
-        typedef typename math_policy::vector_range                       vector_range;
+        typedef typename group_type::math_policy   math_policy;
+        typedef typename vector_type::size_type    size_type;
+        typedef typename math_policy::vector_range vector_range;
 
         math_policy::resize( b, m);
 
-        for(const_indirect_constraint_iterator constraint = group.constraint_begin();constraint != group.constraint_end();++constraint)
+        for(auto constraint : group->constraints())
         {
           if(constraint->is_active())
           {
@@ -77,7 +77,8 @@ namespace OpenTissue
             constraint->get_stabilization_term( tmp_vector_range );
           }
         }
-        for(const_indirect_contact_iterator contact = group.contact_begin();contact != group.contact_end();++contact)
+
+        for(auto contact : group->contacts())
         {
           if(contact->is_active())
           {

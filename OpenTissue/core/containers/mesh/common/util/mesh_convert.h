@@ -45,7 +45,7 @@ namespace OpenTissue
     * @return        The value true if succesful otherwise false.
     */
     template<typename mesh_type_in, typename mesh_type_out>
-    bool convert(   mesh_type_in const & in , mesh_type_out & out  )
+    bool convert(std::shared_ptr<mesh_type_in> const in, std::shared_ptr<mesh_type_out> const out)
     {
       typedef typename mesh_type_in::const_vertex_iterator             in_vertex_iterator;
       typedef typename mesh_type_in::const_face_iterator               in_face_iterator;
@@ -64,16 +64,14 @@ namespace OpenTissue
       typedef std::map<in_index_type,out_vertex_handle>   vh_lut_type;
       vh_lut_type vh_lut;
 
-      out.clear();
+      out->clear();
 
-      in_vertex_iterator vend = in.vertex_end();
-      in_vertex_iterator v    = in.vertex_begin();
-      for(;v!=vend;++v)
+      for(auto v : in->vertices())
       {
-        out_vertex_handle h = out.add_vertex();
+        out_vertex_handle h = out->add_vertex();
         assert(!h.is_null() || !"convert(): Internal error, Could not create vertex in output mesh");
         vh_lut[v->get_handle().get_idx()] = h;
-        out_vertex_iterator o = out.get_vertex_iterator(h);
+        auto o = *out->get_vertex_iterator(h);
 
         out_vertex_traits * ot = static_cast<out_vertex_traits*>(&(*o));
         in_vertex_traits const * it  = static_cast< in_vertex_traits const *>(&(*v));

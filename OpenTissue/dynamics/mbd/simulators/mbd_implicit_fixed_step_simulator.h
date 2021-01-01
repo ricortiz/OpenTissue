@@ -21,7 +21,7 @@ namespace OpenTissue
     * Do not work with First Order Physics!!!
     */
     template< typename mbd_types >
-    class ImplicitFixedStepSimulator 
+    class ImplicitFixedStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -46,10 +46,8 @@ namespace OpenTissue
       vector_type                m_u;                    ///< Generalized velocity vector of all bodies.
       vector_type                m_f_ext;                ///< Generalized force vector of all bodies.
       matrix_type                m_invM;                 ///< Inverse body massed stored in flat compressed format.
-      group_type *               m_all;                  ///< body_type group, used to handle the state of all bodies at once
       group_ptr_container        m_groups;               ///< Temporary Storage, used to hold results from the collision
                                                          ///< detection engine.
-
     public:
 
       ImplicitFixedStepSimulator(){}
@@ -60,36 +58,35 @@ namespace OpenTissue
 
       void run(real_type const & time_step)
       {
-        m_all = this->get_configuration()->get_all_body_group();
-        
-        mbd::compute_scripted_motions(*m_all,this->time());
-        mbd::get_position_vector(*m_all, m_s);
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::get_external_force_vector(*m_all,m_f_ext,true);
-        mbd::get_inverse_mass_matrix(*m_all,m_invM);
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+
+        mbd::compute_scripted_motions(all_body_groups,this->time());
+        mbd::get_position_vector(all_body_groups, m_s);
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::get_external_force_vector(all_body_groups,m_f_ext,true);
+        mbd::get_inverse_mass_matrix(all_body_groups,m_invM);
 
         //--- velocity update, compute effect of gravity: h*inv(M)f_ext
         //m_u += ublas::prod(m_invM, m_f_ext)*time_step;
         math_policy::prod_add(m_invM, m_f_ext, m_u, time_step);
-        
+
         //--- fake position update
-        mbd::compute_position_update(*m_all,m_s,m_u,time_step,m_ss);
-        mbd::set_position_vector(*m_all,m_ss);
-        mbd::compute_scripted_motions(*m_all,this->time() + time_step);
+        mbd::compute_position_update(all_body_groups,m_s,m_u,time_step,m_ss);
+        mbd::set_position_vector(all_body_groups,m_ss);
+        mbd::compute_scripted_motions(all_body_groups,this->time() + time_step);
 
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for(auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
-          this->get_stepper()->run(*group,time_step);
+          this->get_sleepy()->evaluate(group->bodies());
+          this->get_stepper()->run(group,time_step);
         }
 
         //--- get constrained velocities
-        mbd::get_velocity_vector(*m_all, m_u);
+        mbd::get_velocity_vector(all_body_groups, m_u);
         //--- perform true position update
-        mbd::compute_position_update(*m_all,m_s,m_u,time_step,m_ss);
-        mbd::set_position_vector(*m_all,m_ss);
+        mbd::compute_position_update(all_body_groups,m_s,m_u,time_step,m_ss);
+        mbd::set_position_vector(all_body_groups,m_ss);
         SimulatorInterface<mbd_types>::update_time(time_step);
       }
 

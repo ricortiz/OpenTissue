@@ -60,12 +60,12 @@ namespace OpenTissue
           info.get_body_A()->get_position( r_a );
           info.get_body_A()->get_orientation( Q_a );
           AtoWCS = coordsys_type( r_a, Q_a );
-         
+
           info.get_contacts()->clear();
 
           bool collision = OpenTissue::collision::sphere_sdf(BtoWCS,sphere,AtoWCS,sdf,*( info.get_contacts() ), info.get_envelope() );
 
-          for(typename contact_container::iterator cp = info.get_contacts()->begin();cp!=info.get_contacts()->end();++cp)
+          for(auto cp : *info.get_contacts())
           {
             cp->init( info.get_body_A(), info.get_body_B(), cp->m_p, cp->m_n, cp->m_distance, info.get_material() );
           }

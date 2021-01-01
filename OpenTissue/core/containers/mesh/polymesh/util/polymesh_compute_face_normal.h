@@ -9,7 +9,9 @@
 //
 #include <OpenTissue/configuration.h>
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh_face.h>
+
 #include <stdexcept>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -17,7 +19,7 @@ namespace OpenTissue
   {
 
     template<typename mesh_type,typename vector3_type>
-    void compute_face_normal(PolyMeshFace<mesh_type> const & f, vector3_type & normal)
+    void compute_face_normal(std::shared_ptr<PolyMeshFace<mesh_type>> const f, vector3_type & normal)
     {
       typedef typename mesh_type::face_vertex_circulator   face_vertex_circulator;
       typedef typename vector3_type::value_type            real_type;

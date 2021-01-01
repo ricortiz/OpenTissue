@@ -24,13 +24,13 @@ namespace OpenTissue
       *
       * Example usage:
       *
-      * std::cout << mbd::mel::euler_filter_string(configuration.body_begin(),configuration.body_end())  << std::endl;
+      * std::cout << mbd::mel::euler_filter_string(configuration.bodies())  << std::endl;
       */
-      template< typename indirect_body_iterator>
-      std::string euler_filter_string(indirect_body_iterator begin,indirect_body_iterator end)
+      template< typename body_ptr_container>
+      std::string euler_filter_string(body_ptr_container const & bodies)
       {
         std::stringstream stream;
-        for(indirect_body_iterator body=begin;body!=end;++body)
+        for(auto body : bodies)
         {
           if(body->is_active())
           {

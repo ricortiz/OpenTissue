@@ -14,6 +14,7 @@
 #include <iostream>
 #include <queue>
 #include <map>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -39,8 +40,8 @@ namespace OpenTissue
 
     protected:
 
-      typedef typename std::queue<face_type*>                 face_ptr_queue;
-      typedef typename std::map<face_type *,node_ptr_type>    graph_node_map;
+      typedef typename std::queue<std::shared_ptr<face_type>> face_ptr_queue;
+      typedef typename std::map<std::shared_ptr<face_type>,node_ptr_type>    graph_node_map;
 
     protected:
 
@@ -54,38 +55,39 @@ namespace OpenTissue
       * @param mesh
       * @param graph
       */
-      void run(mesh_type & mesh,graph_type & graph)
+      void run(std::shared_ptr<mesh_type> mesh, std::shared_ptr<graph_type> graph)
       {
         m_lookup.clear();
 
-        for(face_iterator face=mesh.face_begin();face!=mesh.face_end();++face)
+        auto faces = mesh->faces();
+        for(auto face : faces)
         {
-          node_ptr_type node = graph.insert(&(*face));
-          m_lookup[&(*face)] = node;
+          node_ptr_type node = graph.insert(face);
+          m_lookup[face] = node;
         }
-        face_ptr_queue Q;
 
+        face_ptr_queue Q;
         mesh::clear_face_tags(mesh);
         mesh::clear_halfedge_tags(mesh);
 
-        Q.push( &(*mesh.face_begin()) );
+        Q.push(*faces.begin());
         while(!Q.empty())
         {
-          face_type * face = Q.front();
+          auto face = Q.front();
           Q.pop();
 
           face->m_tag = 1;
 
-          mesh_type::face_halfedge_circulator h(*face),hend;
+          mesh_type::face_halfedge_circulator h(face),hend;
           for(;h!=hend;++h)
-            visistConnection(face, &(*h), Q, graph);
+            visistConnection(face, *h, Q, graph);
         }
         std::cout << "Mesh2BVHGraph::run(): Graph with " << graph.size_nodes() << " nodes and  " << graph.size_edges() << " edges" << std::endl;
       }
 
     protected:
 
-      void visistConnection(  face_type * face, halfedge_type * edge,  face_ptr_queue & Q, graph_type & graph  )
+      void visistConnection(std::shared_ptr<face_type> face, std::shared_ptr<halfedge_type> edge,  face_ptr_queue & Q, std::shared_ptr<graph_type> graph)
       {
         //--- See if we have a connection we have not yet visited
         if(edge->get_twin_handle().is_null())
@@ -94,12 +96,12 @@ namespace OpenTissue
         if(edge->m_tag==1)
           return;
 
-        halfedge_type * twin_edge = &(*edge->get_twin_iterator());
+        auto twin_edge = *edge->get_twin_iterator();
 
         if(twin_edge->get_face_handle().is_null())
           return;
 
-        face_type * twin_face = &(*twin_edge->get_face_iterator());
+        auto twin_face = *twin_edge->get_face_iterator();
 
         node_ptr_type A = m_lookup[face];
         node_ptr_type B = m_lookup[twin_face];

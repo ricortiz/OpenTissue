@@ -21,6 +21,7 @@
 #include <list>
 #include <vector>
 #include <cassert>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -39,15 +40,14 @@ namespace OpenTissue
       {
       protected:
 
-        typedef V                                vector_type;
-        typedef typename V::value_type           real_type;
-        typedef M                                matrix_type;
-
-        typedef OpenTissue::math::ValueTraits<real_type>  value_traits;
-
-        typedef std::list< vector_type * >                                   feature_ptr_container;
-        typedef typename feature_ptr_container::iterator                     feature_ptr_iterator;
-        typedef boost::indirect_iterator<feature_ptr_iterator,vector_type>   feature_iterator;
+        typedef V                                          vector_type;
+        typedef typename V::value_type                     real_type;
+        typedef M                                          matrix_type;
+        typedef OpenTissue::math::ValueTraits<real_type>   value_traits;
+        // Doesn't make sense for this to be an std::list anylonger since we are storing copies and not pointers.
+        typedef std::vector<vector_type>                   feature_container;
+        typedef typename feature_container::iterator       feature_iterator;
+        typedef typename feature_container::const_iterator feature_const_iterator;
 
       protected:
 
@@ -65,7 +65,10 @@ namespace OpenTissue
           matrix_type            m_C;        ///< Covariance matrix.
           matrix_type            m_invC;     ///< The inverse covariance matrix.
           size_t                 m_index;    ///< A unique cluster index
-          feature_ptr_container  m_features; ///< Pointers to all features in this cluster.
+
+          // TODO: The price to pay for removing the boost::indirect_iterator is to create a copy of the sub-features to each
+          // cluster.
+          feature_container      m_features; ///< List of features in this cluster.
 
         public:
 
@@ -83,15 +86,11 @@ namespace OpenTissue
 
           void update()
           {
-            using OpenTissue::math::covariance;
-            using OpenTissue::math::inverse;
-
             covariance( begin(), end(), m_mean, m_C);
             m_invC = inverse(m_C);
           }
 
         };
-
 
         /**
          * Feature Point Cluster Membership Information.
@@ -103,20 +102,20 @@ namespace OpenTissue
         public:
 
           size_t         m_index;    ///< The index of the original feature point.
-          cluster_type * m_cluster;  ///< A pointer to the cluster that the feature point belongs to.
-          vector_type  * m_p;        ///< A pointer to the feature vector.
+          std::shared_ptr<cluster_type> m_cluster;  ///< A pointer to the cluster that the feature point belongs to.
+          vector_type const *m_p;        ///< A pointer to the feature vector.
 
         public:
 
           membership_info()
             : m_index(0)
-            , m_cluster(0)
-            , m_p(0)
+            , m_cluster(nullptr)
+            , m_p{0}
           {}
 
-          membership_info(size_t const & idx, vector_type * p)
+          membership_info(size_t const & idx, vector_type const *p)
             : m_index(idx)
-            , m_cluster(0)
+            , m_cluster(nullptr)
             , m_p(p)
           {}
 
@@ -128,9 +127,8 @@ namespace OpenTissue
 
         };
 
-
-        typedef typename std::vector< membership_info >          membership_container;
-        typedef typename std::list<cluster_type>                 cluster_container;
+        typedef typename std::vector<membership_info>             membership_container;
+        typedef typename std::list<std::shared_ptr<cluster_type>> cluster_container;
 
         cluster_container      m_clusters;           ///< Clusters.
         membership_container   m_memberships;        ///< Feature to cluster membership container.
@@ -138,6 +136,7 @@ namespace OpenTissue
       public:
 
         typedef typename cluster_container::iterator             cluster_iterator;
+        typedef typename cluster_container::const_iterator       const_cluster_iterator;
         typedef typename membership_container::iterator          membership_iterator;
 
         /**
@@ -175,6 +174,34 @@ namespace OpenTissue
         */
         size_t feature_size() const { return m_memberships.size(); }
 
+        /**
+        * Get cluster list.
+        *
+        * @return    Reference to the cluster list.
+        */
+        cluster_container &clusters() { return m_clusters; }
+
+        /**
+        * Get cluster list.
+        *
+        * @return    Reference to the cluster list.
+        */
+        cluster_container const &clusters() const { return m_clusters; }
+
+        /**
+        * Get cluster list.
+        *
+        * @return    Reference to the cluster list.
+        */
+        membership_container &memberships() { return m_memberships; }
+
+        /**
+        * Get cluster list.
+        *
+        * @return    Reference to the cluster list.
+        */
+        membership_container const &memberships() const { return m_memberships; }
+
       protected:
 
         /**
@@ -184,40 +211,36 @@ namespace OpenTissue
         * @param points   An array type container of feature points.
         * @param K        The wanted number of clusters.
         */
-        template<typename vector_iterator>
+        template<typename features_container>
         void initialize(
-          vector_iterator const & begin
-          , vector_iterator const & end
+          features_container const & features
           , size_t const & K
           )
         {
-          using std::min;
-          using std::max;
-          using OpenTissue::math::random;
-
           // Assign all feature points to the zero-indexed cluster
-
-          size_t N = std::distance( begin, end );
+          size_t N = features.size();
           assert(N > K || !"KMeans::initialize() There must be more feature points than number of clusters.");
 
           {
             m_memberships.resize(N);
-            size_t          index = 0u;
-            vector_iterator p     = begin;
-            for( ; p != end; ++p, ++index)
-              m_memberships[index] = membership_info( index, &(*p) );
+            size_t index = 0u;
+            for(auto &f : features)
+            {
+              m_memberships[index] = membership_info(index, &f);
+              ++index;
+            }
           }
 
           // Find a bounding box of the feature points
-          vector_type min_coord = (*begin);
-          vector_type max_coord = (*begin);
-          for( vector_iterator p = begin; p != end; ++p)
+          vector_type min_coord = features.front();
+          vector_type max_coord = min_coord;
+          for(auto &f : features)
           {
-            min_coord = min( min_coord, (*p) );
-            max_coord = max( max_coord, (*p) );
+            min_coord = std::min( min_coord, f );
+            max_coord = std::max( max_coord, f );
           }
 
-          // Add some randomness 
+          // Add some randomness
           std::random_shuffle(m_memberships.begin(), m_memberships.end());
 
           //--- This initialization just seed clusters at random positions...
@@ -225,11 +248,11 @@ namespace OpenTissue
           for(size_t i=0;i<K;++i)
           {
             // Allocate cluster
-            m_clusters.push_back(cluster_type());
-            cluster_type & cluster = m_clusters.back();
+            auto cluster = std::make_shared<cluster_type>();
+            cluster->m_index = i;
             // Assign a random cluster center within bounding box of feature points
-            random( cluster.m_mean, min_coord, max_coord );
-            cluster.m_index = i;
+            random( cluster->m_mean, min_coord, max_coord );
+            m_clusters.push_back(cluster);
           }
 
           // Finally we assign the membership of the feature points to the random initial clusters
@@ -241,61 +264,54 @@ namespace OpenTissue
         * tries to re-estimate the clusters using a covariance analysis of the
         * assigned feature points.
         *
-        * @return     If a change occured in the reassignment of feature
+        * @return     If a change occurred in the reassignment of feature
         *             points then the return value is true. If the return
         *             value is false then it simply means that the clusters
         *             did not change. In other words we would have converged.
         */
         bool const distribute_features( )
         {
-          using OpenTissue::math::inner_prod;
-
           // Clear all the assignment of feature points to all the clusters.
+          for(auto &cluster : m_clusters)
           {
-            cluster_iterator end     = m_clusters.end();
-            cluster_iterator cluster = m_clusters.begin();
-            for(;cluster!=end;++cluster)
-              cluster->m_features.clear();
+            cluster->m_features.clear();
           }
 
           bool changed = false;
-          // Re-assign feature points to the closest cluster and check for changes in the assignment.
-          {
-            membership_iterator m     = m_memberships.begin();
-            membership_iterator m_end = m_memberships.end();
-            for(;m != m_end; ++m)
-            {
-              vector_type  const * p     = m->m_p;
-              cluster_type       * owner = 0;
 
-              real_type min_squared_distance = value_traits::infinity();
-              cluster_iterator c     = m_clusters.begin();
-              cluster_iterator c_end = m_clusters.end();
-              for(;c!=c_end;++c)
+          // Re-assign feature points to the closest cluster and check for changes in the assignment.
+          for(auto &m : m_memberships)
+          {
+            vector_type const *p = m.m_p;
+            std::shared_ptr<cluster_type> owner;
+
+            real_type min_squared_distance = value_traits::infinity();
+            for(auto &cluster : m_clusters)
+            {
+              vector_type diff = *p - cluster->m_mean;
+              // Mahalonobis type of distance measure, seems to make convergence really bad!!!
+              //   real_type squared_distance = inner_prod( diff,  prod( c->m_invC , diff) );
+              // So we use Euclidean (``spherical'') distances
+              real_type squared_distance = inner_prod( diff, diff );
+              if(squared_distance < min_squared_distance)
               {
-                vector_type diff = *p - c->m_mean;
-                // Mahalonobis type of distance measure, seems to make convergence really bad!!!
-                //   real_type squared_distance = inner_prod( diff,  prod( c->m_invC , diff) );
-                // So we use Euclidean (``spherical'') distances
-                real_type squared_distance = inner_prod( diff, diff );
-                if(squared_distance < min_squared_distance)
-                {
-                  min_squared_distance = squared_distance;
-                  owner = &(*c);
-                }
+                min_squared_distance = squared_distance;
+                owner = cluster;
               }
-              assert(owner || !"distribute_features() Fatal error could not find a cluster owner for feature point");
-              changed = (m->m_cluster != owner) ? true : changed;
-              m->m_cluster = owner;
-              owner->m_features.push_back( const_cast<vector_type*>(  p  )  );
             }
+            assert(owner || !"distribute_features() Fatal error could not find a cluster owner for feature point");
+            changed = (m.m_cluster != owner) ? true : changed;
+            m.m_cluster = owner;
+            owner->m_features.push_back(*p);
           }
 
           // Update cluster information based on new re-assigned feature points.
-          for(cluster_iterator cluster=m_clusters.begin();cluster!=m_clusters.end();++cluster)
+          for(auto &cluster : m_clusters)
           {
-            if(! cluster->m_features.empty())
+            if(!cluster->m_features.empty())
+            {
               cluster->update();
+            }
           }
           return changed;
         }
@@ -312,17 +328,16 @@ namespace OpenTissue
         * @param max_iterations   The maximum number of iterations to perform the KMeans algorithm.
         *
         */
-        template<typename vector_iterator>
-        void run( 
-          vector_iterator const & begin
-          , vector_iterator const & end
+        template<typename features_container>
+        void run(
+          features_container const & features
           , size_t const & K
           , size_t & iteration
           , size_t const & max_iterations
           )
         {
           iteration = 0u;
-          initialize(begin,end,K);
+          initialize(features,K);
           bool changed = false;
           do
           {
@@ -354,10 +369,9 @@ namespace OpenTissue
     * @param max_iterations   The maximum number of iterations to perform the KMeans algorithm. Usually a value of 50 works okay.
     *
     */
-    template<typename vector_iterator, typename vector_container, typename index_container>
+    template<typename vector_container, typename index_container>
     inline void kmeans(
-      vector_iterator const & begin
-      , vector_iterator const & end
+      vector_container const & features
       , vector_container & centers
       , index_container & membership
       , size_t K
@@ -376,23 +390,23 @@ namespace OpenTissue
 
       kmeans_algorithm kmeans;
 
-      kmeans.run( begin , end, K, iteration, max_iterations );
+      kmeans.run( features, K, iteration, max_iterations );
 
       centers.clear();
       centers.resize(K);
 
-      cluster_iterator c_end = kmeans.cluster_end();
-      cluster_iterator c     = kmeans.cluster_begin();
-      for(; c!=c_end; ++c)
-        centers[c->m_index] = c->m_mean;
+      for(auto &cluster : kmeans.clusters())
+      {
+        centers[cluster->m_index] = cluster->m_mean;
+      }
 
       membership.clear();
       membership.resize( kmeans.feature_size() );
 
-      membership_iterator m_end = kmeans.membership_end();
-      membership_iterator m     = kmeans.membership_begin();
-      for(;m!=m_end;++m)
-        membership[m->m_index] = m->m_cluster->m_index;
+      for(auto &cmembership : kmeans.memberships())
+      {
+        membership[cmembership.m_index] = cmembership.m_cluster->m_index;
+      }
     }
 
   } // namespace math

@@ -8,12 +8,11 @@
 // OTTL is licensed under zlib: http://opensource.org/licenses/zlib-license.php
 //
 #include <OpenTissue/configuration.h>
-
 #include <OpenTissue/core/containers/mesh/mesh.h>
-
 #include <OpenTissue/utility/utility_numeric_cast.h> //--- Needed for boost::numerical_cast
 
 #include <list>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -26,7 +25,7 @@ namespace OpenTissue
     * resolution of the corresponding signed distance map.
     *
     * @param mesh               The surface mesh from which a point sampling is computed.
-    * @param phi                The signed distance field corresponding to the specified mesh.
+    * @param phi                The signed distance field corresponding to the specified mesh->
     *
     * @param edge_resolution    Threshold value, indicating the sampling
     *                           resolution along edges. If zero it will be
@@ -39,7 +38,7 @@ namespace OpenTissue
     */
     template<typename mesh_type,typename grid_type, typename point_container>
     void compute_point_sampling(
-      mesh_type /*const*/ & mesh
+      std::shared_ptr<mesh_type> mesh
       , grid_type const & phi
       , double edge_resolution
       , bool face_sampling
@@ -56,7 +55,7 @@ namespace OpenTissue
       typedef typename mesh_type::face_type                   face_type;
       typedef typename mesh_type::halfedge_type               halfedge_type;
       typedef typename mesh_type::face_halfedge_circulator    face_halfedge_circulator;
-      typedef typename std::list<face_type*>                  face_queue;
+      typedef typename std::list<std::shared_ptr<face_type>>  face_queue;
 
       typedef typename mesh_type::math_types                  math_types;
       typedef typename math_types::vector3_type               vector3_type;
@@ -71,12 +70,12 @@ namespace OpenTissue
       points.clear();
 
       //--- Ignore vertices in flat regions
-      for(vertex_iterator v = mesh.vertex_begin();v!=mesh.vertex_end();++v)
+      for(auto v : mesh->vertices())
       {
         v->m_tag = 1;
-        if(!is_convex(  *v  ) )
+        if(!is_convex(v))
           continue;
-        points.push_back( v->m_coord );
+        points.push_back(v->m_coord);
       }
       //--- long flat edges are linearly sub-samplet, to help catch edge-face intersections.
 
@@ -84,20 +83,20 @@ namespace OpenTissue
       real_type tmp = OpenTissue::utility::numeric_cast<real_type>( edge_resolution );
       real_type threshold = max(tmp, sqrt( phi.dx()*phi.dx() + phi.dy()*phi.dy() + phi.dz()*phi.dz() ));
 
-      for(halfedge_iterator h = mesh.halfedge_begin();h!=mesh.halfedge_end();++h)
+      for(auto h : mesh->halfedges())
       {
         if(h->m_tag)
           continue;
         h->m_tag = 1;
-        h->get_twin_iterator()->m_tag = 1;
-        if(!is_convex( *h ) )
+        (*h->get_twin_iterator())->m_tag = 1;
+        if(!is_convex(h))
           continue;
-        vector3_type u = h->get_destination_iterator()->m_coord - h->get_origin_iterator()->m_coord;
+        vector3_type u = (*h->get_destination_iterator())->m_coord - (*h->get_origin_iterator())->m_coord;
         real_type lgth = sqrt(u*u);
         if(lgth>threshold)
         {
           u /= lgth;
-          vector3_type p = h->get_origin_iterator()->m_coord;
+          vector3_type p = (*h->get_origin_iterator())->m_coord;
           real_type t = threshold;
           while(t<lgth)
           {
@@ -115,7 +114,7 @@ namespace OpenTissue
         vector3_type Ai,ai,ei;
         real_type area_test = max(  phi.dx()*phi.dy(), max(phi.dx()*phi.dz(),phi.dy()*phi.dz()));
 
-        for(face_iterator face = mesh.face_begin();face!=mesh.face_end();++face)
+        for(auto face : mesh->faces())
         {
           if(face->m_tag)
             continue;
@@ -123,28 +122,31 @@ namespace OpenTissue
           vector3_type centroid = vector3_type(0,0,0);
           unsigned int size = 0;
           face_queue Q;
-          Q.push_back( &(*face) );
+          Q.push_back(face);
           face->m_tag = 1;
           while(!Q.empty())
           {
-            face_type * cur = Q.front();Q.pop_front();
-            face_halfedge_circulator h(*cur),hend;
-            for(;h!=hend;++h)
+            auto cur = Q.front();
+            Q.pop_front();
+            for(auto h : face_halfedge_circulator(cur))
             {
-              ai = h->get_origin_iterator()->m_coord;
-              ei = h->get_destination_iterator()->m_coord - ai;
+              auto o = *h->get_origin_iterator();
+              auto d = *h->get_destination_iterator();
+              auto twin = *h->get_twin_iterator();
+              ai = o->m_coord;
+              ei = d->m_coord - ai;
               Ai = ai % ei;
               area += 0.5*sqrt(Ai*Ai);
               ++size;
-              centroid += h->get_origin_iterator()->m_coord;
+              centroid += o->m_coord;
 
-              if(h->get_twin_iterator()->get_face_handle().is_null())
+              if(twin->get_face_handle().is_null())
                 continue;
 
-              face_type * neighbor = &(*h->get_twin_iterator()->get_face_iterator());
+              auto neighbor = *twin->get_face_iterator();
               bool unseen = !neighbor->m_tag;
               // TODO 2007-02-08: polymesh specific, bad idea
-              bool coplanar = is_planar(*h);
+              bool coplanar = is_planar(h);
               if(unseen && coplanar)
               {
                 neighbor->m_tag = 1;

@@ -9,16 +9,16 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename mesh_type>
-    void clear_vertex_tags(mesh_type & mesh, int tag_value = 0)
+    void clear_vertex_tags(std::shared_ptr<mesh_type> mesh, int tag_value = 0)
     {
-      typename mesh_type::vertex_iterator vend   = mesh.vertex_end();
-      typename mesh_type::vertex_iterator v      = mesh.vertex_begin();
-      for(;v!=vend;++v)
+      for(auto v : mesh->vertices())
         v->m_tag = tag_value;
     }
 

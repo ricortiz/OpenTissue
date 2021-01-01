@@ -47,7 +47,6 @@ namespace OpenTissue
       vector_type                m_s;                    ///< Generalized position vector of all bodies.
       vector_type                m_ss;                   ///< Generalized position vector of all bodies.
       vector_type                m_u;                    ///< Generalized velocity vector of all bodies.
-      group_type *               m_all;                  ///< body_type group, used to handle the state of all bodies at once.
       group_ptr_container        m_groups;               ///< Temporary Storage, used to hold results from the collision
                                                          ///< detection engine.
 
@@ -63,18 +62,18 @@ namespace OpenTissue
       {
         real_type m_epsilon_fix = OpenTissue::utility::numeric_cast<real_type>(10e-4);
 
-        m_all = this->get_configuration()->get_all_body_group();
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
 
-        mbd::get_position_vector(*m_all, m_s);
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::compute_position_update(*m_all,m_st,m_u,time_step,m_s);
-        mbd::set_position_vector(*m_all,m_s);
+        mbd::get_position_vector(all_body_groups, m_s);
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::compute_position_update(all_body_groups,m_st,m_u,time_step,m_s);
+        mbd::set_position_vector(all_body_groups,m_s);
 
-        mbd::compute_scripted_motions(*m_all,this->time() + time_step);
+        mbd::compute_scripted_motions(all_body_groups,this->time() + time_step);
 
         do
         {
-          mbd::get_position_vector(*m_all, m_s);
+          mbd::get_position_vector(all_body_groups, m_s);
 
           this->get_collision_detection()->run( m_groups );
 
@@ -84,12 +83,12 @@ namespace OpenTissue
 
             this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
 
-            if(!mbd::is_all_bodies_sleepy(*group))
+            if(!mbd::all_bodies_sleepy(*group))
               this->get_stepper()->run(*group,time_step);
           }
-          mbd::get_velocity_vector(*m_all, m_u);
-          mbd::compute_position_update(*m_all,m_st,m_u,time_step,m_ss);
-          mbd::set_position_vector(*m_all,m_ss);
+          mbd::get_velocity_vector(all_body_groups, m_u);
+          mbd::compute_position_update(all_body_groups,m_st,m_u,time_step,m_ss);
+          mbd::set_position_vector(all_body_groups,m_ss);
         }
 
         while(norm(m_s,m_ss)>=m_epsilon_fix);

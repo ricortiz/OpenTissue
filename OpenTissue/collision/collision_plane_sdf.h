@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace collision
@@ -31,20 +33,20 @@ namespace OpenTissue
     *
     * @return           If a collision is detected then the return value is true otherwise it is false.
     */
-    template<typename coordsys_type,typename plane_type,typename sdf_geometry_type,typename contact_point_container>
+    template<typename coordsys_type,typename plane_type,typename sdf_geometry_type,typename contact_ptr_container>
     bool plane_sdf(
       coordsys_type     const & wcsP
       , plane_type        const & plane
       , coordsys_type     const & wcsG
       , sdf_geometry_type const & geometry
-      , contact_point_container & contacts
+      , contact_ptr_container & contacts
       , double envelope = 0.01
       )
     {
-      typedef typename contact_point_container::value_type         contact_point_type;
-      typedef typename coordsys_type::vector3_type                 vector3_type;
-      typedef typename vector3_type::value_type                    real_type;
-      typedef typename sdf_geometry_type::const_point_iterator     const_point_iterator;
+      typedef typename contact_ptr_container::value_type    contact_point_ptr_type;
+      typedef typename contact_point_ptr_type::element_type contact_point_type;
+      typedef typename coordsys_type::vector3_type          vector3_type;
+      typedef typename vector3_type::value_type             real_type;
 
       contacts.clear();
 
@@ -58,27 +60,24 @@ namespace OpenTissue
 
       bool collision = false;
 
-      const_point_iterator end = geometry.m_sampling.end();
-      const_point_iterator p   = geometry.m_sampling.begin();
-
       real_type tst = OpenTissue::utility::numeric_cast<real_type>( envelope );
 
-      for (;p!=end;++p)
+      for(auto &p : geometry.m_sampling)
       {
-        c = (*p);
-        GtoP.xform_point(c);
+        auto p_trans = p;
+        GtoP.xform_point(p_trans);
 
-        real_type dist = plane.signed_distance(c);
+        real_type dist = plane.signed_distance(p_trans);
 
         if(dist < tst)
         {
-          c = (*p);
-          wcsG.xform_point(c);
+          p_trans = p;
+          wcsG.xform_point(p_trans);
 
-          contact_point_type cp;
-          cp.m_p = c;
-          cp.m_n = n_wcs;
-          cp.m_distance = dist;
+          auto cp = std::make_shared<contact_point_type>();
+          cp->m_p = p_trans;
+          cp->m_n = n_wcs;
+          cp->m_distance = dist;
           contacts.push_back(cp);
 
           collision = true;

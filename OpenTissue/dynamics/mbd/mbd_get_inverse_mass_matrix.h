@@ -18,28 +18,27 @@ namespace OpenTissue
     /**
     * Extract Generalized Inverse Mass Matrix.
     *
-    * @param begin   An iterator to the first body in the sequence.
-    * @param end     An iterator to the one past the last body in the sequence.
+    * @param group   Group configuration
     * @param M       Upon return this arguement contains the generalized inverse mass matrix.
     */
-    template<typename indirect_body_iterator,typename matrix_type>
-    void get_inverse_mass_matrix(indirect_body_iterator begin, indirect_body_iterator end, matrix_type & invM)
+    template<typename group_type,typename matrix_type>
+    void get_inverse_mass_matrix(std::shared_ptr<group_type> const group, matrix_type & invM)
     {
-      typedef typename indirect_body_iterator::value_type  body_type;
-      typedef typename body_type::matrix3x3_type           matrix3x3_type;
-      typedef typename body_type::math_policy              math_policy;
-      typedef typename matrix_type::size_type              size_type;
-      typedef typename matrix_type::value_type             real_type;
+      typedef typename group_type::body_type           body_type;
+      typedef typename body_type::matrix3x3_type       matrix3x3_type;
+      typedef typename body_type::math_policy          math_policy;
+      typedef typename matrix_type::size_type          size_type;
+      typedef typename matrix_type::value_type         real_type;
 
       matrix3x3_type invI;
 
-      size_type n = std::distance(begin,end);
+      size_type n = group->size_bodies();
 
       math_policy::resize(invM,6*n,6*n);
       invM.clear();
       size_type tag=0;
 
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies())
       {
         assert(body->is_active() || !"get_inverse_mass_matrix(): body was not active");
 
@@ -64,7 +63,7 @@ namespace OpenTissue
         invM(offset,offset)     = inv_mass;
         invM(offset+1,offset+1) = inv_mass;
         invM(offset+2,offset+2) = inv_mass;
-        offset += 3;      
+        offset += 3;
         invM(offset,offset)     = invI(0,0);
         invM(offset,offset+1)   = invI(0,1);
         invM(offset,offset+2)   = invI(0,2);
@@ -75,12 +74,6 @@ namespace OpenTissue
         invM(offset+2,offset+1) = invI(2,1);
         invM(offset+2,offset+2) = invI(2,2);
       }
-    }
-
-    template<typename group_type,typename matrix_type>
-    void get_inverse_mass_matrix(group_type const & group, matrix_type & invM)
-    {
-      get_inverse_mass_matrix(group.body_begin(),group.body_end(),invM);
     }
 
   } //--- End of namespace mbd

@@ -12,6 +12,8 @@
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_mesh_minimum_coord.h>
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_mesh_maximum_coord.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
@@ -37,8 +39,8 @@ namespace OpenTissue
      * @param max_coord      Upon return this argument holds the maximum coordinates of the mesh.
      */
     template<typename mesh_type>
-    inline void compute_aabb( 
-        mesh_type const & mesh
+    inline void compute_aabb(
+        std::shared_ptr<mesh_type> const mesh
         , typename mesh_type::math_types::vector3_type & min_coord
         , typename mesh_type::math_types::vector3_type & max_coord
       )

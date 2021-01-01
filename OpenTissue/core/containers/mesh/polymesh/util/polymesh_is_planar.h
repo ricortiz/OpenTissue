@@ -16,13 +16,15 @@
 #include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_compute_face_normal.h>
 #include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_valency.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
   {
 
     template<typename mesh_type,typename real_type>
-    bool is_planar(PolyMeshHalfEdge<mesh_type> const & e,real_type const & tolerance)
+    bool is_planar(std::shared_ptr<PolyMeshHalfEdge<mesh_type>> const e,real_type const & tolerance)
     {
       real_type radian;
       compute_dihedral_angle(e,radian);
@@ -32,15 +34,15 @@ namespace OpenTissue
     }
 
     template<typename mesh_type>
-    bool is_planar(PolyMeshHalfEdge<mesh_type> const & e)  
-    {    
+    bool is_planar(std::shared_ptr<PolyMeshHalfEdge<mesh_type>> const e)
+    {
       typedef typename mesh_type::math_types     math_types;
       typedef typename math_types::value_traits  value_traits;
-      return is_planar(e,value_traits::zero());  
+      return is_planar(e,value_traits::zero());
     }
 
     template<typename mesh_type,typename real_type>
-    bool is_planar(PolyMeshFace<mesh_type> const & f, real_type const & tolerance )
+    bool is_planar(std::shared_ptr<PolyMeshFace<mesh_type>> const f, real_type const & tolerance )
     {
       typedef typename mesh_type::face_vertex_circulator     face_vertex_circulator;
       typedef typename mesh_type::math_types                 math_types;
@@ -69,15 +71,15 @@ namespace OpenTissue
     }
 
     template<typename mesh_type>
-    bool is_planar(PolyMeshFace<mesh_type> const & f)  
-    {    
+    bool is_planar(std::shared_ptr<PolyMeshFace<mesh_type>> const f)
+    {
       typedef typename mesh_type::math_types     math_types;
       typedef typename math_types::value_traits  value_traits;
-      return is_planar(f, value_traits::zero() );  
+      return is_planar(f, value_traits::zero() );
     }
 
     template<typename mesh_type,typename real_type>
-    bool is_planar(PolyMeshVertex<mesh_type> const & v,real_type const & tolerance)
+    bool is_planar(std::shared_ptr<PolyMeshVertex<mesh_type>> const & v,real_type const & tolerance)
     {
       typedef typename mesh_type::vertex_halfedge_circulator   vertex_halfedge_circulator;
       if(valency(v)==0)
@@ -92,12 +94,12 @@ namespace OpenTissue
     }
 
     template<typename mesh_type>
-    bool is_planar(PolyMeshVertex<mesh_type> const & v)
+    bool is_planar(std::shared_ptr<PolyMeshVertex<mesh_type>> const & v)
     {
       typedef typename mesh_type::math_types     math_types;
       typedef typename math_types::value_traits  value_traits;
 
-      return is_planar(v,value_traits::zero()); 
+      return is_planar(v,value_traits::zero());
     }
 
   } // namespace polymesh

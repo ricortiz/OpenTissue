@@ -22,20 +22,19 @@ namespace OpenTissue
     *
     * Example of usage:
     *
-    * std::cout << "|C| = " << mbd::compute_contact_count(configuration.body_begin(),configuration.body_end()) << std::endl;
+    * std::cout << "|C| = " << mbd::compute_contact_count(configuration.bodies()) << std::endl;
     *
     */
-    template< typename indirect_body_iterator>
-    size_t compute_contact_count(indirect_body_iterator begin, indirect_body_iterator end)
+    template< typename body_ptr_container>
+    size_t compute_contact_count(body_ptr_container const & bodies)
     {
-      typedef typename indirect_body_iterator::value_type   body_type;
-      typedef typename body_type::indirect_edge_iterator    indirect_edge_iterator;
+      typedef typename body_ptr_container::value_type   body_type;
 
       size_t cnt = 0;
 
-      for(indirect_body_iterator body=begin;body!=end;++body)
+      for(auto body : bodies)
       {
-        for(indirect_edge_iterator edge=body->edge_begin();edge!=body->edge_end();++edge)
+        for(auto edge : body->edges())
         {
           if(edge->is_up_to_date() )
             cnt += edge->size_contacts();

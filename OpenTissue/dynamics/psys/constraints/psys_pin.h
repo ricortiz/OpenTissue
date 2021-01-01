@@ -11,6 +11,7 @@
 
 #include <OpenTissue/dynamics/psys/psys_constraint.h>
 #include <cassert>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -30,7 +31,7 @@ namespace OpenTissue
 
     protected:
 
-      particle_type  * m_particle;    ///< The particle that is subject to the constraint.
+      std::shared_ptr<particle_type>  m_particle;    ///< The particle that is subject to the constraint.
       vector3_type     m_r;           ///< The constrained position.
 
     public:
@@ -52,9 +53,9 @@ namespace OpenTissue
       /**
       * NOTE: Sets the pin position to the particle position!
       */
-      void init(particle_type * particle)
+      void init(std::shared_ptr<particle_type> particle)
       {
-        assert(particle || !"Pin::init(): particle was null?");
+        assert(nullptr != particle || !"Pin::init(): particle was null?");
 
         m_particle = particle;
         m_r = m_particle->position();

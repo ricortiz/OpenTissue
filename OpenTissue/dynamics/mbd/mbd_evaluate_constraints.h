@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -26,27 +28,24 @@ namespace OpenTissue
       * @param use_stabilization    Boolean flag indicating whether stabiliation should be turned off or on.
       * @param use_friction         Boolean flag indicating whether friction should be turned off on all contact points in group.
       * @param use_bounce           Boolean flag indicating whether collision law should be turned off on all contact points in group (This makes all contacts completely inelastic).
-      * @param use_erp           
+      * @param use_erp
       *
       * @return                     Total number of active constraints.
       */
       template<typename group_type,typename real_type>
-      size_t evaluate_constraints(  
-          group_type & group
-        , real_type const & fps 
+      size_t evaluate_constraints(
+        std::shared_ptr<group_type> group
+        , real_type const & fps
         , bool const & use_stabilization
         , bool const & use_friction
         , bool const & use_bounce
         , bool const & use_erp
         )
       {
-        typedef typename group_type::indirect_constraint_iterator         indirect_constraint_iterator;
-        typedef typename group_type::indirect_contact_iterator            indirect_contact_iterator;
-
         assert( fps >= 0 || !"evaluate_constraints(): fps must be positive");
-        size_t cnt = 0;    
+        size_t cnt = 0;
 
-        for(indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+        for(auto constraint : group->constraints())
         {
           constraint->set_frames_per_second(fps);
           constraint->use_erp() = use_erp;
@@ -57,7 +56,8 @@ namespace OpenTissue
             cnt += constraint->get_number_of_jacobian_rows();
           }
         }
-        for(indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+
+        for(auto contact : group->contacts())
         {
           contact->set_frames_per_second(fps);
           contact->use_erp() = use_erp;

@@ -12,9 +12,7 @@
 
 #include <OpenTissue/configuration.h>
 
-#include <OpenTissue/utility/utility_map_data_iterator.h>
-
-#include <boost/iterator/indirect_iterator.hpp>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -222,22 +220,20 @@ choice a low friction bouncy type of material.
 
     protected:
 
-      typedef typename std::unordered_map<index_type, material_type*>         material_ptr_lut_type;
-      typedef OpenTissue::utility::map_data_iterator<typename material_ptr_lut_type::iterator>   material_ptr_lut_iterator;
-
-    public:
-
-      typedef boost::indirect_iterator<material_ptr_lut_iterator>           material_iterator;
+      typedef typename std::unordered_map<index_type, std::shared_ptr<material_type>> material_ptr_lut_type;
+      typedef typename material_ptr_lut_type::iterator                                material_iterator;
+      typedef typename material_ptr_lut_type::const_iterator                          const_material_iterator;
 
     protected:
 
-      material_ptr_lut_type  m_storage;   ///< Storage of material properties.
-      material_type          m_default;   ///< Default material property
+      material_ptr_lut_type           m_storage;   ///< Storage of material properties.
+      std::shared_ptr<material_type>  m_default;   ///< Default material property
 
     public:
 
       MaterialLibrary()
       {
+        m_default = std::make_shared<material_type>();
         add(m_default);
       }
 
@@ -245,37 +241,67 @@ choice a low friction bouncy type of material.
 
     public:
 
-      void add(material_type const & m)
+      void add(std::shared_ptr<material_type> m)
       {
-        assert(m_storage.find(m.hash_key())==m_storage.end() || !"MaterialLibrary::add(): Material already exist");
-        m_storage.insert( std::pair<index_type, material_type*>(m.hash_key(), const_cast<material_type*>(&m) ) );
+        assert(m_storage.find(m->hash_key())==m_storage.end() || !"MaterialLibrary::add(): Material already exist");
+        m_storage.insert( std::make_pair(m->hash_key(), m) );
       }
 
-      material_type * get(index_type A, index_type B)
+      std::shared_ptr<material_type> get(index_type A, index_type B)
       {
         typename material_ptr_lut_type::iterator mit = m_storage.find(material_type::hash_key(A,B));
         if(mit==m_storage.end())
-          return 0;
+          return nullptr;
         return mit->second;
       }
 
       void clear()
       {
         m_storage.clear();
-        m_default.clear();
-        add(m_default);
+        m_default->clear();
+        this->add(m_default);
       }
 
-      material_type * default_material() { return &m_default; }
+      std::shared_ptr<material_type> default_material() { return m_default; }
 
       size_type size_materials() const { return m_storage.size(); }
 
-      material_iterator material_begin() { return material_iterator( material_ptr_lut_iterator( m_storage.begin() ) );}
-      material_iterator material_end()   { return material_iterator( material_ptr_lut_iterator( m_storage.end()   ) );}
+      material_iterator begin()             { return  m_storage.begin(); }
+      const_material_iterator begin() const { return  m_storage.begin(); }
+      material_iterator end()               { return  m_storage.end()  ; }
+      const_material_iterator end()   const { return  m_storage.end()  ; }
 
     };
+
+
 
   } // namespace mbd
 } // namespace OpenTissue
 // OPENTISSUE_DYNAMICS_MBD_MBD_MATERIAL_LIBRARY_H
+
+/// Helpers supporting range for loops
+template<typename mbd_types>
+typename OpenTissue::mbd::MaterialLibrary<mbd_types>::material_iterator being(OpenTissue::mbd::MaterialLibrary<mbd_types> &m)
+{
+  return m.begin();
+}
+
+template<typename mbd_types>
+typename OpenTissue::mbd::MaterialLibrary<mbd_types>::const_material_iterator being(const OpenTissue::mbd::MaterialLibrary<mbd_types> &m)
+{
+  return m.begin();
+}
+
+template<typename mbd_types>
+typename OpenTissue::mbd::MaterialLibrary<mbd_types>::material_iterator end(OpenTissue::mbd::MaterialLibrary<mbd_types> &m)
+{
+  return m.end();
+}
+
+template<typename mbd_types>
+typename OpenTissue::mbd::MaterialLibrary<mbd_types>::const_material_iterator end(const OpenTissue::mbd::MaterialLibrary<mbd_types> &m)
+{
+  return m.end();
+}
+
 #endif

@@ -17,6 +17,8 @@
 #include <OpenTissue/dynamics/mbd/mbd_is_all_bodies_sleepy.h>
 #include <OpenTissue/dynamics/mbd/collision_laws/mbd_frictional_newton_collision_law_policy.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -33,7 +35,7 @@ namespace OpenTissue
     * update.
     */
     template< typename mbd_types, typename solver_type  >
-    class TwoPassShockPropagationStepper 
+    class TwoPassShockPropagationStepper
       : public StepperInterface<mbd_types>
     {
     protected:
@@ -45,16 +47,16 @@ namespace OpenTissue
       typedef typename mbd_types::math_policy::idx_vector_type       idx_vector_type;
       typedef typename mbd_types::group_type                         group_type;
 
-      typedef StackPropagation<mbd_types>                      propagation_algorithm;
-      typedef DynamicsStepper<mbd_types,solver_type>           dynamics_algorithm;
-      typedef FirstOrderStepper<mbd_types,solver_type>         error_correction_algorithm;
+      typedef StackPropagation<mbd_types>                            propagation_algorithm;
+      typedef DynamicsStepper<mbd_types,solver_type>                 dynamics_algorithm;
+      typedef FirstOrderStepper<mbd_types,solver_type>               error_correction_algorithm;
 
       typedef typename collision_laws::FrictionalNewtonCollisionLawPolicy      collision_law_policy;
       typedef IterateOnceCollisionResolver<mbd_types, collision_law_policy > collision_resolver_algorithm;
 
     public:
 
-      class node_traits 
+      class node_traits
         : public dynamics_algorithm::node_traits
         , public error_correction_algorithm::node_traits
         , public propagation_algorithm::node_traits
@@ -88,7 +90,7 @@ namespace OpenTissue
 
         void operator()(group_type & layer)
         {
-          if(mbd::is_all_bodies_sleepy(layer))
+          if(mbd::all_bodies_sleepy(layer))
             return;
           m_correction.error_correction(layer);
         }
@@ -110,7 +112,7 @@ namespace OpenTissue
 
         void operator()(group_type & layer)
         {
-          if(mbd::is_all_bodies_sleepy(layer))
+          if(mbd::all_bodies_sleepy(layer))
             return;
           m_dynamics.run(layer,m_h);
         }
@@ -118,9 +120,9 @@ namespace OpenTissue
 
       struct StepperFunctor
       {
-        dynamics_algorithm          m_dynamics; 
+        dynamics_algorithm          m_dynamics;
         error_correction_algorithm m_correction;
-        real_type                  m_h;         
+        real_type                  m_h;
 
         StepperFunctor()
         {
@@ -138,7 +140,7 @@ namespace OpenTissue
 
         void operator()(group_type & layer)
         {
-          if(mbd::is_all_bodies_sleepy(layer))
+          if(mbd::all_bodies_sleepy(layer))
             return;
           m_correction.error_correction(layer);
           m_dynamics.run(layer,m_h);
@@ -160,35 +162,35 @@ namespace OpenTissue
 
     public:
 
-      void run(group_type & group,real_type const & time_step)
+      void run(std::shared_ptr<group_type> group,real_type const & time_step)
       {
         m_dynamics_functor.m_h = value_traits::zero();
-        m_propagation.run(  
+        m_propagation.run(
             group
-          , m_dynamics_functor 
-          , typename propagation_algorithm::downward_tag() 
+          , m_dynamics_functor
+          , typename propagation_algorithm::downward_tag()
           );
 
         m_dynamics_functor.m_h = time_step;
-        m_propagation.rerun(  
+        m_propagation.rerun(
             group
-          , m_dynamics_functor 
+          , m_dynamics_functor
           , typename propagation_algorithm::fixate_tag()
-          , typename propagation_algorithm::upward_tag() 
+          , typename propagation_algorithm::upward_tag()
           );
       }
 
-      void error_correction(group_type & group)
+      void error_correction(std::shared_ptr<group_type> group)
       {
-        m_propagation.rerun(  
+        m_propagation.rerun(
             group
-          , m_error_functor 
+          , m_error_functor
           , typename propagation_algorithm::fixate_tag()
-          , typename propagation_algorithm::upward_tag() 
+          , typename propagation_algorithm::upward_tag()
           );
       }
 
-      void resolve_collisions(group_type & group)
+      void resolve_collisions(std::shared_ptr<group_type> group)
       {
         m_dynamics_functor.m_dynamics.resolve_collisions(group);
       }

@@ -31,25 +31,25 @@ namespace OpenTissue
     * @param simulator     A reference to the simulator where the dispatcher belongs to.
     */
     template<typename simulator_type>
-    inline void setup_default_geometry_dispatcher( simulator_type & simulator)
+    inline void setup_default_geometry_dispatcher( std::shared_ptr<simulator_type> & simulator)
     {
       typedef typename simulator_type::types                  mbd_types;
 
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxBoxHandler<mbd_types>::test   );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSDFHandler<mbd_types>::test    );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSphereHandler<mbd_types>::test  );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSphereHandler<mbd_types>::mirrowed_test  );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereSphereHandler<mbd_types>::test  );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFPlaneHandler<mbd_types>::test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFPlaneHandler<mbd_types>::mirrowed_test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SpherePlaneHandler<mbd_types>::test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SpherePlaneHandler<mbd_types>::mirrowed_test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereBoxHandler<mbd_types>::test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereBoxHandler<mbd_types>::mirrowed_test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxPlaneHandler<mbd_types>::test );
-      simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxPlaneHandler<mbd_types>::mirrowed_test );
-      //simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::InvertedBoxSphereHandler<mbd_types>::test );
-      //simulator.get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::InvertedBoxSphereHandler<mbd_types>::mirrowed_test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxBoxHandler<mbd_types>::test   );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSDFHandler<mbd_types>::test    );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSphereHandler<mbd_types>::test  );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFSphereHandler<mbd_types>::mirrowed_test  );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereSphereHandler<mbd_types>::test  );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFPlaneHandler<mbd_types>::test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SDFPlaneHandler<mbd_types>::mirrowed_test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SpherePlaneHandler<mbd_types>::test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SpherePlaneHandler<mbd_types>::mirrowed_test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereBoxHandler<mbd_types>::test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::SphereBoxHandler<mbd_types>::mirrowed_test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxPlaneHandler<mbd_types>::test );
+      simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::BoxPlaneHandler<mbd_types>::mirrowed_test );
+      //simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::InvertedBoxSphereHandler<mbd_types>::test );
+      //simulator->get_collision_detection()->get_narrow_phase()->bind( &OpenTissue::mbd::collision_detection::InvertedBoxSphereHandler<mbd_types>::mirrowed_test );
     }
 
   } // namespace mbd

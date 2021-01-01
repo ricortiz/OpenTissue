@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/math/math_is_number.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -20,7 +22,7 @@ namespace OpenTissue
     *
     * Further it is assumed that the vector library used provides a vector
     * proxy function called subrange, which is capable of returning a
-    * vector range. (see for instance in Boost uBLAS for an example). 
+    * vector range. (see for instance in Boost uBLAS for an example).
     *
     * @param group        The group corresponding to the A-matrix.
     *
@@ -31,20 +33,18 @@ namespace OpenTissue
     *                     have size m, where m is total number of jacobian rows.
     */
     template<typename group_type,typename vector_type>
-    void set_cached_solution_vector(  
-      group_type & group  
-      , size_t const & m  
+    void set_cached_solution_vector(
+      std::shared_ptr<group_type> group
+      , size_t const & m
       , vector_type & x
       )
     {
       typedef typename group_type::math_policy                 math_policy;
-      typedef typename group_type::indirect_constraint_iterator         indirect_constraint_iterator;
-      typedef typename group_type::indirect_contact_iterator   indirect_contact_iterator;
       typedef typename vector_type::size_type                  size_type;
 
       assert(x.size()==m || !"set_cached_solution(): wrong dimension");
 
-      for(indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+      for(auto constraint : group->constraints())
       {
         if(constraint->is_active())
         {
@@ -53,7 +53,8 @@ namespace OpenTissue
           constraint->set_solution( math_policy::subrange( x,start,end ) );
         }
       }
-      for(indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+
+      for(auto contact : group->contacts())
       {
         if(contact->is_active())
         {

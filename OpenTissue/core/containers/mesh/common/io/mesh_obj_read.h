@@ -19,6 +19,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -138,7 +139,7 @@ namespace OpenTissue
     template<typename mesh_type>
     bool obj_read(
       std::string const & filename
-      , mesh_type & mesh
+      , std::shared_ptr<mesh_type> mesh
       , bool keep_shared_vertices = true )
     {
       typedef typename mesh_type::math_types        math_types;
@@ -153,7 +154,7 @@ namespace OpenTissue
       typedef std::map<index_vector, vertex_handle> lut_type;
       typedef std::vector<vector3_type>             vector3_container;
 
-      mesh.clear();
+      mesh->clear();
 
       std::ifstream file(filename.c_str());
 
@@ -270,12 +271,12 @@ namespace OpenTissue
 
             typename lut_type::iterator lookup = lut.find(key);
             if( lookup==lut.end() )
-              lut[key] = mesh.add_vertex( );
+              lut[key] = mesh->add_vertex( );
 
             assert(!lut[key].is_null() || !"obj_read(): Could not find vertex");
 
             handles.push_back( lut[key]  );
-            vertex_iterator v = mesh.get_vertex_iterator( lut[key] );
+            auto v = *mesh->get_vertex_iterator( lut[key] );
 
             if( cnt >= 1 )
               v->m_coord  = positions[ indices[0] - 1];
@@ -291,12 +292,9 @@ namespace OpenTissue
             }
             if( cnt >= 3 )
               v->m_normal = normals[ indices[2] - 1 ];
-
-
-
-
           }
-          face_handle h = mesh.add_face(handles.begin(),handles.end());
+
+          face_handle h = mesh->add_face(handles.begin(),handles.end());
 
           assert(!h.is_null() || !"obj_read() : Internal error, could not create face");
 
@@ -312,9 +310,9 @@ namespace OpenTissue
       std::cout << "obj_read() : "
         << filename
         << " nodes = "
-        << mesh.size_vertices()
+        << mesh->size_vertices()
         << " faces = "
-        << mesh.size_faces()
+        << mesh->size_faces()
         << std::endl;
 #endif
       return true;

@@ -12,30 +12,30 @@
 #undef DEFINE_GLUT_MAIN
 
 #include "data.h"
-#include "scenes/setup_cow.h"
-#include "scenes/setup_box.h"
-#include "scenes/setup_cow_stack.h"
-#include "scenes/setup_falling_cows.h"
+// #include "scenes/setup_cow.h"
+// #include "scenes/setup_box.h"
+// #include "scenes/setup_cow_stack.h"
+// #include "scenes/setup_falling_cows.h"
 #include "scenes/setup_silo.h"
-#include "scenes/setup_diku.h"
-#include "scenes/setup_silo_tower.h"
-#include "scenes/setup_roof_tower.h"
-#include "scenes/setup_domino_spiral.h"
-#include "scenes/setup_domino_circle.h"
-#include "scenes/setup_pyramid.h"
-#include "scenes/setup_large_mass.h"
-#include "scenes/setup_house.h"
-#include "scenes/setup_card.h"
-#include "scenes/setup_revolute_joint.h"
-#include "scenes/setup_slider_joint.h"
-#include "scenes/setup_ball_joint.h"
-#include "scenes/setup_universal_joint.h"
-#include "scenes/setup_wheel_joint.h"
-#include "scenes/setup_vehicle.h"
-#include "scenes/setup_box_stack.h"
-#include "scenes/setup_jamm1.h"
-#include "scenes/setup_jamm2.h"
-#include "scenes/setup_ragdoll.h"
+// #include "scenes/setup_diku.h"
+// #include "scenes/setup_silo_tower.h"
+// #include "scenes/setup_roof_tower.h"
+// #include "scenes/setup_domino_spiral.h"
+// #include "scenes/setup_domino_circle.h"
+// #include "scenes/setup_pyramid.h"
+// #include "scenes/setup_large_mass.h"
+// #include "scenes/setup_house.h"
+// #include "scenes/setup_card.h"
+// #include "scenes/setup_revolute_joint.h"
+// #include "scenes/setup_slider_joint.h"
+// #include "scenes/setup_ball_joint.h"
+// #include "scenes/setup_universal_joint.h"
+// #include "scenes/setup_wheel_joint.h"
+// #include "scenes/setup_vehicle.h"
+// #include "scenes/setup_box_stack.h"
+// #include "scenes/setup_jamm1.h"
+// #include "scenes/setup_jamm2.h"
+// #include "scenes/setup_ragdoll.h"
 
 
 #include <OpenTissue/utility/utility_timer.h>
@@ -50,8 +50,8 @@ protected:
   bool m_action[256];          ///< Boolean array used to keep track of the user actions/selections.
 
   Data m_data;
-  Vehicle m_vehicle;
-  Ragdoll m_ragdoll;
+  // Vehicle m_vehicle;
+  // Ragdoll m_ragdoll;
 
   std::string   m_prefix;         ///< Prefix std::string used for generating images...
   size_type     m_framecount;     ///< frame counter...
@@ -103,7 +103,9 @@ protected:
 
 public:
 
-  Application() { }
+  Application()
+  {
+  }
 
 public:
 
@@ -119,22 +121,8 @@ public:
         m_data.m_wheel.get_wheel_body()->set_finite_rotation_axis(m_data.m_wheel.get_motor_axis_world());
       }
       //Make sure vehicle is ready
-      m_vehicle.update();
+      // m_vehicle.update();
 
-      OpenTissue::utility::Timer<real_type> watch;
-      watch.start();
-      m_data.m_simulator.run(m_timestep);
-      watch.stop();
-      if(!m_statistics_on)
-      {
-        std::cout << "time = " << watch() << " secs.";
-        std::cout << "\t|C| = " << OpenTissue::mbd::compute_contact_count(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end());
-        real_type min_dist;
-        real_type max_dist;
-        OpenTissue::mbd::compute_min_max_distance(m_data.m_configuration,min_dist,max_dist);
-        std::cout << "\tmin = " << min_dist << "\tmax = " << max_dist << std::endl;
-        std::cout << "\t accuracy = " << m_data.m_simulator.get_stepper()->get_solver()->get_accuracy() << " in " << m_data.m_simulator.get_stepper()->get_solver()->get_iteration() << " iterations" << std::endl;
-      }
       if(m_statistics_on)
       {
         if(m_cur==0)
@@ -144,18 +132,18 @@ public:
           m_contacts.resize(m_max_frames,false);
           m_iterations.resize(m_max_frames,false);
           m_accuracy.resize(m_max_frames,false);
-          m_energy_kin.resize(m_data.m_configuration.size_bodies(),m_max_frames,false);
-          m_energy_pot.resize(m_data.m_configuration.size_bodies(),m_max_frames,false);
+          m_energy_kin.resize(m_data.m_configuration->size_bodies(),m_max_frames,false);
+          m_energy_pot.resize(m_data.m_configuration->size_bodies(),m_max_frames,false);
         }
 
         if(m_cur<m_max_frames)
         {
-          m_iterations(m_cur) = m_data.m_simulator.get_stepper()->get_solver()->get_iteration();
-          m_accuracy(m_cur) = m_data.m_simulator.get_stepper()->get_solver()->get_accuracy();
-          m_timings(m_cur) = m_data.m_simulator.time();
-          m_contacts(m_cur) = OpenTissue::mbd::compute_contact_count(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end());
+          m_iterations(m_cur) = m_data.m_simulator->get_stepper()->get_solver()->get_iteration();
+          m_accuracy(m_cur) = m_data.m_simulator->get_stepper()->get_solver()->get_accuracy();
+          m_timings(m_cur) = m_data.m_simulator->time();
+          m_contacts(m_cur) = OpenTissue::mbd::compute_contact_count(m_data.m_configuration->bodies());
           size_type i = 0;
-          for(configuration_type::body_iterator body =  m_data.m_configuration.body_begin();body!= m_data.m_configuration.body_end();++body)
+          for(auto body : m_data.m_configuration->bodies())
           {
             m_energy_kin(i,m_cur) = body->compute_kinetic_energy();
             vector3_type p;
@@ -191,13 +179,13 @@ public:
     }
 
     if(m_wireframe_on)
-      for_each(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end(),OpenTissue::mbd::DrawBodyFunctor<true>());
+      for_each(m_data.m_configuration->body_begin(),m_data.m_configuration->body_end(),OpenTissue::mbd::DrawBodyFunctor<true>());
     else
-      for_each(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end(),OpenTissue::mbd::DrawBodyFunctor<false>());
+      for_each(m_data.m_configuration->body_begin(),m_data.m_configuration->body_end(),OpenTissue::mbd::DrawBodyFunctor<false>());
     OpenTissue::mbd::draw_contacts(m_data.m_configuration);
     //OpenTissue::mbd::draw_penetrations(m_data.m_configuration);
 
-    std::for_each( m_data.m_configuration.joint_begin(), m_data.m_configuration.joint_end(), OpenTissue::mbd::DrawJointFunctor() );
+    std::for_each( m_data.m_configuration->joint_begin(), m_data.m_configuration->joint_end(), OpenTissue::mbd::DrawJointFunctor() );
 
     if(m_recording_on)
     {
@@ -210,14 +198,14 @@ public:
       if(!mel_file.is_open())
         std::cout << "error could not open file = " << filename.c_str() << std::endl;
       if(m_framecount==0)
-        mel_file << OpenTissue::mbd::mel::geometry_string(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end())  << std::endl;
+        mel_file << OpenTissue::mbd::mel::geometry_string(m_data.m_configuration->bodies())  << std::endl;
       if((m_framecount%m_inbetween)==0)
-        mel_file << OpenTissue::mbd::mel::keyframe_string(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end(),m_data.m_simulator.time())  << std::endl;
+        mel_file << OpenTissue::mbd::mel::keyframe_string(m_data.m_configuration->bodies(),m_data.m_simulator->time())  << std::endl;
       if(m_framecount==m_max_frames)
-        mel_file << OpenTissue::mbd::mel::euler_filter_string(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end())  << std::endl;
+        mel_file << OpenTissue::mbd::mel::euler_filter_string(m_data.m_configuration->bodies())  << std::endl;
       mel_file.flush();
       mel_file.close();
-      std::cout << "frame = " << m_framecount << " time = " << m_data.m_simulator.time() << std::endl;
+      std::cout << "frame = " << m_framecount << " time = " << m_data.m_simulator->time() << std::endl;
       ++m_framecount;
       if(m_framecount>m_max_frames)
         m_recording_on = false;
@@ -231,141 +219,141 @@ public:
     std::cout << "choice: " << choice << " = " << (int)choice << " value "<< m_action[choice] << std::endl;
     switch(choice)
     {
-    case '1':
-      m_prefix = "falling_cows";
-      setup_falling_cows(m_data);
-      reset_timestep();
-      break;
-    case '2':
-      m_prefix = "cow_stack";
-      setup_cow_stack(m_data);
-      reset_timestep();
-      break;
-    case '3':
-      m_prefix = "cow";
-      setup_cow(m_data);
-      reset_timestep();
-      break;
-    case '4':
-      m_prefix = "box";
-      setup_box(m_data);
-      reset_timestep();
-      break;
+    // case '1':
+    //   m_prefix = "falling_cows";
+    //   setup_falling_cows(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '2':
+    //   m_prefix = "cow_stack";
+    //   setup_cow_stack(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '3':
+    //   m_prefix = "cow";
+    //   setup_cow(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '4':
+    //   m_prefix = "box";
+    //   setup_box(m_data);
+    //   reset_timestep();
+    //   break;
     case '5':
       m_prefix = "silo";
       setup_silo(m_data);
       reset_timestep();
       break;
-    case '6':
-      m_prefix = "diku";
-      setup_diku(m_data);
-      reset_timestep();
-      break;
-    case '7':
-      m_prefix = "roof";
-      setup_roof_tower(m_data);
-      reset_timestep();
-      break;
-    case '8':
-      m_prefix = "silo2";
-      setup_silo_tower(m_data);
-      reset_timestep();
-      break;
-    case '#':
-      m_prefix = "domino_spiral";
-      setup_domino_spiral(m_data);
-      reset_timestep();
-      break;
-    case '¤':
-      m_prefix = "domino_circle";
-      setup_domino_circle(m_data);
-      reset_timestep();
-      break;
-    case '%':
-      m_prefix = "pyramid";
-      setup_pyramid(m_data);
-      reset_timestep();
-      break;
-    case '&':
-      m_prefix = "large_mass";
-      setup_large_mass(m_data);
-      reset_timestep();
-      break;
-    case '/':
-      m_prefix = "house";
-      setup_house(m_data);
-      reset_timestep();
-      break;
-    case '(':
-      m_prefix = "card";
-      setup_card(m_data);
-      reset_timestep();
-      break;
-    case ')':
-      m_prefix = "revolute";
-      setup_revolute_joint(m_data);
-      reset_timestep();
-      break;
-    case '=':
-      m_prefix = "slider";
-      setup_slider_joint(m_data);
-      reset_timestep();
-      break;
-    case 'a':
-      m_prefix = "ball";
-      setup_ball_joint(m_data);
-      reset_timestep();
-      break;
-    case 'b':
-      m_prefix = "universal";
-      setup_universal_joint(m_data);
-      reset_timestep();
-      break;
-    case 'c':
-      m_prefix = "wheel";
-      setup_wheel_joint(m_data);
-      reset_timestep();
-      break;
-    case 'd':
-      m_prefix = "wheel";
-      m_vehicle.setup(m_data);
-      reset_timestep();
-      break;
-    case 'e':
-      m_prefix = "box_stack";
-      setup_box_stack(m_data);
-      reset_timestep();
-      break;
-    case 'f':
-      m_prefix = "penetrating_box_stack";
-      setup_box_stack(m_data, 0.9);
-      reset_timestep();
-      break;
-    case 'g':
-      m_prefix = "jamm1";
-      setup_jamm1(m_data);
-      reset_timestep();
-      break;
-    case 'h':
-      m_prefix = "jamm2";
-      setup_jamm2(m_data);
-      reset_timestep();
-      break;
-    case 'i':
-      m_prefix = "ragdoll";
-      m_ragdoll.setup(m_data);
-      reset_timestep();
-      break;
-    case 'j':
-      m_prefix = "pain";
-      m_ragdoll.torture1(m_data);
-      reset_timestep();
-      break;
-    case 'k':
-      m_prefix = "agony";
-      m_ragdoll.torture2(m_data);
-      reset_timestep();
-      break;
+    // case '6':
+    //   m_prefix = "diku";
+    //   setup_diku(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '7':
+    //   m_prefix = "roof";
+    //   setup_roof_tower(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '8':
+    //   m_prefix = "silo2";
+    //   setup_silo_tower(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '#':
+    //   m_prefix = "domino_spiral";
+    //   setup_domino_spiral(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'ï¿½':
+    //   m_prefix = "domino_circle";
+    //   setup_domino_circle(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '%':
+    //   m_prefix = "pyramid";
+    //   setup_pyramid(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '&':
+    //   m_prefix = "large_mass";
+    //   setup_large_mass(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '/':
+    //   m_prefix = "house";
+    //   setup_house(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '(':
+    //   m_prefix = "card";
+    //   setup_card(m_data);
+    //   reset_timestep();
+    //   break;
+    // case ')':
+    //   m_prefix = "revolute";
+    //   setup_revolute_joint(m_data);
+    //   reset_timestep();
+    //   break;
+    // case '=':
+    //   m_prefix = "slider";
+    //   setup_slider_joint(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'a':
+    //   m_prefix = "ball";
+    //   setup_ball_joint(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'b':
+    //   m_prefix = "universal";
+    //   setup_universal_joint(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'c':
+    //   m_prefix = "wheel";
+    //   setup_wheel_joint(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'd':
+    //   m_prefix = "wheel";
+    //   m_vehicle.setup(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'e':
+    //   m_prefix = "box_stack";
+    //   setup_box_stack(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'f':
+    //   m_prefix = "penetrating_box_stack";
+    //   setup_box_stack(m_data, 0.9);
+    //   reset_timestep();
+    //   break;
+    // case 'g':
+    //   m_prefix = "jamm1";
+    //   setup_jamm1(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'h':
+    //   m_prefix = "jamm2";
+    //   setup_jamm2(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'i':
+    //   m_prefix = "ragdoll";
+    //   m_ragdoll.setup(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'j':
+    //   m_prefix = "pain";
+    //   m_ragdoll.torture1(m_data);
+    //   reset_timestep();
+    //   break;
+    // case 'k':
+    //   m_prefix = "agony";
+    //   m_ragdoll.torture2(m_data);
+    //   reset_timestep();
+    //   break;
     case 'A':
       m_recording_on = true;
       m_framecount = 0;
@@ -373,8 +361,8 @@ public:
     case 'D':    m_statistics_on = ! m_statistics_on;      break;
     case 'R':    m_simulation_on = !m_simulation_on;    break;
     case 'S':
-      m_data.m_simulator.run(m_timestep);
-      std::cout << "|C| = " << OpenTissue::mbd::compute_contact_count(m_data.m_configuration.body_begin(),m_data.m_configuration.body_end());
+      m_data.m_simulator->run(m_timestep);
+      std::cout << "|C| = " << OpenTissue::mbd::compute_contact_count(m_data.m_configuration->bodies());
       real_type min_dist;
       real_type max_dist;
       OpenTissue::mbd::compute_min_max_distance(m_data.m_configuration,min_dist,max_dist);
@@ -386,7 +374,7 @@ public:
     case 'r': reset_timestep();                            break;
     default: break;
     };
-    std::cout << "#bodies         = " << m_data.m_configuration.size_bodies() << std::endl;
+    std::cout << "#bodies         = " << m_data.m_configuration->size_bodies() << std::endl;
     std::cout << "Dump statistics = " << m_statistics_on                      << std::endl;
     std::cout << "MEL recording   = " << m_recording_on                       << std::endl;
     std::cout << "Run simulation  = " << m_simulation_on                      << std::endl;
@@ -411,7 +399,7 @@ public:
     glutAddMenuEntry("roof               [7]", '7');
     glutAddMenuEntry("silo2              [8]", '8');
     glutAddMenuEntry("domino spiral      [#]", '#');
-    glutAddMenuEntry("domino circel      [¤]", '¤');
+    // glutAddMenuEntry("domino circel      [ï¿½]", 'ï¿½');
     glutAddMenuEntry("pyramid            [%]", '%');
     glutAddMenuEntry("large mass         [&]", '&');
     glutAddMenuEntry("house              [/]", '/');
@@ -455,7 +443,26 @@ public:
     reset_timestep();
   }
 
-  void do_run(){}
+  void do_run()
+  {
+    if(m_simulation_on || m_recording_on)
+    {
+      OpenTissue::utility::Timer<real_type> watch;
+      watch.start();
+      m_data.m_simulator->run(m_timestep);
+      watch.stop();
+      if(!m_statistics_on)
+      {
+        std::cout << "time = " << watch() << " secs.";
+        std::cout << "\t|C| = " << OpenTissue::mbd::compute_contact_count(m_data.m_configuration->bodies());
+        real_type min_dist;
+        real_type max_dist;
+        OpenTissue::mbd::compute_min_max_distance(m_data.m_configuration,min_dist,max_dist);
+        std::cout << "\tmin = " << min_dist << "\tmax = " << max_dist << std::endl;
+        std::cout << "\t accuracy = " << m_data.m_simulator->get_stepper()->get_solver()->get_accuracy() << " in " << m_data.m_simulator->get_stepper()->get_solver()->get_iteration() << " iterations" << std::endl;
+      }
+    }
+  }
 
   void do_shutdown(){}
 

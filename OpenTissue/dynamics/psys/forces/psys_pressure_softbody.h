@@ -12,6 +12,7 @@
 #include <OpenTissue/dynamics/psys/mass_spring_system/psys_surface_mesh.h>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -31,7 +32,7 @@ namespace OpenTissue
      *
      */
     template< typename types  >
-    class PressureSoftBody 
+    class PressureSoftBody
       : public types::force_type
     {
     public:
@@ -47,14 +48,14 @@ namespace OpenTissue
 
     protected:
 
-      coupling_type   * m_coupling;   ///< A pointer to a mesh coupling.
+      std::shared_ptr<coupling_type> m_coupling;   ///< A pointer to a mesh coupling.
 
       real_type m_P1;  ///< Internal variables used by volume computation.
       real_type m_Pa;
-      real_type m_Pb; 
+      real_type m_Pb;
       real_type m_Fa;  ///< Internal variables used by volume computation.
       real_type m_Fb;
-      real_type m_Fc; 
+      real_type m_Fc;
 
       enum { ///< Internal variables used by volume computation.
         m_X = 0,
@@ -86,28 +87,30 @@ namespace OpenTissue
 
     public:
 
-      void init(coupling_type const & coupling)
+      void init(std::shared_ptr<coupling_type> coupling)
       {
-        m_coupling = const_cast<coupling_type*>( &coupling );
 
-        std::size_t N = m_coupling->mesh().size_faces();
+        std::size_t N = coupling->mesh()->size_faces();
         //--- Allocate space for internal data structures
         m_normal.resize( N);
         m_d.resize(N);
         m_area.resize(N);
 
         //--- Setup constants
-        m_initial_volume = compute_volume_integral(m_coupling->mesh());
+        m_initial_volume = compute_volume_integral(coupling->mesh());
         m_nRT            = m_initial_pressure_inside * m_initial_volume;
 
-        std::cout << "PressureSoftBody::init(): initial volume   = " 
-          << m_initial_volume 
+        //--- Store coupling data structure
+        m_coupling       = coupling;
+
+        std::cout << "PressureSoftBody::init(): initial volume   = "
+          << m_initial_volume
           << std::endl;
-        std::cout << "PressureSoftBody::init(): initial pressure = " 
-          << m_initial_pressure_inside 
+        std::cout << "PressureSoftBody::init(): initial pressure = "
+          << m_initial_pressure_inside
           << std::endl;
-        std::cout << "PressureSoftBody::init(): initial gas rhs = "  
-          << m_nRT 
+        std::cout << "PressureSoftBody::init(): initial gas rhs = "
+          << m_nRT
           << std::endl;
       }
 
@@ -145,49 +148,47 @@ namespace OpenTissue
         if(pressure<=0) //--- This does not make sense so we give up!
           return;
 
-        mesh::compute_angle_weighted_vertex_normals( m_coupling->mesh() );
-
-        face_iterator f   = m_coupling->mesh().face_begin();
-        face_iterator end = m_coupling->mesh().face_end();
-        for (int i=0;f!= end;++f,++i)
+        mesh::compute_angle_weighted_vertex_normals(m_coupling->mesh());
+        size_t face_idx = 0;
+        for(auto f : m_coupling->mesh()->faces())
         {
-          real_type N = valency(*f);
-          real_type face_pressure = (fabs(m_area[i])*0.5*pressure);
+          real_type N = valency(f);
+          real_type face_pressure = (fabs(m_area[face_idx])*0.5*pressure);
           real_type vertex_pressure = face_pressure/N;
-          typename mesh_type::face_vertex_circulator v(*f),vend;
+          typename mesh_type::face_vertex_circulator v(f),vend;
           for(;v!=vend;++v)
-            m_coupling->particle( *v ).force() +=  vertex_pressure*v->m_normal;
+            m_coupling->particle(v)->force() +=  vertex_pressure*v->m_normal;
+          face_idx++;
         }
       }
 
     protected:
 
-      real_type const compute_volume_integral(mesh_type & mesh)
+      real_type const compute_volume_integral(std::shared_ptr<mesh_type> mesh)
       {
         real_type volume = 0;
-        face_iterator f   = mesh.face_begin();
-        face_iterator end = mesh.face_end();
-        for (int i=0;f!= end;++f,++i)
+        size_t face_idx = 0;
+        for(auto f : m_coupling->mesh()->faces())
         {
-          face_vertex_circulator p1(*f);
-          face_vertex_circulator p2(*f);++p2;
-          face_vertex_circulator p3(*f);++p3;++p3;
+          face_vertex_circulator p1(f);
+          face_vertex_circulator p2(f);++p2;
+          face_vertex_circulator p3(f);++p3;++p3;
 
           vector3_type   u1,u2,u1xu2;
 
           u1 = p2->m_coord - p1->m_coord;
           u2 = p3->m_coord - p2->m_coord;
           u1xu2 = u1 % u2;
-          m_area[i] = std::sqrt( u1xu2*u1xu2 );
-          m_normal[i] = unit(u1xu2);
-          m_d[i] = m_normal[i] * p1->m_coord;
+          m_area[face_idx] = std::sqrt( u1xu2*u1xu2 );
+          m_normal[face_idx] = unit(u1xu2);
+          m_d[face_idx] = m_normal[face_idx] * p1->m_coord;
 
-          vector3_type n(m_normal[i]);
+          vector3_type n(m_normal[face_idx]);
 
           real_type nx = std::fabs(n(m_X));
           real_type ny = std::fabs(n(m_Y));
           real_type nz = std::fabs(n(m_Z));
-          
+
           if(!(nx || ny || nz)) //--- zero area face encountered, drop it!
             continue;
 
@@ -199,14 +200,15 @@ namespace OpenTissue
           m_A = (m_C + 1) % 3;
           m_B = (m_C + 2) % 3;
 
-          compute_face_integral(*f,n,m_d[i]);
+          compute_face_integral(f,n,m_d[face_idx]);
 
           volume += n(m_X) * ((m_A == m_X) ? m_Fa : ((m_B == m_X) ? m_Fb : m_Fc));
+          face_idx++;
         }
         return volume;
       }
 
-      void compute_face_integral(face_type & f,vector3_type & n,const real_type & d)
+      void compute_face_integral(std::shared_ptr<face_type> f,vector3_type & n,const real_type & d)
       {
         compute_projection_integral(f);
         real_type w = -d; //--- Mirtich defines n*p+d=0 I have defined n*p-d=0
@@ -217,7 +219,7 @@ namespace OpenTissue
         m_Fc   = -k2 * (n(m_A)*m_Pa + n(m_B)*m_Pb + w*m_P1);
       }
 
-      void compute_projection_integral(face_type & f)
+      void compute_projection_integral(std::shared_ptr<face_type> f)
       {
         m_P1 = m_Pa = m_Pb = static_cast<real_type>(0.0);
         face_vertex_circulator v1(f),vend;

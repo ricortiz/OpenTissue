@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -33,18 +35,18 @@ namespace OpenTissue
 
     private:
 
-      halfedge_handle m_self;
-      mesh_type     * m_owner;
-      halfedge_handle m_next;
-      halfedge_handle m_prev;
-      face_handle     m_face;
-      halfedge_handle m_twin;
-      vertex_handle   m_destination;
-      edge_handle     m_edge;
+      halfedge_handle             m_self;
+      std::shared_ptr<mesh_type>  m_owner;
+      halfedge_handle             m_next;
+      halfedge_handle             m_prev;
+      face_handle                 m_face;
+      halfedge_handle             m_twin;
+      vertex_handle               m_destination;
+      edge_handle                 m_edge;
 
     public:
 
-      PolyMeshHalfEdge() 
+      PolyMeshHalfEdge()
         : m_self()
         , m_owner(0)
         , m_next()
@@ -57,8 +59,9 @@ namespace OpenTissue
 
     public:
 
+      std::shared_ptr<mesh_type>   get_owner() const { return m_owner; }
+
       halfedge_handle   get_handle() const { return m_self; }
-      mesh_type     *   get_owner() const { return m_owner; }
 
       halfedge_handle   get_next_handle() const { return m_next; }
       halfedge_iterator get_next_iterator() const { return m_owner->get_halfedge_iterator(m_next); }
@@ -66,8 +69,8 @@ namespace OpenTissue
       halfedge_handle   get_twin_handle() const { return m_twin; }
       halfedge_iterator get_twin_iterator() const { return m_owner->get_halfedge_iterator(m_twin); }
 
-      vertex_handle     get_origin_handle() const { return get_twin_iterator()->get_destination_handle(); }
-      vertex_iterator   get_origin_iterator() const { return get_twin_iterator()->get_destination_iterator(); }
+      vertex_handle     get_origin_handle() const { return (*get_twin_iterator())->get_destination_handle(); }
+      vertex_iterator   get_origin_iterator() const { return (*get_twin_iterator())->get_destination_iterator(); }
 
       vertex_handle     get_destination_handle() const { return m_destination; }
       vertex_iterator   get_destination_iterator() const { return m_owner->get_vertex_iterator(m_destination); }
@@ -85,7 +88,7 @@ namespace OpenTissue
 
       friend class polymesh_core_access;
       void set_handle(halfedge_handle h) { m_self = h; }
-      void set_owner(mesh_type * owner){ m_owner = owner; }
+      void set_owner(std::shared_ptr<mesh_type> owner){ m_owner = owner; }
       void set_next_handle(halfedge_handle h)
       {
         //if(m_owner->is_valid_halfedge_handle(m_next))
@@ -97,8 +100,8 @@ namespace OpenTissue
 
         if(m_owner->is_valid_halfedge_handle(h))
         {
-          m_owner->get_halfedge_iterator(h)->m_prev = m_self;
-        }      
+          (*m_owner->get_halfedge_iterator(h))->m_prev = m_self;
+        }
       }
       void set_face_handle(face_handle f){ m_face = f; }
       void set_twin_handle(halfedge_handle h){ m_twin = h; }

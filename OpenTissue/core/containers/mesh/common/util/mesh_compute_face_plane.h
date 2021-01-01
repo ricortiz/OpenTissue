@@ -12,13 +12,15 @@
 #include <OpenTissue/core/containers/mesh/polymesh/util/polymesh_compute_face_normal.h>
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_face_center.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
 
     template<typename face_type,typename plane_type>
-    void compute_face_plane(face_type const & f, plane_type & plane)
+    void compute_face_plane(std::shared_ptr<face_type> const & f, plane_type & plane)
     {
       typedef typename face_type::mesh_type                mesh_type;
       typedef typename mesh_type::math_types               math_types;

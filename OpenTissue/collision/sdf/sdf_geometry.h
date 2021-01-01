@@ -16,8 +16,8 @@
 #include <OpenTissue/core/geometry/geometry_compute_obb_aabb.h>
 #include <OpenTissue/utility/utility_class_id.h>
 
-
 #include <list>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -63,7 +63,7 @@ namespace OpenTissue
 
     public: //--- kenny 20060420: Maybe these should be protected?
 
-      mesh_type             m_mesh;            ///< A pointer to the mesh representing the zero-level set surface of the signed distance field.
+      std::shared_ptr<mesh_type>             m_mesh;            ///< A pointer to the mesh representing the zero-level set surface of the signed distance field.
       grid_type             m_phi;             ///< A pointer to a map containing the signed distance field.
       real_type             m_max_radius;      ///< The maximum radius
       vector3_type          m_min_coord;       ///< The AABB corner node with smallest coordinates (in BF coords).
@@ -75,8 +75,8 @@ namespace OpenTissue
 
       size_t const class_id() const { return OpenTissue::utility::ClassID<OpenTissue::sdf::Geometry<mesh_type_,grid_type_> >::class_id(); }
 
-      Geometry() 
-        : m_max_radius() 
+      Geometry()
+        : m_max_radius()
         , m_min_coord(0,0,0)
         , m_max_coord(0,0,0)
       {}

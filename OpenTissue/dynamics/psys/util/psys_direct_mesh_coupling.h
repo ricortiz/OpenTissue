@@ -9,7 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
-#include <map>
+#include <unordered_map>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -28,31 +29,31 @@ namespace OpenTissue
 
     public:
 
-      typedef typename types::mesh_type        mesh_type; 
+      typedef typename types::mesh_type        mesh_type;
       typedef typename mesh_type::vertex_type  vertex_type;
 
-      typedef std::map<vertex_type*, particle_type*>         particle_lut_type;
+      typedef std::unordered_map<std::shared_ptr<vertex_type>,
+                                 std::shared_ptr<particle_type>> particle_lut_type;
 
     protected:
 
-      particle_lut_type   m_particle_lut;         ///< Internal data structure used to find correspond particle of vertex.
-      mesh_type         * m_mesh;                 ///< A pointer to the surface mesh.
+      particle_lut_type           m_particle_lut;         ///< Internal data structure used to find correspond particle of vertex.
+      std::shared_ptr<mesh_type>  m_mesh;                 ///< A pointer to the surface mesh.
 
 
     public:
 
       DirectMeshCoupling()
-        : m_mesh(0)
+        : m_mesh(nullptr)
       {}
 
     public:
 
-      mesh_type       & mesh()       { return *m_mesh; }
-      mesh_type const & mesh() const { return *m_mesh; }
+      std::shared_ptr<mesh_type>       mesh()       { return m_mesh; }
+      std::shared_ptr<mesh_type> const mesh() const { return m_mesh; }
 
-      particle_type       & particle( vertex_type const & v )       {  return *m_particle_lut[ const_cast<vertex_type*>(&v) ]; }
-      particle_type const & particle( vertex_type const & v ) const {  return *m_particle_lut[ const_cast<vertex_type*>(&v) ]; }
-
+      std::shared_ptr<particle_type>       particle( std::shared_ptr<vertex_type> const v )       {  return m_particle_lut[v]; }
+      std::shared_ptr<particle_type> const particle( std::shared_ptr<vertex_type> const v ) const {  return m_particle_lut[v]; }
 
       /**
        *
@@ -60,10 +61,9 @@ namespace OpenTissue
        *
        *
        * @param  v
-       * @return 
+       * @return
        */
-      particle_type       * operator()( vertex_type const * v )       {  return &(particle(*v)); }
-
+      std::shared_ptr<particle_type> operator()( std::shared_ptr<vertex_type> const v ) {  return this->particle(v); }
 
     public:
 
@@ -72,30 +72,21 @@ namespace OpenTissue
       void clear()
       {
         m_particle_lut.clear();
-        m_mesh = 0;
+        m_mesh = nullptr;
       }
 
-      template<typename particle_system_type>
-        void init(particle_system_type & system, mesh_type & mesh)
-      {      
-        typedef typename particle_system_type::particle_iterator   particle_iterator;
-
+      template<typename particle_system>
+      void init(std::shared_ptr<particle_system> system, std::shared_ptr<mesh_type> mesh)
+      {
         m_particle_lut.clear();
-        system.clear();
-        m_mesh = &mesh;
+        system->clear();
+        m_mesh = mesh;
 
-        typename mesh_type::vertex_iterator begin = mesh.vertex_begin();
-        typename mesh_type::vertex_iterator end   = mesh.vertex_end();
-        typename mesh_type::vertex_iterator v     = begin;
-
-        for(;v!=end;++v)
-          system.create_particle( particle_type() );
-
-        particle_iterator p = system.particle_begin();
-        for(v=begin;v!=end;++v,++p)
+        for(auto &v : mesh->vertices())
         {
+          auto p = system->create_particle();
           p->bind(v->m_coord);
-          m_particle_lut[ &(*v) ] = &(*p);
+          m_particle_lut[v] = p;
         }
       }
 

@@ -16,6 +16,7 @@
 #include <OpenTissue/core/geometry/geometry_plane.h>
 #include <OpenTissue/core/geometry/geometry_obb.h>
 
+#include <memory>
 
 namespace OpenTissue
 {
@@ -23,7 +24,7 @@ namespace OpenTissue
   {
 
     template<typename body_type>
-    void draw_body(body_type const & body, bool wireframe)
+    void draw_body(std::shared_ptr<body_type> const body, bool wireframe)
     {
       typedef typename body_type::math_policy           math_policy;
 
@@ -45,24 +46,24 @@ namespace OpenTissue
       static real_type const one_third = value_traits::one() / 3;
       static real_type const two_third = value_traits::two()*one_third;
 
-      if(body.is_fixed())
+      if(body->is_fixed())
         gl::ColorPicker(one_third,one_third,one_third);
-      else if (body.is_sleepy())
+      else if (body->is_sleepy())
         gl::ColorPicker(value_traits::zero(),value_traits::zero(),two_third);
       else
         gl::ColorPicker(two_third,two_third,two_third);
 
-      //if(body.m_sa_stack_height==0)
+      //if(body->m_sa_stack_height==0)
       //  gl::ColorPicker(one_third,one_third,one_third);
-      //else if(body.m_sa_stack_height==1)
+      //else if(body->m_sa_stack_height==1)
       //  gl::ColorPicker(one_third,value_traits::zero(),value_traits::zero());  // red
-      //else if(body.m_sa_stack_height==2)
+      //else if(body->m_sa_stack_height==2)
       //  gl::ColorPicker(value_traits::zero(),one_third,value_traits::zero()); // green
-      //else if(body.m_sa_stack_height==3)
+      //else if(body->m_sa_stack_height==3)
       //  gl::ColorPicker(value_traits::zero(),value_traits::zero(),one_third);  // blue
-      //else if(body.m_sa_stack_height==4)
+      //else if(body->m_sa_stack_height==4)
       //  gl::ColorPicker(one_third,one_third,value_traits::zero());  // yellow
-      //else if(body.m_sa_stack_height==5)
+      //else if(body->m_sa_stack_height==5)
       //  gl::ColorPicker(one_third, value_traits::zero(), one_third, value_traits::zero()); // puple
       //else
       //  gl::ColorPicker(value_traits::zero(),value_traits::zero(),value_traits::zero());
@@ -70,17 +71,17 @@ namespace OpenTissue
       glPushMatrix();
       vector3_type r;
       quaternion_type Q;
-      body.get_position(r);
-      body.get_orientation(Q);
+      body->get_position(r);
+      body->get_orientation(Q);
       gl::Transform(r,Q);
 
       // 2008-06-13 kenny: this is down-right ugly! Stuf like this should
       // not be part of a multibody simulator! And if functionality like
       // this should be supported it would proberly be better to do it with
       // virtual interfaces or using a dispatcher.
-      if(body.get_geometry()->class_id() == sdf_geometry_type::id() )
+      if(body->get_geometry()->class_id() == sdf_geometry_type::id() )
       {
-        sdf_geometry_type * sdf = static_cast<sdf_geometry_type*>(body.get_geometry());
+        sdf_geometry_type * sdf = static_cast<sdf_geometry_type*>(body->get_geometry());
         if(wireframe)
           gl::DrawMesh(sdf->m_mesh,GL_LINE_LOOP);
         else
@@ -88,19 +89,19 @@ namespace OpenTissue
         gl::ColorPicker(value_traits::one(),value_traits::zero(),value_traits::zero());
         gl::DrawGridAABB(sdf->m_phi);
       }
-      else if(body.get_geometry()->class_id() == box_type::id() )
+      else if(body->get_geometry()->class_id() == box_type::id() )
       {
-        gl::DrawOBB( *(static_cast<box_type*>(body.get_geometry() )), wireframe);
+        gl::DrawOBB( *(static_cast<box_type*>(body->get_geometry() )), wireframe);
       }
-      else if(body.get_geometry()->class_id() == sphere_type::id() )
+      else if(body->get_geometry()->class_id() == sphere_type::id() )
       {
-        gl::DrawSphere( *(static_cast<sphere_type*>(body.get_geometry() )), wireframe);
+        gl::DrawSphere( *(static_cast<sphere_type*>(body->get_geometry() )), wireframe);
       }
-      else if(body.get_geometry()->class_id() == plane_type::id() )
+      else if(body->get_geometry()->class_id() == plane_type::id() )
       {
-        gl::DrawPlane(  *(static_cast<plane_type*>(body.get_geometry() )), wireframe );
+        gl::DrawPlane(  *(static_cast<plane_type*>(body->get_geometry() )), wireframe );
       }
-      else 
+      else
       {
         assert(!"draw_body(): not handled");
       }
@@ -108,11 +109,11 @@ namespace OpenTissue
       if(wireframe)
       {
         vector3_type u;
-        body.get_velocity(u);
+        body->get_velocity(u);
         gl::ColorPicker(value_traits::one(),value_traits::zero(),value_traits::one());
         gl::DrawVector(r,u);
         gl::ColorPicker(value_traits::one(),value_traits::one(),value_traits::zero());
-        body.get_spin(u);
+        body->get_spin(u);
         gl::DrawVector(r,u);
       }
     }
@@ -143,4 +144,4 @@ namespace OpenTissue
   } //End of namespace mbd
 } //End of namespace OpenTissue
 // OPENTISSUE_DYNAMICS_MBD_UTIL_MBD_DRAW_BODY_H
-#endif 
+#endif

@@ -63,7 +63,7 @@ namespace OpenTissue
 
           bool collision = OpenTissue::collision::sdf_sdf(AtoWCS,sdfA,BtoWCS,sdfB, *(info.get_contacts()) ,info.get_envelope() );
 
-          for(typename contact_container::iterator cp = info.get_contacts()->begin();cp!=info.get_contacts()->end();++cp)
+          for(auto cp : *info.get_contacts())
           {
             cp->init( info.get_body_A(), info.get_body_B(), cp->m_p, cp->m_n, cp->m_distance, info.get_material() );
           }

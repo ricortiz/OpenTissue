@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/containers/mesh/polymesh/circulators/polymesh_face_halfedge_circulator.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -45,7 +47,7 @@ namespace OpenTissue
         : m_circ()
       {}
 
-      explicit PolyMeshFaceEdgeCirculator(  typename PolyMesh::face_type const & f)
+      explicit PolyMeshFaceEdgeCirculator(std::shared_ptr<typename PolyMesh::face_type> f)
         : m_circ(f)
       {}
 
@@ -84,9 +86,18 @@ namespace OpenTissue
 
     public:
 
-      Value & operator*() const { return *(m_circ->get_edge_iterator()); }
+      std::shared_ptr<Value> operator*() const
+      {
+        return *m_circ->get_edge_iterator();
+      }
 
-      Value * operator->() const { return &(*(m_circ->get_edge_iterator())); }
+      Value * operator->() const
+      {
+        return (*m_circ->get_edge_iterator()).get();
+      }
+
+      PolyMeshFaceEdgeCirculator begin() { return *this; }
+      PolyMeshFaceEdgeCirculator end()   { return PolyMeshFaceEdgeCirculator(); }
 
     };
 

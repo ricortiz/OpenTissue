@@ -15,6 +15,8 @@
 #include <OpenTissue/dynamics/mbd/steppers/mbd_first_order_stepper.h>
 #include <OpenTissue/dynamics/mbd/mbd_stack_propagation.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -23,21 +25,21 @@ namespace OpenTissue
     * This stepper combines a velocity based complementarity formulation with stack propagation.
     */
     template< typename mbd_types, typename solver_type  >
-    class ConstraintBasedShockPropagationStepper 
+    class ConstraintBasedShockPropagationStepper
       : public StepperInterface<mbd_types>
     {
     protected:
 
-      typedef typename mbd_types::math_policy::real_type           real_type;
-      typedef typename mbd_types::math_policy::value_traits        value_traits;
-      typedef typename mbd_types::group_type                       group_type;
-      typedef StackPropagation<mbd_types>                     propagation_algorithm;
-      typedef DynamicsStepper<mbd_types,solver_type>          dynamics_algorithm;
-      typedef FirstOrderStepper<mbd_types,solver_type>        correction_algorithm;
+      typedef typename mbd_types::math_policy::real_type    real_type;
+      typedef typename mbd_types::math_policy::value_traits value_traits;
+      typedef typename mbd_types::group_type                group_type;
+      typedef StackPropagation<mbd_types>                   propagation_algorithm;
+      typedef DynamicsStepper<mbd_types,solver_type>        dynamics_algorithm;
+      typedef FirstOrderStepper<mbd_types,solver_type>      correction_algorithm;
 
     public:
 
-      class node_traits 
+      class node_traits
         : public dynamics_algorithm::node_traits
         , public correction_algorithm::node_traits
         , public propagation_algorithm::node_traits
@@ -61,7 +63,7 @@ namespace OpenTissue
       {
         dynamics_algorithm     m_dynamics;
         correction_algorithm   m_correction;
-        real_type              m_h;         
+        real_type              m_h;
 
         StepperFunctor()
         {
@@ -77,9 +79,9 @@ namespace OpenTissue
           m_correction.get_solver()->set_max_iterations(10);
         }
 
-        void operator()(group_type & layer)
+        void operator()(std::shared_ptr<group_type> layer)
         {
-          if(mbd::is_all_bodies_sleepy(layer))
+          if(mbd::all_bodies_sleepy(layer))
             return;
           m_correction.error_correction(layer);
           m_dynamics.run(layer,m_h);
@@ -121,7 +123,7 @@ namespace OpenTissue
     public:
 
 
-      void run(group_type & group,real_type const & time_step)
+      void run(std::shared_ptr<group_type> group,real_type const & time_step)
       {
         if(time_step<=value_traits::zero())
           throw std::invalid_argument( "ConstraintBasedShockPropagationStepper::run() time step was non-positive" );
@@ -142,12 +144,12 @@ namespace OpenTissue
         //std::cout << " |layers| = " << m_propagation.size() << std::endl;
       }
 
-      void resolve_collisions(group_type & group)
+      void resolve_collisions(std::shared_ptr<group_type> group)
       {
         m_stepper_functor.m_dynamics.resolve_collisions(group);
       }
 
-      void error_correction(group_type & group)
+      void error_correction(std::shared_ptr<group_type> group)
       {
         m_stepper_functor.m_correction.error_correction(group);
       }

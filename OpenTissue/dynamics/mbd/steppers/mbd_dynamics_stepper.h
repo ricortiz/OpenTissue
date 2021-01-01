@@ -23,6 +23,8 @@
 
 #include <OpenTissue/utility/utility_timer.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -35,12 +37,12 @@ namespace OpenTissue
     public:
 
       typedef typename mbd_types::math_policy             math_policy;
-      typedef typename math_policy::value_traits            value_traits;
-      typedef typename math_policy::index_type              size_type;
-      typedef typename math_policy::real_type               real_type;
-      typedef typename math_policy::vector_type             vector_type;
-      typedef typename math_policy::matrix_type             matrix_type;
-      typedef typename math_policy::idx_vector_type         idx_vector_type;
+      typedef typename math_policy::value_traits          value_traits;
+      typedef typename math_policy::index_type            size_type;
+      typedef typename math_policy::real_type             real_type;
+      typedef typename math_policy::vector_type           vector_type;
+      typedef typename math_policy::matrix_type           matrix_type;
+      typedef typename math_policy::idx_vector_type       idx_vector_type;
       typedef typename mbd_types::group_type              group_type;
 
     protected:
@@ -87,10 +89,10 @@ namespace OpenTissue
       bool & use_friction()       {    return m_use_friction;        }
       bool & use_bounce()         {    return m_use_bounce;          }
 
-      bool const & warm_starting()      const {    return m_warm_starting;       }
-      bool const & use_stabilization()  const {    return m_use_stabilization;   }
-      bool const & use_friction()       const {    return m_use_friction;        }
-      bool const & use_bounce()         const {    return m_use_bounce;          }
+      bool const & warm_starting()      const { return m_warm_starting;     }
+      bool const & use_stabilization()  const { return m_use_stabilization; }
+      bool const & use_friction()       const { return m_use_friction;      }
+      bool const & use_bounce()         const { return m_use_bounce;        }
 
       real_type const & query_time()    const { return m_query_time;    }
       real_type const & assembly_time() const { return m_assembly_time; }
@@ -114,7 +116,7 @@ namespace OpenTissue
 
     public:
 
-      void run(group_type & group, real_type const & time_step)
+      void run(std::shared_ptr<group_type> group, real_type const & time_step)
       {
         OpenTissue::utility::Timer<double> watch1,watch2;
 
@@ -233,12 +235,12 @@ namespace OpenTissue
         m_total_time = watch2();
       }
 
-      void error_correction(group_type & /*group*/)
+      void error_correction(std::shared_ptr<group_type> /*group*/)
       {
         throw std::logic_error("DynamicsStepper(): error correction is not defined for this type of stepper");
       }
 
-      void resolve_collisions(group_type & group)
+      void resolve_collisions(std::shared_ptr<group_type> group)
       {
         bool tmp1 = this->use_stabilization();
         this->use_stabilization() = false;

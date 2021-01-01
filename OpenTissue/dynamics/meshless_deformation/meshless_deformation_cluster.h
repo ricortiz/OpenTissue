@@ -17,6 +17,7 @@
 #include <OpenTissue/utility/utility_numeric_cast.h> // needed for OpenTissue::utility::numeric_cast
 
 #include <list>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -33,14 +34,12 @@ namespace OpenTissue
       {
       public:
 
-        typedef Particle<math_types>                                           particle_type;
-        typedef typename math_types::value_traits                              value_traits;
-        typedef typename math_types::real_type                                 real_type;
-        typedef typename math_types::vector3_type                              vector3_type;
-        typedef typename math_types::matrix3x3_type                            matrix3x3_type;
-        typedef typename std::list<particle_type*>                             particle_ptr_container;
-        typedef typename particle_ptr_container::iterator                      particle_ptr_iterator;
-        typedef boost::indirect_iterator<particle_ptr_iterator,particle_type>  particle_iterator;
+        typedef Particle<math_types>                                          particle_type;
+        typedef typename math_types::value_traits                             value_traits;
+        typedef typename math_types::real_type                                real_type;
+        typedef typename math_types::vector3_type                             vector3_type;
+        typedef typename math_types::matrix3x3_type                           matrix3x3_type;
+        typedef typename std::list<std::shared_ptr<particle_type>>            particle_ptr_container;
 
       protected:
 
@@ -87,7 +86,7 @@ namespace OpenTissue
 
       public:
 
-        void bind_particle(particle_type & particle) { m_particles.push_back(&particle); }
+        void bind_particle(std::shared_ptr<particle_type> particle) { m_particles.push_back(particle); }
 
         void set_beta(real_type const & beta)
         {
@@ -134,17 +133,17 @@ namespace OpenTissue
 
         void init()
         {
-          particle_iterator begin = m_particles.begin();
-          particle_iterator end   = m_particles.end();
-          particle_iterator particle;
-
           m_mass = value_traits::zero();
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             m_mass += particle->m_mass;
+          }
 
           m_t0.clear();
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             m_t0 += particle->m_mass * particle->m_x0;
+          }
           m_t0 /= m_mass;
 
           compute_q();
@@ -169,26 +168,28 @@ namespace OpenTissue
 
         void compute_q()
         {
-          particle_iterator begin = m_particles.begin();
-          particle_iterator end   = m_particles.end();
-          particle_iterator particle;
-
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             particle->m_q[0] =  m_Sp*(particle->m_x0 - m_t0);
+          }
 
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             particle->m_q[1] =  vector3_type (
               particle->m_q[0](0)*particle->m_q[0](0)
             , particle->m_q[0](1)*particle->m_q[0](1)
             , particle->m_q[0](2)*particle->m_q[0](2)
             );
+          }
 
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             particle->m_q[2] =  vector3_type (
               particle->m_q[0](0)*particle->m_q[0](1)
             , particle->m_q[0](1)*particle->m_q[0](2)
             , particle->m_q[0](2)*particle->m_q[0](0)
             );
+          }
 
           //           |q0|                       | q0 q0^T    q0 q1^T    q0 q2^T |
           //    A =    |q1|   [q0^T q1^T q2^T]  = | q1 q0^T    q1 q1^T    q1 q2^T |
@@ -204,7 +205,7 @@ namespace OpenTissue
           m_A_qq[2][0].clear();
           m_A_qq[2][1].clear();
           m_A_qq[2][2].clear();
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
           {
             m_A_qq[0][0] +=  particle->m_mass * outer_prod(particle->m_q[0],particle->m_q[0]);
             m_A_qq[1][1] +=  particle->m_mass * outer_prod(particle->m_q[1],particle->m_q[1]);
@@ -235,17 +236,17 @@ namespace OpenTissue
 
         void compute_p()
         {
-          particle_iterator begin = m_particles.begin();
-          particle_iterator end   = m_particles.end();
-          particle_iterator particle;
-
           m_t.clear();
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             m_t += particle->m_mass * particle->x();
+          }
           m_t /= m_mass;
 
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
+          {
             particle->m_p =  particle->x() - m_t;
+          }
 
           //
           //   [p]   [q0^T q1^T q2^T]  = | p q0^T    p q1^T    p q2^T |
@@ -253,7 +254,7 @@ namespace OpenTissue
           m_A_pq[0].clear();
           m_A_pq[1].clear();
           m_A_pq[2].clear();
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
           {
             m_A_pq[0] +=  particle->m_mass * outer_prod(particle->m_p,particle->m_q[0]);
             m_A_pq[1] +=  particle->m_mass * outer_prod(particle->m_p,particle->m_q[1]);
@@ -263,14 +264,8 @@ namespace OpenTissue
 
         void compute_goal(real_type const & dt)
         {
-          using std::min;
-
           static real_type const third = value_traits::one()/value_traits::three();
           static real_type const tiny  = OpenTissue::utility::numeric_cast<real_type>(10e-7);
-
-          particle_iterator begin = m_particles.begin();
-          particle_iterator end   = m_particles.end();
-          particle_iterator particle;
 
           m_A = m_A_pq[0]*m_A_qq[0][0] + m_A_pq[1]*m_A_qq[1][0] + m_A_pq[2]*m_A_qq[2][0];
           m_Q = m_A_pq[0]*m_A_qq[0][1] + m_A_pq[1]*m_A_qq[1][1] + m_A_pq[2]*m_A_qq[2][1];
@@ -290,11 +285,11 @@ namespace OpenTissue
           m_Q = truncate(m_Q,tiny);
           m_M = truncate(m_M,tiny);
 
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
             particle->m_g =  (m_A * particle->m_q[0]) + (m_Q * particle->m_q[1]) + (m_M * particle->m_q[2]) + m_t;
 
           real_type alpha = min( m_tau/dt, value_traits::one() );
-          for(particle=begin;particle!=end;++particle)
+          for(auto particle : m_particles)
             particle->m_f_goal  += alpha*(particle->m_g - particle->x())/dt;
         }
 

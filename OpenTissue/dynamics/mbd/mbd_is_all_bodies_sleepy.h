@@ -13,24 +13,16 @@ namespace OpenTissue
 {
   namespace mbd
   {
-
-    template<typename indirect_body_iterator>
-    bool is_all_bodies_sleepy(indirect_body_iterator begin, indirect_body_iterator end)
+    template<typename body_ptr_container>
+    bool all_bodies_sleepy(body_ptr_container const & bodies)
     {
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : bodies)
       {
         assert(body->is_active() || !"is_all_bodies_sleepy(): body was not active");
         if(!body->is_sleepy())
           return false;
-
       }
       return true;
-    }
-
-    template<typename group_type>
-    bool is_all_bodies_sleepy(group_type const & group)
-    {
-      return is_all_bodies_sleepy(group.body_begin(),group.body_end());
     }
 
   } //--- End of namespace mbd

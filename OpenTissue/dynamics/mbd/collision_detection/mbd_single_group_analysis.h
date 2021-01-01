@@ -12,6 +12,7 @@
 #include <OpenTissue/core/math/math_precision.h>
 #include <OpenTissue/core/math/math_constants.h>
 
+#include <memory>
 
 namespace OpenTissue
 {
@@ -36,7 +37,6 @@ namespace OpenTissue
       typedef typename types::group_ptr_container group_ptr_container;
       typedef typename types::group_type group_type;
       typedef typename types::edge_ptr_container edge_ptr_container;
-      typedef typename types::indirect_edge_iterator indirect_edge_iterator;
       typedef typename types::body_type body_type;
       typedef typename types::contact_type contact_type;
       typedef typename types::edge_type edge_type;
@@ -76,7 +76,7 @@ namespace OpenTissue
 
       public:
         edge_traits()
-          : m_sga_time_stamp(0) 
+          : m_sga_time_stamp(0)
         {}
       public:
         coordsys_type m_sga_xformAtoB;         ///< Storage holder for relative transform between A and B.
@@ -91,16 +91,19 @@ namespace OpenTissue
 
     protected:
 
-      configuration_type * m_configuration;         ///< A pointer to the configuration that holds the current configuration.
-      group_type m_group;                           ///< A body group used to collected isolated bodies
-      size_type m_time_stamp;                       ///< Time-stamp indicating which iteration the STC analysis i performed in.
+      std::shared_ptr<configuration_type> m_configuration;  ///< A pointer to the configuration that holds the current configuration.
+      std::shared_ptr<group_type>         m_group;          ///< A body group used to collected isolated bodies
+      size_type m_time_stamp;                               ///< Time-stamp indicating which iteration the STC analysis i performed in.
 
     public:
 
       SingleGroupAnalysis()
         : m_configuration(0)
+        , m_group(std::make_shared<group_type>())
         , m_time_stamp(0)
-      {}
+      {
+
+      }
 
     protected:
 
@@ -118,7 +121,7 @@ namespace OpenTissue
         //real_type accuracy = precision;
         real_type accuracy = 0.001;      //--- TODO (KE 11-05-2005): Accuracy should be scale dependent (fraction of geometry size?)
         //--- Test Absolute Resting.
-        for(typename configuration_type::body_iterator body = m_configuration->body_begin();body!=m_configuration->body_end();++body)
+        for(auto body : m_configuration->bodies())
         {
           //--- We only want to test absolute rest on active bodies
           if(!body->is_active())
@@ -164,9 +167,7 @@ namespace OpenTissue
         //--- Mark all overlaps detected in this iteration by
         //--- the broad phase collision detection algorithm as
         //--- being alive and fresh.
-        indirect_edge_iterator begin(edges.begin());
-        indirect_edge_iterator end(edges.end());
-        for( indirect_edge_iterator edge = begin;   edge!=end;  ++edge )
+        for(auto edge : edges)
         {
           edge->m_sga_time_stamp = m_time_stamp;
           edge->prunned() = true;
@@ -243,9 +244,7 @@ namespace OpenTissue
 
         assert(m_configuration);
         real_type envelope = m_configuration->get_collision_envelope();
-        indirect_edge_iterator begin(edges.begin());
-        indirect_edge_iterator end(edges.end());
-        for(indirect_edge_iterator edge=begin;edge!=end;++edge)
+        for(auto edge : edges)
         {
           if(edge->prunned())
             continue;
@@ -278,7 +277,7 @@ namespace OpenTissue
           //--- method, so the code is unecessary
           edge->m_sga_state = edge_type::undefined;
           real_type minimum = OpenTissue::math::detail::highest<real_type>();
-          for(typename edge_type::contact_iterator contact = edge->contact_begin();contact != edge->contact_end();++contact)
+          for(auto contact : edge->get_contacts())
           {
             minimum = min(contact->m_distance,minimum);
           }
@@ -299,52 +298,52 @@ namespace OpenTissue
       {
         groups.clear();
 
-        m_group.clear();
-        for(typename configuration_type::body_iterator body = m_configuration->body_begin();body!=m_configuration->body_end();++body)
+        m_group->clear();
+
+        for(auto body : m_configuration->bodies())
         {
           if(body->is_active())
-            m_group.m_bodies.push_back( &(*body));
+            m_group->m_bodies.push_back(body);
         }
-        indirect_edge_iterator begin(edges.begin());
-        indirect_edge_iterator end(edges.end());
-        for(indirect_edge_iterator edge = begin;edge!=end;++edge )
+
+        for(auto edge : edges)
         {
-          for(typename edge_type::contact_iterator contact = edge->contact_begin();contact!=edge->contact_end();++contact)
+          for(auto &contact : edge->get_contacts())
           {
-            m_group.m_contacts.push_back( &(*contact) );
+            m_group->m_contacts.push_back(contact);
           }
 
-          body_type * A = edge->get_body_A();
-          body_type * B = edge->get_body_B();
+          std::shared_ptr<body_type> A = edge->get_body_A();
+          std::shared_ptr<body_type> B = edge->get_body_B();
           if(A->has_joint_to(B))
           {
-            for(typename body_type::indirect_joint_iterator joint = A->joint_begin();joint!=A->joint_end();++joint)
+            for(auto joint : A->joints())
             {
               if(joint->get_socket_A()->get_body()==B || joint->get_socket_B()->get_body()==B)
               {
-                m_group.m_constraints.push_back( &(*joint) );
+                m_group->m_constraints.push_back(joint);
               }
             }
           }
         }
-        groups.push_back(&m_group);
+        groups.push_back(m_group);
       };
 
     public:
 
-      void clear()  
+      void clear()
       {
         this->m_time_stamp = 0;
-        this->m_configuration = 0;
-        this->m_group.clear();
+        this->m_configuration = nullptr;
+        this->m_group->clear();
       }
 
-      void add(body_type * /*body*/){};
-      void remove(body_type * /*body*/){};
-      void init(configuration_type & configuration)
+      void add( std::shared_ptr<body_type> /*body*/ )    { };
+      void remove( std::shared_ptr<body_type> /*body*/ )    {};
+      void init(std::shared_ptr<configuration_type> configuration)
       {
         clear();
-        m_configuration = &configuration;
+        m_configuration = configuration;
         m_time_stamp = 0;
       };
 

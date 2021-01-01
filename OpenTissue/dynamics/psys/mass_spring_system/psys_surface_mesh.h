@@ -14,7 +14,8 @@
 #include <OpenTissue/dynamics/psys/mass_spring_system/psys_mass_spring_system.h>
 
 #include <list>
-#include <map>
+#include <unordered_map>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -30,7 +31,7 @@ namespace OpenTissue
         typename types
       , typename integrator_policy
     >
-    class SurfaceMesh : public MassSpringSystem<types,integrator_policy>
+    class SurfaceMesh : public MassSpringSystem<types,integrator_policy>, std::enable_shared_from_this<SurfaceMesh<types,integrator_policy>>
     {
     public:
 
@@ -42,66 +43,57 @@ namespace OpenTissue
       typedef typename math_types::real_type     real_type;
       typedef typename math_types::vector3_type  vector3_type;
       typedef typename types::particle_type      particle_type;
-      typedef Stick<types>                   stick_type;
-      typedef Spring<types>                  spring_type;
+      typedef Stick<types>                       stick_type;
+      typedef Spring<types>                      spring_type;
       typedef typename types::coupling_type      coupling_type;
       typedef typename types::mesh_type          mesh_type;
 
     protected:
 
-      typedef typename mesh_type::vertex_type                          vertex_type;
-      typedef typename mesh_type::vertex_iterator                      vertex_iterator;
-      typedef typename mesh_type::vertex_halfedge_circulator           vertex_halfedge_circulator;
+      typedef typename mesh_type::vertex_type                                       vertex_type;
+      typedef typename mesh_type::vertex_iterator                                   vertex_iterator;
+      typedef typename mesh_type::vertex_halfedge_circulator                        vertex_halfedge_circulator;
 
-      typedef std::list<stick_type>                           stick_container;
-      typedef std::list<stick_type*>                          stick_ptr_container;
-      typedef std::map<particle_type*, stick_ptr_container >  stick_lut_type;
+      typedef std::list<std::shared_ptr<stick_type>>                                stick_container;
+      typedef std::unordered_map<std::shared_ptr<particle_type>, stick_container >  stick_lut_type;
 
-      typedef std::list<spring_type>                          spring_container;
-      typedef std::list<spring_type*>                         spring_ptr_container;
-      typedef std::map<particle_type*, spring_ptr_container > spring_lut_type;
+      typedef std::list<std::shared_ptr<spring_type>>                               spring_container;
+      typedef std::unordered_map<std::shared_ptr<particle_type>, spring_container > spring_lut_type;
 
     public:
 
-      coupling_type       m_coupling;             ///< Internal data structure used to find correspond particle of vertex.
-      int                 m_rigidty;              ///< Constant used to determine how rigid a surface should be.
-      stick_container     m_sticks;               ///< Internal data structure used to store all stick constraints.
-      stick_lut_type      m_stick_lut;            ///< Internal datas tructure to record stick connections.
-      spring_container    m_springs;              ///< Internal data structure used to store all spring constraints.
-      spring_lut_type     m_spring_lut;           ///< Internal datas tructure to record spring connections.
+      std::shared_ptr<coupling_type> m_coupling;             ///< Internal data structure used to find correspond particle of vertex.
+      int                            m_rigidty;              ///< Constant used to determine how rigid a surface should be.
+      stick_container                m_sticks;               ///< Internal data structure used to store all stick constraints.
+      stick_lut_type                 m_stick_lut;            ///< Internal datas tructure to record stick connections.
+      spring_container               m_springs;              ///< Internal data structure used to store all spring constraints.
+      spring_lut_type                m_spring_lut;           ///< Internal datas tructure to record spring connections.
 
     public:
 
-      int                  & rigidty()        { return m_rigidty;  }
-      int const            & rigidty()  const { return m_rigidty;  }
-      coupling_type        & coupling()       { return m_coupling; }
-      coupling_type  const & coupling() const { return m_coupling; }
+      int                  & rigidity()                       { return m_rigidty;  }
+      int const            & rigidity()  const                { return m_rigidty;  }
+      std::shared_ptr<coupling_type>        coupling()       { return m_coupling; }
+      std::shared_ptr<coupling_type>  const coupling() const { return m_coupling; }
 
     protected:
 
-      bool exist_stick(particle_type * A,particle_type * B)
+      bool exist_stick(std::shared_ptr<particle_type> A, std::shared_ptr<particle_type> B)
       {
-        typedef typename boost::indirect_iterator< typename stick_ptr_container::iterator, stick_type> stick_iterator;
 
-        stick_ptr_container sticksA = m_stick_lut[A];
-        stick_ptr_container sticksB = m_stick_lut[B];
-        if(sticksA.empty())
-          return false;
-        if(sticksB.empty())
+        auto sticksA = m_stick_lut[A];
+        auto sticksB = m_stick_lut[B];
+        if(sticksA.empty() || sticksB.empty())
           return false;
         {
-          stick_iterator  s   = stick_iterator( sticksA.begin() );
-          stick_iterator  end = stick_iterator( sticksA.end()   );
-          for(;s!=end;++s)
+          for(auto s : sticksA)
           {
             if( (s->A() == A && s->B()==B) || (s->B()==A && s->A()==B) )
               return true;
           }
         }
         {
-          stick_iterator  s   = stick_iterator( sticksB.begin() );
-          stick_iterator  end = stick_iterator( sticksB.end()   );
-          for(;s!=end;++s)
+          for(auto s : sticksB)
           {
             if( (s->A()==A && s->B()==B) || (s->B()==A && s->A()==B) )
               return true;
@@ -110,28 +102,21 @@ namespace OpenTissue
         return false;
       }
 
-      bool exist_spring(particle_type * A,particle_type * B)
+      bool exist_spring(std::shared_ptr<particle_type> A, std::shared_ptr<particle_type> B)
       {
-        typedef boost::indirect_iterator< typename spring_ptr_container::iterator, spring_type> spring_iterator;
-        spring_ptr_container springsA = m_spring_lut[A];
-        spring_ptr_container springsB = m_spring_lut[B];
-        if(springsA.empty())
-          return false;
-        if(springsB.empty())
+        auto springsA = m_spring_lut[A];
+        auto springsB = m_spring_lut[B];
+        if(springsA.empty() || springsB.empty())
           return false;
         {
-          spring_iterator  s   = spring_iterator( springsA.begin() );
-          spring_iterator  end = spring_iterator( springsA.end()   );
-          for(;s!=end;++s)
+          for(auto s : springsA)
           {
             if( (s->A() == A && s->B()==B) || (s->B()==A && s->A()==B) )
               return true;
           }
         }
         {
-          spring_iterator  s   = spring_iterator( springsB.begin() );
-          spring_iterator  end = spring_iterator( springsB.end()   );
-          for(;s!=end;++s)
+          for(auto s : springsB)
           {
             if( (s->A()==A && s->B()==B) || (s->B()==A && s->A()==B) )
               return true;
@@ -141,32 +126,30 @@ namespace OpenTissue
       }
 
 
-      void add_stick(particle_type * A,particle_type * B)
+      void add_stick(std::shared_ptr<particle_type> A, std::shared_ptr<particle_type> B)
       {
         if(A==B)
           return;
 
-        m_sticks.push_back(stick_type());
-          stick_type * s = &m_sticks.back();
-          this->add_constraint( s );
-          s->init(A,B);
-          m_stick_lut[A].push_back(s);
-          m_stick_lut[B].push_back(s);
-
+        auto s = std::make_shared<stick_type>();
+        this->add_constraint( s );
+        s->init(A,B);
+        m_stick_lut[A].push_back(s);
+        m_stick_lut[B].push_back(s);
+        m_sticks.push_back(s);
       }
 
-      void add_spring(particle_type * A,particle_type * B)
+      void add_spring(std::shared_ptr<particle_type> A, std::shared_ptr<particle_type> B)
       {
         if(A==B)
           return;
 
-        m_springs.push_back(spring_type());
-          spring_type * s = &m_springs.back();
-          this->add_force( s );
-          s->init(A,B);
-          m_spring_lut[A].push_back(s);
-          m_spring_lut[B].push_back(s);
-
+        auto s = std::make_shared<spring_type>();
+        this->add_force( s );
+        s->init(A,B);
+        m_spring_lut[A].push_back(s);
+        m_spring_lut[B].push_back(s);
+        m_springs.push_back(s);
       }
 
 
@@ -189,11 +172,11 @@ namespace OpenTissue
         vertex_halfedge_circulator h(*from),hend;
         for(;h!=hend;++h)
         {
-          vertex_iterator to = h->get_destination_iterator();
+          auto to = h->get_destination_iterator();
           if( to->m_tag == 0 )
           {
-            particle_type * A = &(  m_coupling.particle( (*root) )   );
-            particle_type * B = &(  m_coupling.particle(  (*to)  )   );
+            auto A = m_coupling->particle(*root);
+            auto B = m_coupling->particle(*to);
 
             if(create_sticks && !exist_stick(A,B))
               add_stick(A,B);
@@ -214,7 +197,9 @@ namespace OpenTissue
         , m_stick_lut()
         , m_springs()
         , m_spring_lut()
-      {}
+      {
+        m_coupling = std::make_shared<coupling_type>();
+      }
 
       virtual ~SurfaceMesh() {}
 
@@ -224,7 +209,7 @@ namespace OpenTissue
       {
         base_class::clear();
 
-        m_coupling.clear();
+        m_coupling->clear();
 
         m_sticks.clear();
         m_springs.clear();
@@ -232,16 +217,16 @@ namespace OpenTissue
         m_spring_lut.clear();
       }
 
-      virtual void init(mesh_type /*const*/ & mesh, bool create_sticks, bool create_springs)
+      virtual void init(std::shared_ptr<mesh_type> mesh, bool create_sticks, bool create_springs)
       {
-        clear();
+        this->clear();
 
-        m_coupling.init(*this,mesh);
+        m_coupling->init(this->shared_from_this(), mesh);
 
-        mesh::clear_vertex_tags(m_coupling.mesh());
+        mesh::clear_vertex_tags(m_coupling->mesh());
 
-        vertex_iterator end   = m_coupling.mesh().vertex_end();
-        vertex_iterator v     = m_coupling.mesh().vertex_begin();
+        vertex_iterator end   = m_coupling->mesh().vertex_end();
+        vertex_iterator v     = m_coupling->mesh().vertex_begin();
         for(;v!=end;++v)
         {
           std::list<vertex_iterator> visited;

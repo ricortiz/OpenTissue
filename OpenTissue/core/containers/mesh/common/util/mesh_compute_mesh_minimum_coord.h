@@ -9,19 +9,21 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename mesh_type, typename vector3_type>
-    void compute_mesh_minimum_coord(mesh_type const & mesh, vector3_type & min_coord)
+    void compute_mesh_minimum_coord(std::shared_ptr<mesh_type> const mesh, vector3_type & min_coord)
     {
-      assert(mesh.size_vertices()>0 || !"mesh did not have any vertices");
+      using value_type = typename vector3_type::value_type;
+      assert(mesh->size_vertices()>0 || !"mesh did not have any vertices");
 
-      typename mesh_type::const_vertex_iterator end    = mesh.vertex_end();
-      typename mesh_type::const_vertex_iterator v      = mesh.vertex_begin();
-      min_coord = v->m_coord;
-      for(;v!=end;++v)
+      auto constexpr inf = std::numeric_limits<value_type>::max();
+      min_coord = {inf, inf, inf};
+      for(auto v : mesh->vertices())
         min_coord = min(min_coord, v->m_coord);
     }
 

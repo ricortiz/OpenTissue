@@ -19,14 +19,14 @@ namespace OpenTissue
     template< typename mbd_types>
     struct NoSleepyPolicy
     {
-      typedef typename mbd_types::group_type             group_type;
-      typedef typename group_type::indirect_body_iterator           indirect_body_iterator;
-      
+      typedef typename mbd_types::group_type          group_type;
+      typedef typename group_type::body_ptr_container body_ptr_container;
+
       class node_traits{};
       class edge_traits{};
       class constraint_traits{};
-      
-      void evaluate(indirect_body_iterator /*begin*/, indirect_body_iterator /*end*/){}
+
+      void evaluate(body_ptr_container &){}
 
       void clear(){}
     };

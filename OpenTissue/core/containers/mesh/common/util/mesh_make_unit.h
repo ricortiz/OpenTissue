@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -29,13 +30,11 @@ namespace OpenTissue
     *
     */
     template<typename mesh_type>
-    void make_unit(mesh_type & mesh)
+    void make_unit(std::shared_ptr<mesh_type> mesh)
     {
       typedef typename mesh_type::math_types                        math_types;
       typedef typename math_types::value_traits                     value_traits;
       typedef typename math_types::vector3_type                     vector3_type;
-      //typedef typename math_types::real_type                        real_type;
-
 
       vector3_type min_coord;
       vector3_type max_coord;

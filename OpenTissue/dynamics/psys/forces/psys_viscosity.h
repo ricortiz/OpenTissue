@@ -15,7 +15,7 @@ namespace OpenTissue
   {
 
     template<typename types>
-    class Viscosity 
+    class Viscosity
       : public types::force_type
     {
     public:
@@ -40,22 +40,22 @@ namespace OpenTissue
         : m_viscosity(9.81)
       {}
 
+      Viscosity(real_type const v)
+        : m_viscosity(v)
+      {}
+
       ~Viscosity(){}
 
     public:
 
       void apply()
       {
-        typedef typename system_type::particle_iterator   particle_iterator;
         using std::fabs;
 
         if(!(fabs(m_viscosity) > 0))
           return;
 
-        particle_iterator p   = this->owner()->particle_begin();
-        particle_iterator end = this->owner()->particle_end();
-
-        for(;p!=end;++p)
+        for(auto p : this->owner()->particles())
         {
           if( p->inv_mass() <= 0 )
             continue;

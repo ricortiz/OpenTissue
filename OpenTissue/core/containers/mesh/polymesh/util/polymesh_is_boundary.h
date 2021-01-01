@@ -14,21 +14,23 @@
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh_vertex.h>
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh_face.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
   {
 
     template<typename mesh_type>
-    bool is_boundary(PolyMeshHalfEdge<mesh_type> const & h)
+    bool is_boundary(std::shared_ptr<PolyMeshHalfEdge<mesh_type>> const h)
     {
-      if(h.get_face_handle().is_null())
+      if(h->get_face_handle().is_null())
         return true;
       return false;
     }
 
     template<typename mesh_type>
-    bool is_boundary(PolyMeshVertex<mesh_type> const & v)
+    bool is_boundary(std::shared_ptr<PolyMeshVertex<mesh_type>> const v)
     {
       typedef typename mesh_type::vertex_halfedge_circulator   vertex_halfedge_circulator;
 
@@ -46,28 +48,28 @@ namespace OpenTissue
     }
 
     template<typename mesh_type>
-    bool is_boundary(PolyMeshEdge<mesh_type> const & e)
+    bool is_boundary(std::shared_ptr<PolyMeshEdge<mesh_type>> const e)
     {
       typedef typename mesh_type::halfedge_iterator   halfedge_iterator;
 
-      halfedge_iterator h0 = e.get_halfedge0_iterator();
+      halfedge_iterator h0 = e->get_halfedge0_iterator();
       if( is_boundary( *h0 ) )
         return true;
-      halfedge_iterator h1 = e.get_halfedge1_iterator();
+      halfedge_iterator h1 = e->get_halfedge1_iterator();
       if( is_boundary( *h1 ) )
         return true;
       return false;
     }
 
     template<typename mesh_type>
-    bool is_boundary(PolyMeshFace<mesh_type> const & f)
+    bool is_boundary(std::shared_ptr<PolyMeshFace<mesh_type>> const f)
     {
       typedef typename mesh_type::face_halfedge_circulator   face_halfedge_circulator;
 
       face_halfedge_circulator h(f),end;
       for( ; h!=end; ++h)
       {
-        if(    is_boundary(     *(h->get_twin_iterator())      )    )
+        if(is_boundary(*(h->get_twin_iterator())))
           return true;
       }
       return false;

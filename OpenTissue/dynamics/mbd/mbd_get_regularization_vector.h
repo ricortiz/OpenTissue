@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -31,30 +33,28 @@ namespace OpenTissue
       *
       * Further it is assumed that the vector library used provides a vector
       * proxy function called subrange, which is capable of returning a
-      * vector range. (see for instance in Boost uBLAS for an example). 
+      * vector range. (see for instance in Boost uBLAS for an example).
       *
       * @param group        The group corresponding to the A-matrix.
       * @param m            The number of active constraints in the group (i.e. the
       *                     number of rows in the Jacobian matrix).
-      * @param gamma        Upon return this vector holds the amount of damping for 
+      * @param gamma        Upon return this vector holds the amount of damping for
       *                     each constraint variable.
       */
       template<typename group_type,typename vector_type>
-      void get_regularization_vector( 
-        group_type const & group
+      void get_regularization_vector(
+        std::shared_ptr<group_type> group
         , size_t const & m
-        , vector_type & gamma 
+        , vector_type & gamma
         )
       {
-        typedef typename group_type::math_policy                                math_policy;
-        typedef typename group_type::const_indirect_constraint_iterator         const_indirect_constraint_iterator;
-        typedef typename group_type::const_indirect_contact_iterator            const_indirect_contact_iterator;
-        typedef typename vector_type::size_type                                 size_type;
-        typedef typename math_policy::vector_range                              vector_range;
+        typedef typename group_type::math_policy   math_policy;
+        typedef typename vector_type::size_type    size_type;
+        typedef typename math_policy::vector_range vector_range;
 
         math_policy::resize( gamma, m);
 
-        for(const_indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+        for(auto constraint : group->constraints())
         {
           if(constraint->is_active())
           {
@@ -64,7 +64,8 @@ namespace OpenTissue
             constraint->get_regularization(tmp_vector_range);
           }
         }
-        for(const_indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+
+        for(auto contact : group->contacts())
         {
           if(contact->is_active())
           {

@@ -17,12 +17,19 @@
 class Data
 {
 public:
+  Data()
+  {
+    m_simulator     = std::make_shared<simulator_type>();
+    m_library       = std::make_shared<material_library_type>();
+    m_configuration = std::make_shared<configuration_type>();
+    m_gravity       = std::make_shared<gravity_type>();
+  }
 
-  gravity_type                m_gravity;
-  std::vector< body_type >    m_bodies;
-  simulator_type              m_simulator;
-  configuration_type          m_configuration;
-  material_library_type       m_library;
+  std::vector<std::shared_ptr<body_type>> m_bodies;
+  std::shared_ptr<material_library_type>  m_library;
+  std::shared_ptr<configuration_type>     m_configuration;
+  std::shared_ptr<simulator_type>         m_simulator;
+  std::shared_ptr<gravity_type>           m_gravity;
 
   material_type               m_material1;
   material_type               m_material2;
@@ -41,23 +48,21 @@ public:
 
   // Used for simple joint scenes
 
-  box_type               m_boxes[10];
-  socket_type            m_socket_A;
-  socket_type            m_socket_B;
-  hinge_type             m_hinge;
-  slider_type            m_slider;
-  ball_type              m_ball;
-  universal_type         m_universal;
-  wheel_type             m_wheel;
-  angular_limit_type     m_angular_limit1;
-  angular_limit_type     m_angular_limit2;
-  angular_motor_type     m_angular_motor1;
-  angular_motor_type     m_angular_motor2;
-  linear_limit_type      m_linear_limit;
-  linear_motor_type      m_linear_motor;
-  reach_cone_type        m_reach_cone;
-
-
+  box_type                    m_boxes[10];
+  socket_type                 m_socket_A;
+  socket_type                 m_socket_B;
+  hinge_type                  m_hinge;
+  slider_type                 m_slider;
+  ball_type                   m_ball;
+  universal_type              m_universal;
+  wheel_type                  m_wheel;
+  angular_limit_type          m_angular_limit1;
+  angular_limit_type          m_angular_limit2;
+  angular_motor_type          m_angular_motor1;
+  angular_motor_type          m_angular_motor2;
+  linear_limit_type           m_linear_limit;
+  linear_motor_type           m_linear_motor;
+  reach_cone_type             m_reach_cone;
 };
 
 

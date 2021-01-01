@@ -21,6 +21,8 @@
 
 #include <OpenTissue/utility/utility_timer.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -31,40 +33,31 @@ namespace OpenTissue
     {
     public:
 
-      typedef typename mbd_types::math_policy          math_policy;
-      typedef typename math_policy::value_traits         value_traits;
-      typedef typename math_policy::index_type           size_type;
-      typedef typename math_policy::real_type            real_type;
-      typedef typename math_policy::vector_type          vector_type;
-      typedef typename math_policy::matrix_type          matrix_type;
-      typedef typename math_policy::idx_vector_type      idx_vector_type;
-      typedef typename mbd_types::group_type           group_type;
+      typedef typename mbd_types::math_policy        math_policy;
+      typedef typename math_policy::value_traits     value_traits;
+      typedef typename math_policy::index_type       size_type;
+      typedef typename math_policy::real_type        real_type;
+      typedef typename math_policy::vector_type      vector_type;
+      typedef typename math_policy::matrix_type      matrix_type;
+      typedef typename math_policy::idx_vector_type  idx_vector_type;
+      typedef typename mbd_types::group_type         group_type;
 
     protected:
 
-      solver_type            m_solver;
-      vector_type            m_f_ext;
-      vector_type            m_s;
-      matrix_type            m_invM;
-      matrix_type            m_J;
-      idx_vector_type        m_pi;
-      vector_type            m_mu;
-      vector_type            m_b;
-      vector_type            m_rhs;
-      vector_type            m_gamma;
-      vector_type            m_lo;
-      vector_type            m_hi;
-      vector_type            m_x;
-      vector_type            m_tmp;
-
-    public:
-
-      class node_traits{};
-      class edge_traits{};
-      class constraint_traits{};
-
-    protected:
-
+      solver_type     m_solver;
+      vector_type     m_f_ext;
+      vector_type     m_s;
+      matrix_type     m_invM;
+      matrix_type     m_J;
+      idx_vector_type m_pi;
+      vector_type     m_mu;
+      vector_type     m_b;
+      vector_type     m_rhs;
+      vector_type     m_gamma;
+      vector_type     m_lo;
+      vector_type     m_hi;
+      vector_type     m_x;
+      vector_type     m_tmp;
       bool            m_warm_starting;
       bool            m_use_external_forces;
       bool            m_use_erp;              ///< If set to true all constraints and contacts use their own erp-parameter value. If set to value all constraints and contacts use a value of value_traits::one() as their erp-value.
@@ -74,6 +67,12 @@ namespace OpenTissue
       real_type       m_solver_time;    ///< The time (in seconds) it took to solve the NCP formulation.
       real_type       m_update_time;    ///< The time (in seconds) it took to udpate the body states, that is the position update.
       real_type       m_total_time;     ///< The total time of last invokation of the run-method given in seconds.
+
+    public:
+
+      class node_traits{};
+      class edge_traits{};
+      class constraint_traits{};
 
     public:
 
@@ -106,7 +105,7 @@ namespace OpenTissue
 
     public:
 
-      void run(group_type & group,real_type const & time_step)
+      void run(std::shared_ptr<group_type> group,real_type const & time_step)
       {
         OpenTissue::utility::Timer<double> watch1,watch2;
 
@@ -223,7 +222,7 @@ namespace OpenTissue
         m_total_time = watch2();
       }
 
-      void error_correction(group_type & group)
+      void error_correction(std::shared_ptr<group_type> group)
       {
         bool tmp1 = this->warm_starting();
         bool tmp2 = this->use_external_forces();
@@ -240,7 +239,7 @@ namespace OpenTissue
         this->warm_starting()       = tmp1;
       }
 
-      void resolve_collisions(group_type & /*group*/)
+      void resolve_collisions(std::shared_ptr<group_type> /*group*/)
       {
         assert(false || !"FirstOrderStepper::resolve_collisions(): collision resolving is not defined for this type of stepper");
       }

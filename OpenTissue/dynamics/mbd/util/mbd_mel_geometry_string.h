@@ -187,12 +187,13 @@ namespace OpenTissue
       * std::cout << mbd::mel::geometry_string(configuration.body_begin(),configuration.body_end(),simulator.get_time())  << std::endl;
       *
       */
-      template< typename indirect_body_iterator>
-      std::string geometry_string(indirect_body_iterator begin, indirect_body_iterator end)
+      template< typename body_ptr_container>
+      std::string geometry_string(body_ptr_container const & bodies)
       {
-        typedef typename indirect_body_iterator::value_type     body_type;
+        typedef typename body_ptr_container::value_type         body_ptr_type;
+        typedef typename body_ptr_type::element_type            body_type;
 
-        typedef typename body_type::math_policy           math_policy;
+        typedef typename body_type::math_policy                 math_policy;
 
         typedef OpenTissue::geometry::Sphere<math_policy>       sphere_type;
         typedef OpenTissue::geometry::Plane<math_policy>        plane_type;
@@ -201,9 +202,8 @@ namespace OpenTissue
         typedef OpenTissue::grid::Grid<float,math_policy>       grid_type;
         typedef OpenTissue::sdf::Geometry<mesh_type,grid_type>  sdf_geometry_type;
 
-
         std::stringstream stream;
-        for(indirect_body_iterator body=begin;body!=end;++body)
+        for(auto body : bodies)
         {
 
           // 2008-06-13 kenny: this is down-right ugly! Stuf like this should

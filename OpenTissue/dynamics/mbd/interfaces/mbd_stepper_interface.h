@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -25,7 +27,7 @@ namespace OpenTissue
 
     protected:
 
-      configuration_type * m_configuration;   ///< Pointer to configuration (or sub-part) that
+      std::shared_ptr<configuration_type> m_configuration;   ///< Pointer to configuration (or sub-part) that
                                               ///< stepper works on. Can be used to access
                                               ///< information about materials etc..
     public:
@@ -39,21 +41,21 @@ namespace OpenTissue
     public:
 
 
-      void connect(configuration_type & configuration) 
-      {   
-        m_configuration = &configuration;   
+      void connect(std::shared_ptr<configuration_type> configuration)
+      {
+        m_configuration = configuration;
       }
 
       void clear()
       {
-        this->m_configuration = 0;
+        this->m_configuration = nullptr;
       }
 
     public:
 
-      virtual void resolve_collisions(group_type & group) = 0;
-      virtual void error_correction(group_type & group) = 0;
-      virtual void run(group_type & group,real_type const & time_step) = 0;
+      virtual void resolve_collisions(std::shared_ptr<group_type> group) = 0;
+      virtual void error_correction(std::shared_ptr<group_type> group) = 0;
+      virtual void run(std::shared_ptr<group_type> group,real_type const & time_step) = 0;
 
     };
 

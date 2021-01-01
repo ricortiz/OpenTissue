@@ -125,11 +125,11 @@ namespace OpenTissue
             v = mesh.add_vertex(vector3_grid[k][i]);
           }
           grid[k][i] = v;
-          typename mesh_type::vertex_iterator vit = mesh.get_vertex_iterator(v);
-          vit->m_normal = normalize(vit->m_coord);
-          vit->m_u = (i*delta_angle)/sweep_angle;
-          vit->m_v = (vit->m_coord(2)-min_z_value)/range_z_value;
-          vit->m_color  = vector3_type( vit->m_u, 0.0, vit->m_v);
+          auto vertex = *mesh.get_vertex_iterator(v);
+          vertex->m_normal = normalize(vertex->m_coord);
+          vertex->m_u = (i*delta_angle)/sweep_angle;
+          vertex->m_v = (vertex->m_coord(2)-min_z_value)/range_z_value;
+          vertex->m_color  = vector3_type( vertex->m_u, 0.0, vertex->m_v);
         }
       }
       //--- At this point we have created a vertex grid from which we can build the faces.

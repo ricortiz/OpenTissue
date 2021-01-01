@@ -9,13 +9,16 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
   {
     template< typename mbd_types >
-    class Edge 
+    class Edge
       : public mbd_types::edge_traits
+      , std::enable_shared_from_this<Edge<mbd_types>>
     {
     public:
 
@@ -23,25 +26,23 @@ namespace OpenTissue
       typedef typename mbd_types::body_type                  body_type;
       typedef typename mbd_types::edge_type                  edge_type;
       typedef typename mbd_types::material_type              material_type;
-      typedef typename mbd_types::contact_iterator           contact_iterator;
-      typedef typename mbd_types::const_contact_iterator     const_contact_iterator;
 
     protected:
 
-      typedef typename mbd_types::contact_container          contact_container;
+      typedef typename mbd_types::contact_ptr_container      contact_ptr_container;
       typedef typename mbd_types::collision_detection_policy collision_detection_policy;
 
     protected:
 
-      body_type * m_A;                      ///< Pointer to body with smallest index.
-      body_type * m_B;                      ///< Pointer to body with highest index.
-      contact_container m_contacts;         ///< All contacts between A and B.
+      std::shared_ptr<body_type> m_A;       ///< Pointer to body with smallest index.
+      std::shared_ptr<body_type> m_B;       ///< Pointer to body with highest index.
+      contact_ptr_container m_contacts;     ///< All contacts between A and B.
 
       bool m_prunned;                       ///< Booelan flag indicating whether the edge has been prunned by some collision detection module during a collision query.
 
     public:
 
-      material_type * m_material;           ///< A pointer to the material properties between A and B.
+      std::shared_ptr<material_type> m_material;           ///< A pointer to the material properties between A and B.
       bool m_relative_resting;              ///< Boolean value indicating whatever the bodies
                                             ///< are in relative rest
                                             ///< since the last invocation
@@ -55,26 +56,20 @@ namespace OpenTissue
                                             ///< detection engine, if they are equal the edge contains valid
                                             ///< cached contact information, if they are unequal the cached
                                             ///< information is non-valid and should not be used.
-      collision_detection_policy * m_collision_detection; ///< A pointer to the collision detection engine that detected this edge.
+      std::shared_ptr<collision_detection_policy> m_collision_detection; ///< A pointer to the collision detection engine that detected this edge.
 
     public:
 
-      body_type const * get_body_A() const { return m_A; }
-      body_type       * get_body_A()       { return m_A; }
+      std::shared_ptr<body_type> const     get_body_A()   const { return m_A; }
+      std::shared_ptr<body_type>           get_body_A()         { return m_A; }
+      std::shared_ptr<body_type> const     get_body_B()   const { return m_B; }
+      std::shared_ptr<body_type>           get_body_B()         { return m_B; }
+      std::shared_ptr<material_type> const get_material() const { return m_material; }
+      std::shared_ptr<material_type>       get_material()       { return m_material; }
+      contact_ptr_container               &get_contacts()       { return m_contacts; }
+      contact_ptr_container const         &get_contacts() const { return m_contacts; }
 
-      body_type const * get_body_B() const { return m_B; }
-      body_type       * get_body_B()       { return m_B; }
-
-      contact_iterator       contact_begin()       { return contact_iterator(m_contacts.begin());       }
-      contact_iterator       contact_end()         { return contact_iterator(m_contacts.end());         }
-      const_contact_iterator contact_begin() const { return const_contact_iterator(m_contacts.begin()); }
-      const_contact_iterator contact_end()   const { return const_contact_iterator(m_contacts.end());   }
-
-      size_type size_contacts() const { return m_contacts.size(); }
-
-      contact_container   * get_contacts()       { return &m_contacts; }
-      material_type const * get_material() const { return m_material;  }
-      material_type       * get_material()       { return m_material;  }
+      size_t size_contacts() { return m_contacts.size(); }
 
     public:
 
@@ -87,7 +82,7 @@ namespace OpenTissue
     public:
 
 
-      /** 
+      /**
        * Get Prunned Flag.
        *
        * @return   A reference to a booelan flag indicating whether the edge has been prunned by some collision detection module during a collision query.
@@ -95,39 +90,39 @@ namespace OpenTissue
       bool       & prunned()       { return m_prunned; }
       bool const & prunned() const { return m_prunned; }
 
-      void init(body_type * const body_A, body_type * const body_B)
+      void init(std::shared_ptr<body_type> body_A, std::shared_ptr<body_type> body_B)
       {
         assert(body_A || !"Edge::init(): body A was null");
         assert(body_B || !"Edge::init(): body A was null");
         if(body_A->get_index() < body_B->get_index())
         {
-          m_A = const_cast<body_type*>(body_A);
-          m_B = const_cast<body_type*>(body_B);
+          m_A = body_A;
+          m_B = body_B;
         }
         else
         {
-          m_A = const_cast<body_type*>(body_B);
-          m_B = const_cast<body_type*>(body_A);
+          m_A = body_B;
+          m_B = body_A;
         }
 
-        m_material            = 0;
         m_contacts.clear();
         m_relative_resting    = false;
         m_updated_time_stamp  = 0;
-        m_collision_detection = 0;
+        m_material            = nullptr;
+        m_collision_detection = nullptr;
       }
 
-      bool operator==(edge_type const & edge) const
+      bool operator==(std::shared_ptr<edge_type> const edge) const
       {
         assert(m_A      || !"Edge::operator==(): body A was null");
         assert(m_B      || !"Edge::operator==(): body B was null");
-        assert(edge.m_A || !"Edge::operator==(): body A on edge was null");
-        assert(edge.m_B || !"Edge::operator==(): body B on edge was null");
-        return (m_A==edge.m_A && m_B==edge.m_B)? true : false;
-      } 
-      bool operator!=(edge_type const & edge) const {  return !(*this==edge);  }
+        assert(edge->m_A || !"Edge::operator==(): body A on edge was null");
+        assert(edge->m_B || !"Edge::operator==(): body B on edge was null");
+        return (m_A==edge->m_A && m_B==edge->m_B)? true : false;
+      }
+      bool operator!=(std::shared_ptr<edge_type> const edge) const {  return !(this->shared_from_this() == edge);  }
 
-      bool operator<(edge_type const & edge)const
+      bool operator<(std::shared_ptr<edge_type> const edge)const
       {
         assert(m_A      || !"Edge::operator<(): body A was null");
         assert(m_B      || !"Edge::operator<(): body B was null");
@@ -152,7 +147,7 @@ namespace OpenTissue
       * @param B
       * @return
       */
-      static size_type hash_key(body_type const * A,body_type const * B)
+      static size_type hash_key(std::shared_ptr<body_type> const A,std::shared_ptr<body_type> const B)
       {
         assert(A      || !"Edge::hash_key(): body A was null");
         assert(B      || !"Edge::hash_key(): body B was null");

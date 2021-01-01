@@ -19,14 +19,15 @@ namespace OpenTissue
     {
     public:
 
-      typedef typename mbd_types::math_policy                 math_policy;
+      typedef typename mbd_types::math_policy               math_policy;
+      typedef typename mbd_types::body_type                 body_type;
+      typedef typename mbd_types::body_ptr_container        body_ptr_container;
 
     protected:
 
-      typedef typename mbd_types::math_policy::index_type     size_type;
-      typedef typename mbd_types::contact_ptr_container       contact_ptr_container;
-      typedef typename mbd_types::constraint_ptr_container    constraint_ptr_container;
-      typedef typename mbd_types::body_ptr_container          body_ptr_container;
+      typedef typename mbd_types::math_policy::index_type   size_type;
+      typedef typename mbd_types::contact_ptr_container     contact_ptr_container;
+      typedef typename mbd_types::constraint_ptr_container  constraint_ptr_container;
 
     public:  // TODO should be protected!
 
@@ -42,33 +43,15 @@ namespace OpenTissue
 
     public:
 
-      typedef typename mbd_types::indirect_constraint_iterator              indirect_constraint_iterator;
-      typedef typename mbd_types::const_indirect_constraint_iterator        const_indirect_constraint_iterator;
-      typedef typename mbd_types::indirect_contact_iterator                 indirect_contact_iterator;
-      typedef typename mbd_types::const_indirect_contact_iterator           const_indirect_contact_iterator;
-      typedef typename mbd_types::indirect_body_iterator                    indirect_body_iterator;
-      typedef typename mbd_types::const_indirect_body_iterator              const_indirect_body_iterator;
-
-      indirect_constraint_iterator             constraint_begin()       { return indirect_constraint_iterator(m_constraints.begin());          }
-      indirect_constraint_iterator             constraint_end()         { return indirect_constraint_iterator(m_constraints.end());            }
-
-      const_indirect_constraint_iterator       constraint_begin() const { return const_indirect_constraint_iterator(m_constraints.begin());    }
-      const_indirect_constraint_iterator       constraint_end()   const { return const_indirect_constraint_iterator(m_constraints.end());      }
-
-      indirect_contact_iterator                contact_begin()          { return indirect_contact_iterator(m_contacts.begin());                }
-      indirect_contact_iterator                contact_end()            { return indirect_contact_iterator(m_contacts.end());                  }
-
-      const_indirect_contact_iterator          contact_begin()    const { return const_indirect_contact_iterator(m_contacts.begin());          }
-      const_indirect_contact_iterator          contact_end()      const { return const_indirect_contact_iterator(m_contacts.end());            }
-
-      indirect_body_iterator                   body_begin()             { return indirect_body_iterator(m_bodies.begin());                     }
-      indirect_body_iterator                   body_end()               { return indirect_body_iterator(m_bodies.end());                       }
-
-      const_indirect_body_iterator             body_begin()       const { return const_indirect_body_iterator(m_bodies.begin());               }
-      const_indirect_body_iterator             body_end()         const { return const_indirect_body_iterator(m_bodies.end());                 }
-
       size_type size_bodies()   const { return m_bodies.size();   }
       size_type size_contacts() const { return m_contacts.size(); }
+
+      contact_ptr_container           &contacts()          { return m_contacts; }
+      contact_ptr_container    const  &contacts()    const { return m_contacts; }
+      constraint_ptr_container        &constraints()       { return m_constraints; }
+      constraint_ptr_container const  &constraints() const { return m_constraints; }
+      body_ptr_container              &bodies()            { return m_bodies; }
+      body_ptr_container       const  &bodies()      const { return m_bodies; }
 
       void clear()
       {

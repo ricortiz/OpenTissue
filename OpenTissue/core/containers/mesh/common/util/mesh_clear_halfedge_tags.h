@@ -9,16 +9,16 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename mesh_type>
-    void clear_halfedge_tags(mesh_type & mesh, int tag_value = 0)
+    void clear_halfedge_tags(std::shared_ptr<mesh_type> mesh, int tag_value = 0)
     {
-      typename mesh_type::halfedge_iterator hend   = mesh.halfedge_end();
-      typename mesh_type::halfedge_iterator h      = mesh.halfedge_begin();
-      for(;h!=hend;++h)
+      for(auto h : mesh->halfedges())
         h->m_tag = tag_value;
     }
 

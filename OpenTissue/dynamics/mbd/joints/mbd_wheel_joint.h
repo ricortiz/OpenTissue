@@ -14,6 +14,7 @@
 #include <OpenTissue/dynamics/mbd/motors/mbd_angular_joint_motor.h>
 #include <OpenTissue/core/math/math_constants.h>
 
+#include <memory>
 
 namespace OpenTissue
 {
@@ -166,24 +167,24 @@ namespace OpenTissue
         return s_wcs * (this->w_A - this->w_B);
       }
 
-      vector3_type get_steering_axis_world() const 
+      vector3_type get_steering_axis_world() const
       {
-        return this->m_socketA->get_joint_axis_world(); 
+        return this->m_socketA->get_joint_axis_world();
       }
 
-      vector3_type get_motor_axis_world() const 
+      vector3_type get_motor_axis_world() const
       {
-        return this->m_socketB->get_joint_axis_world(); 
+        return this->m_socketB->get_joint_axis_world();
       }
 
-      body_type * get_wheel_body() const
+      std::shared_ptr<body_type> get_wheel_body() const
       {
         if(this->m_socketB)
           return this->m_socketB->get_body();
         return 0;
       }
 
-      body_type * get_car_body() const
+      std::shared_ptr<body_type> get_car_body() const
       {
         if(this->m_socketA)
           return this->m_socketA->get_body();
@@ -208,29 +209,29 @@ namespace OpenTissue
         m_erp_susp = erp;
       }
 
-      real_type get_suspension_cfm() const 
-      { 
-        return m_cfm_susp; 
-      }
-
-      real_type get_suspension_erp() const   
+      real_type get_suspension_cfm() const
       {
-        return m_erp_susp;   
+        return m_cfm_susp;
       }
 
-      void set_steering_limit(angular_limit_type const & limit) 
-      { 
-        m_limit = const_cast<angular_limit_type*>(&limit); 
-      }
-      
-      void set_steering_motor(angular_motor_type const & motor) 
-      { 
-        m_motor1 = const_cast<angular_motor_type*>(&motor); 
+      real_type get_suspension_erp() const
+      {
+        return m_erp_susp;
       }
 
-      void set_wheel_motor(angular_motor_type const & motor) 
-      { 
-        m_motor2 = const_cast<angular_motor_type*>(&motor); 
+      void set_steering_limit(angular_limit_type const & limit)
+      {
+        m_limit = const_cast<angular_limit_type*>(&limit);
+      }
+
+      void set_steering_motor(angular_motor_type const & motor)
+      {
+        m_motor1 = const_cast<angular_motor_type*>(&motor);
+      }
+
+      void set_wheel_motor(angular_motor_type const & motor)
+      {
+        m_motor2 = const_cast<angular_motor_type*>(&motor);
       }
 
     public:

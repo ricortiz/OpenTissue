@@ -66,13 +66,13 @@ namespace OpenTissue
 
           size_t cnt = OpenTissue::collision::plane_box(BtoWCS,AtoWCS,plane,box,info.get_envelope(),p,n,distance);
 
-          info.get_contacts()->clear();          
+          info.get_contacts()->clear();
           if(cnt>0)
           {
             for(size_t i=0;i<cnt;++i)
             {
-              contact_type contact;
-              contact.init( info.get_body_B(), info.get_body_A(), p[i], n, distance[i], info.get_material() );
+              auto contact = std::make_shared<contact_type>();
+              contact->init( info.get_body_A(), info.get_body_B(), p[i], n, distance[i], info.get_material() );
               info.get_contacts()->push_back(contact);
             }
             return ( distance[0]  <  -info.get_envelope() );

@@ -13,6 +13,8 @@
 #include <OpenTissue/core/containers/grid/util/grid_gradient_at_point.h>
 #include <OpenTissue/core/containers/grid/util/grid_value_at_point.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace sdf
@@ -113,10 +115,10 @@ namespace OpenTissue
       *                       then the return value it true otherwise it is false.
       */
       template<typename sdf_geometry_type>
-      bool overlap( 
+      bool overlap(
         coordsys_type const & xform
         , bv_ptr const & bv
-        , sdf_geometry_type const & geometry 
+        , sdf_geometry_type const & geometry
         )
       {
         typedef typename coordsys_type::vector3_type    vector3_type;
@@ -195,17 +197,18 @@ namespace OpenTissue
       *                             is normals are pointing from A towards B by convention.
       *
       */
-      template<typename sdf_geometry_type,typename contact_point_container>
-      void report( 
+      template<typename sdf_geometry_type,typename contact_point_ptr_container>
+      void report(
         coordsys_type const & xform
         , bv_ptr const & bv
-        , sdf_geometry_type const & geometry
-        , contact_point_container & contacts 
+        , sdf_geometry_type const     & geometry
+        , contact_point_ptr_container & contacts
         )
       {
         using std::min;
-        typedef typename sdf_geometry_type::grid_type           grid_type;
-        typedef typename contact_point_container::value_type   contact_point_type;
+        typedef typename sdf_geometry_type::grid_type             grid_type;
+        typedef typename contact_point_ptr_container::value_type  contact_ptr_type;
+        typedef typename contact_ptr_type::element_type           contact_point_type;
 
         grid_type const & phi = geometry.m_phi;
 
@@ -263,7 +266,7 @@ namespace OpenTissue
           //--- NOTE: n is pointing from geometry towards bvh (from B to A)
           //---
           //--- by convention we want n to point from A to b.
-          n = -unit(n); 
+          n = -unit(n);
 
           //--- It may be that caller have reversed the roles of A and
           //--- B, if so we must flip normal otherwise caller will get
@@ -279,10 +282,10 @@ namespace OpenTissue
           m_wcs_xform.xform_point( center );
 
           //--- Finally we can create and return a contact point.
-          contact_point_type cp;        
-          cp.m_n = n;
-          cp.m_p = center;
-          cp.m_distance = distance;
+          auto cp = std::make_shared<contact_point_type>();
+          cp->m_n = n;
+          cp->m_p = center;
+          cp->m_distance = distance;
           contacts.push_back(cp);
         }
       }

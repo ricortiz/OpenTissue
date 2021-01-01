@@ -9,20 +9,23 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
 
     template<typename face_type,typename vector3_type>
-    void compute_face_maximum_coord(face_type const & f, vector3_type & max_coord)
+    void compute_face_maximum_coord(std::shared_ptr<face_type> const f, vector3_type & max_coord)
     {
       typedef typename face_type::mesh_type               mesh_type;
       typedef typename mesh_type::face_vertex_circulator  face_vertex_circulator;
-      face_vertex_circulator v(f),end;
-      max_coord = v->m_coord;
-      for(;v!=end;++v)
-        max_coord = max(max_coord,v->m_coord);
+      typedef std::numeric_limits<typename vector3_type::value_type> limits;
+
+      max_coord = limits::min();
+      for(auto v: face_vertex_circulator(f))
+        max_coord = std::max(max_coord,v->m_coord);
     }
 
   } // namespace mesh

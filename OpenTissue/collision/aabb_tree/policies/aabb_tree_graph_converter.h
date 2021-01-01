@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace aabb_tree
@@ -40,36 +42,34 @@ namespace OpenTissue
         typename mesh_type
         , typename vertex_data_binder
       >
-      void run(mesh_type & mesh,  graph_type & graph, vertex_data_binder & binder)
+      void run(std::shared_ptr<mesh_type> mesh,  graph_type & graph, vertex_data_binder & binder)
       {
         typedef typename mesh_type::halfedge_type             halfedge_type;
         typedef typename mesh_type::face_type                 face_type;
         typedef typename mesh_type::vertex_type               vertex_type;
         typedef typename mesh_type::face_iterator             face_iterator;
 
-        typedef typename std::queue<face_type*>               face_ptr_queue;
-        typedef typename std::map<face_type *,node_ptr>       graph_node_map;
+        typedef typename std::queue<std::shared_ptr<face_type>>              face_ptr_queue;
+        typedef typename std::map<std::shared_ptr<face_type>,node_ptr>       graph_node_map;
 
         graph_node_map lookup;   ///< Internally used data structure. Needed for looking up graph nodes corresponding to mesh faces.
         lookup.clear();
 
-        face_iterator face = mesh.face_begin();
-        face_iterator end  = mesh.face_end();
-        for(;face!=end;++face)
+        for(auto face : mesh->faces())
         {
           geometry_type triangle;
 
-          typename mesh_type::face_vertex_circulator v0(*face);
-          typename mesh_type::face_vertex_circulator v1(*face);++v1;
-          typename mesh_type::face_vertex_circulator v2(*face);++v2;++v2;
+          typename mesh_type::face_vertex_circulator v0(face);
+          typename mesh_type::face_vertex_circulator v1(face);++v1;
+          typename mesh_type::face_vertex_circulator v2(face);++v2;++v2;
 
           //--- Ask user-specified binder what vertex data should be
-          triangle.m_p0 = binder( &(*v0) );//  psys.m_particle_lut[ &(*v0) ];
-          triangle.m_p1 = binder( &(*v1) );//  psys.m_particle_lut[ &(*v1) ];
-          triangle.m_p2 = binder( &(*v2) );//  psys.m_particle_lut[ &(*v2) ];
+          triangle.m_p0 = binder(v0);//  psys.m_particle_lut[ &(*v0) ];
+          triangle.m_p1 = binder(v1);//  psys.m_particle_lut[ &(*v1) ];
+          triangle.m_p2 = binder(v2);//  psys.m_particle_lut[ &(*v2) ];
 
-          node_ptr node = graph.insert(  triangle  );
-          lookup[ &(*face) ] = node;
+          node_ptr node = graph.insert(triangle);
+          lookup[face] = node;
         }
 
         face_ptr_queue Q;
@@ -77,7 +77,7 @@ namespace OpenTissue
         mesh::clear_face_tags(mesh);
         mesh::clear_halfedge_tags(mesh);
 
-        Q.push( &(  *(mesh.face_begin())   )  );
+        Q.push(*(mesh->face_begin()));
         while(!Q.empty())
         {
           face_type * face = Q.front(); Q.pop();
@@ -89,10 +89,10 @@ namespace OpenTissue
             visist_connection( face, &(*h), Q, graph, lookup);
 
         }
-        std::cout << "GraphConverter::run(): graph created with |N| = " 
-          << graph.size_nodes() 
-          << " and  |E| = " 
-          << graph.size_edges() 
+        std::cout << "GraphConverter::run(): graph created with |N| = "
+          << graph.size_nodes()
+          << " and  |E| = "
+          << graph.size_edges()
           << std::endl;
       }
 
@@ -110,7 +110,7 @@ namespace OpenTissue
       * @param lookup    A graph node lookup table. This is used to find a graph
       *                  node that correspond to a given mesh face.
       */
-      template< 
+      template<
         typename face_type
         , typename halfedge_type
         , typename face_ptr_queue

@@ -9,18 +9,21 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename face_type,typename vector3_type>
-    void compute_face_minimum_coord(face_type const & f, vector3_type & min_coord)
+    void compute_face_minimum_coord(std::shared_ptr<face_type> const & f, vector3_type & min_coord)
     {
       typedef typename face_type::mesh_type               mesh_type;
       typedef typename mesh_type::face_vertex_circulator  face_vertex_circulator;
-      face_vertex_circulator v(f),end;
-      min_coord = v->m_coord;
-      for(;v!=end;++v)
+      typedef std::numeric_limits<typename vector3_type::value_type> limits;
+
+      min_coord = limits::max();
+      for(auto v : face_vertex_circulator(f))
         min_coord = min(min_coord,v->m_coord);
     }
 

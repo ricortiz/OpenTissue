@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/math/math_is_number.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -18,24 +20,23 @@ namespace OpenTissue
     /**
     * Set velocities and spins of a sequence of bodies.
     *
-    * @param begin   An iterator to the first body in the sequence.
-    * @param end     An iterator to the one past the last body in the sequence.
+    * @param group
     * @param u       This vector holds the extracted generalized velocity vector.
     */
-    template<typename indirect_body_iterator,typename vector_type>
-    void set_velocity_vector(indirect_body_iterator begin, indirect_body_iterator end, vector_type const & u)
+    template<typename group_type,typename vector_type>
+    void set_velocity_vector(std::shared_ptr<group_type> group, vector_type & u)
     {
-      typedef typename indirect_body_iterator::value_type  body_type;
+      typedef typename group_type::body_type      body_type;
       typedef typename body_type::vector3_type    vector3_type;
       typedef typename vector_type::size_type     size_type;
 
       vector3_type V,W;
-      size_type n = std::distance(begin,end);
-      
+      size_type n = group->size_bodies();
+
       assert(u.size() == 6*n || !"set_velocity_vector(): u has incorrect dimension");
 
       typename vector_type::const_iterator uval = u.begin();
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies())
       {
         assert(body->is_active() || !"set_velocity_vector(): body was not active");
         V(0) = *uval++;
@@ -56,12 +57,6 @@ namespace OpenTissue
           body->set_spin(W);
         }
       }
-    }
-
-    template<typename group_type,typename vector_type>
-    void set_velocity_vector(group_type const & group, vector_type & u)
-    {
-      set_velocity_vector(group.body_begin(),group.body_end(),u);
     }
 
   } //--- End of namespace mbd

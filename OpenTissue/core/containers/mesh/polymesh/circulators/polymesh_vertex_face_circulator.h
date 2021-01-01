@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/containers/mesh/polymesh/circulators/polymesh_vertex_halfedge_circulator.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -55,10 +57,10 @@ namespace OpenTissue
         : m_circ()
       {}
 
-      explicit PolyMeshVertexFaceCirculator(  typename PolyMesh::vertex_type const & v)
+      explicit PolyMeshVertexFaceCirculator(std::shared_ptr<typename PolyMesh::vertex_type> v)
         : m_circ(v)
       {
-        while(m_circ->get_face_handle().is_null() && 
+        while(m_circ->get_face_handle().is_null() &&
               !is_end() )
         {
           ++m_circ;
@@ -107,18 +109,20 @@ namespace OpenTissue
 
     public:
 
-      Value & operator*() const
+      std::shared_ptr<Value> & operator*() const
       {
         assert(!m_circ->get_face_handle().is_null() || !"face was null");
-        return *(m_circ->get_face_iterator());
+        return *m_circ->get_face_iterator();
       }
 
-      Value * operator->() const
+      Value operator->() const
       {
         assert(!m_circ->get_face_handle().is_null() || !"face was null");
-        return &(*(m_circ->get_face_iterator()));
+        return (*m_circ->get_face_iterator()).get();
       }
 
+      PolyMeshVertexFaceCirculator begin() { return *this; }
+      PolyMeshVertexFaceCirculator end()   { return PolyMeshVertexFaceCirculator(); }
     };
 
   } // namespace polymesh

@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -19,9 +21,9 @@ namespace OpenTissue
     {
     private:
 
-      typedef typename PolyMesh::opt_halfedge_iter iterator_t;
+      typedef typename PolyMesh::halfedge_iterator iterator_t;
 
-      typename PolyMesh::kernel_type * m_kernel;
+      std::shared_ptr<typename PolyMesh::kernel_type> m_kernel;
       iterator_t              m_first;
       iterator_t              m_cur;
       bool                             m_active;
@@ -40,32 +42,32 @@ namespace OpenTissue
       * @param v  The vertex to create a circulator for.
       * @return   An outgoing_halfedge_iterator if the corresponding handle is valid, or an optional.
       */
-      static iterator_t init(typename PolyMesh::vertex_type const & v)
+      static iterator_t init(std::shared_ptr<typename PolyMesh::vertex_type> v)
       {
-        if ( v.get_outgoing_halfedge_handle().is_null() )
+        if ( v->get_outgoing_halfedge_handle().is_null() )
           return iterator_t();
         else
-          return v.get_outgoing_halfedge_iterator();
+          return v->get_outgoing_halfedge_iterator();
       }
 
     public:
 
       PolyMeshVertexHalfedgeCirculator()
-        : m_kernel(0)
+        : m_kernel(nullptr)
         , m_first ()
         , m_cur   ()
         , m_active(false)
       { }
 
-      explicit PolyMeshVertexHalfedgeCirculator(  typename PolyMesh::vertex_type const & v)
-        : m_kernel( v.get_owner() )
+      explicit PolyMeshVertexHalfedgeCirculator(std::shared_ptr<typename PolyMesh::vertex_type> v)
+        : m_kernel( v->get_owner() )
         , m_first ( init(v)       )
         , m_cur   ( init(v)       )
         , m_active( false         )
       {}
 
       template <class OtherValue>
-      PolyMeshVertexHalfedgeCirculator( PolyMeshVertexHalfedgeCirculator<PolyMesh,OtherValue> const& other )
+      PolyMeshVertexHalfedgeCirculator(PolyMeshVertexHalfedgeCirculator<PolyMesh,OtherValue> const& other)
         : m_kernel( other.m_kernel )
         , m_first ( other.m_first  )
         , m_cur   ( other.m_cur    )
@@ -75,7 +77,7 @@ namespace OpenTissue
       template <class OtherValue>
       bool operator==(PolyMeshVertexHalfedgeCirculator<PolyMesh,OtherValue> const& /*other*/) const
       {
-        if( !m_kernel || !m_cur )
+        if( !m_kernel || !*m_cur )
           return true;
         return (m_active && m_first == m_cur);
       }
@@ -90,10 +92,10 @@ namespace OpenTissue
       {
         m_active = true;
 
-        if( !m_kernel || !m_cur)
+        if( !m_kernel || !*m_cur)
           return *this;
 
-        m_cur = m_cur.get()->get_twin_iterator()->get_next_iterator();
+        m_cur = (*(*m_cur)->get_twin_iterator())->get_next_iterator();
         return *this;
       }
 
@@ -104,19 +106,22 @@ namespace OpenTissue
         if( !m_kernel || !m_cur)
           return *this;
 
-        m_cur = m_cur.get()->get_prev_iterator()->get_twin_iterator();
+        m_cur = (*m_cur->get_prev_iterator())->get_twin_iterator();
         return *this;
       }
 
-      Value& operator*() const
+      std::shared_ptr<Value> operator*() const
       {
-        return *( m_cur.get() );
-      }
-      Value * operator->() const
-      {
-        return &( *( m_cur.get() ) );
+        return *m_cur;
       }
 
+      Value * operator->() const
+      {
+        return (*m_cur).get();
+      }
+
+      PolyMeshVertexHalfedgeCirculator begin() { return *this; }
+      PolyMeshVertexHalfedgeCirculator end()   { return PolyMeshVertexHalfedgeCirculator(); }
     };
 
   } // namespace polymesh

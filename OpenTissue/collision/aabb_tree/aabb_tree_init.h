@@ -14,6 +14,8 @@
 #include <OpenTissue/collision/aabb_tree/policies/aabb_tree_bottom_up_constructor_policy.h>
 #include <OpenTissue/collision/aabb_tree/policies/aabb_tree_graph_converter.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace aabb_tree
@@ -26,7 +28,7 @@ namespace OpenTissue
     * @param aabb_tree
     */
     template< typename mesh_type, typename aabb_tree_geometry, typename vertex_data_binder>
-    void init(mesh_type & mesh,aabb_tree_geometry & aabb_tree, vertex_data_binder & binder)
+    void init(std::shared_ptr<mesh_type> mesh, std::shared_ptr<aabb_tree_geometry> aabb_tree, std::shared_ptr<vertex_data_binder> binder)
     {
 
       typedef typename aabb_tree_geometry::bvh_type                                                                          bvh_type;
@@ -39,7 +41,7 @@ namespace OpenTissue
       constructor_type constructor;         ///< The bottom up constructor.
 
       converter.run( mesh, graph, binder );
-      constructor.run( graph, aabb_tree.m_bvh );
+      constructor.run( graph, aabb_tree->m_bvh );
     }
 
 

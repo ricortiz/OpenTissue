@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/math/math_is_number.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -23,29 +25,28 @@ namespace OpenTissue
     * side-effects could occur if bodies are ``shared'' among
     * different groups.
     *
-    * @param begin   An iterator to the first body in the sequence.
-    * @param end     An iterator to the one past the last body in the sequence.
+    * @param group   Group body configuration
     * @param s       Upon return this vector holds the extracted
     *                generalized position vector.
     */
-    template<typename indirect_body_iterator,typename vector_type>
-    void get_position_vector(indirect_body_iterator begin, indirect_body_iterator end, vector_type & s)
+    template<typename group_type,typename vector_type>
+    void get_position_vector(std::shared_ptr<group_type> group, vector_type & s)
     {
-      typedef typename indirect_body_iterator::value_type   body_type;
-      typedef typename body_type::math_policy               math_policy;
-      typedef typename body_type::vector3_type              vector3_type;
-      typedef typename body_type::quaternion_type           quaternion_type;
-      typedef typename vector_type::size_type               size_type;
+      typedef typename group_type::body_type      body_type;
+      typedef typename body_type::math_policy     math_policy;
+      typedef typename body_type::vector3_type    vector3_type;
+      typedef typename body_type::quaternion_type quaternion_type;
+      typedef typename vector_type::size_type     size_type;
 
       vector3_type r;
       quaternion_type Q;
 
-      size_type n = std::distance(begin,end);
+      size_type n = group->size_bodies();
 
-      math_policy::resize( s, 7*n);      
+      math_policy::resize( s, 7*n);
 
       typename vector_type::iterator sval = s.begin();
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies())
       {
         assert(body->is_active() || !"get_position_vector(): body was not active");
 
@@ -68,12 +69,6 @@ namespace OpenTissue
         *sval++ = Q.v()(1);
         *sval++ = Q.v()(2);
       }
-    }
-
-    template<typename group_type,typename vector_type>
-    void get_position_vector(group_type const & group, vector_type & s)
-    {
-      get_position_vector(group.body_begin(),group.body_end(),s);
     }
 
   } //--- End of namespace mbd

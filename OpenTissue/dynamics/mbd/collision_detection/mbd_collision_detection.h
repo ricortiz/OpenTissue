@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -38,7 +40,6 @@ namespace OpenTissue
       typedef typename types::group_ptr_container      group_ptr_container;
       typedef typename types::group_type               group_type;
       typedef typename types::edge_ptr_container       edge_ptr_container;
-      typedef typename types::indirect_edge_iterator   indirect_edge_iterator;
 
       typedef BroadPhasePolicy<types>                  broad_phase_type;
       typedef NarrowPhasePolicy<types>                 narrow_phase_type;
@@ -46,19 +47,19 @@ namespace OpenTissue
 
     public:
 
-      class node_traits 
+      class node_traits
         : public broad_phase_type::node_traits
         , public narrow_phase_type::node_traits
         , public analyzer_type::node_traits
       {};
 
-      class edge_traits 
+      class edge_traits
         : public broad_phase_type::edge_traits
         , public narrow_phase_type::edge_traits
         , public analyzer_type::edge_traits
       {};
 
-      class constraint_traits 
+      class constraint_traits
         : public broad_phase_type::constraint_traits
         , public narrow_phase_type::constraint_traits
         , public analyzer_type::constraint_traits
@@ -66,12 +67,12 @@ namespace OpenTissue
 
     protected:
 
-      configuration_type *         m_configuration;            ///< A pointer to the configuration.
-      broad_phase_type             m_broad_phase;              ///< Broad phase collision detection algorithm.
-      narrow_phase_type            m_narrow_phase;             ///< Narrow phase collision detection algorithm.
-      analyzer_type                m_analyzer;                 ///< Spatial Temporal Analyzer.
-      bool                         m_short_circuit;            ///< Boolean flag indicating whether the collision detection engine should short-circuit on first penetration it finds.
-      size_type                    m_time_stamp;               ///< Time-stamp of last invocation of the collision detection engine.
+      std::shared_ptr<configuration_type> m_configuration;            ///< A pointer to the configuration.
+      broad_phase_type                    m_broad_phase;              ///< Broad phase collision detection algorithm.
+      narrow_phase_type                   m_narrow_phase;             ///< Narrow phase collision detection algorithm.
+      analyzer_type                       m_analyzer;                 ///< Spatial Temporal Analyzer.
+      bool                                m_short_circuit;            ///< Boolean flag indicating whether the collision detection engine should short-circuit on first penetration it finds.
+      size_type                           m_time_stamp;               ///< Time-stamp of last invocation of the collision detection engine.
 
     public:
 
@@ -124,52 +125,45 @@ namespace OpenTissue
         assert(m_configuration || !"CollisionDetection::run(): missing configuration");
 
         edge_ptr_container edges;
-        bool penetration = false;
         m_broad_phase.run(edges);
 
-
-        indirect_edge_iterator begin(edges.begin());
-        indirect_edge_iterator end(edges.end());
-        //--- Make sure to set up-to-date time stamp, see method BodyPair::is_up_to_date() for more information
-        for(indirect_edge_iterator edge = begin;edge!=end;++edge)
+        for(auto &edge : edges)
         {
           edge->m_updated_time_stamp = m_time_stamp;
         }
 
-
+        // Add any missing edges that corresponds to joints between bodies!
+        //
+        // Hmmm, this does not seem to be a very efficient way of doing it!!!
+        //
+        for(auto &joint : m_configuration->joints())
         {
-          // Add any missing edges that corresponds to joints between bodies!
-          //
-          // Hmmm, this does not seem to be a very efficient way of doing it!!!
-          //
-          typename configuration_type::joint_iterator joint = m_configuration->joint_begin();
-          typename configuration_type::joint_iterator end = m_configuration->joint_end();
-          for(;joint!=end;++joint)
+          auto A = joint->get_socket_A()->get_body();
+          auto B = joint->get_socket_B()->get_body();
+
+          auto edge = m_configuration->get_edge(A,B);
+          if(!edge)
+            edge = m_configuration->add(A,B);
+
+          if(edge->m_updated_time_stamp != m_time_stamp)
           {
-            body_type * A = joint->get_socket_A()->get_body();
-            body_type * B = joint->get_socket_B()->get_body();
-            edge_type * edge = m_configuration->get_edge(A,B);
-            if(!edge)
-              edge = m_configuration->add(A,B);
-            if(edge->m_updated_time_stamp != m_time_stamp)
-            {
-              edge->m_updated_time_stamp = m_time_stamp;
-              edges.push_back( &(*edge) );
-            }
+            edge->m_updated_time_stamp = m_time_stamp;
+            edges.push_back(edge);
           }
         }
 
+        bool penetration = false;
         penetration |= m_analyzer.post_broad_phase_analysis(edges);
 
         if(m_short_circuit && penetration)
           return penetration;
 
-        for(indirect_edge_iterator edge = begin;edge!=end;++edge)
+        for(auto &edge : edges)
         {
           if(edge->prunned())
             continue;
 
-          penetration |= m_narrow_phase.run(&(*edge));
+          penetration |= m_narrow_phase.run(edge);
 
           if(m_short_circuit && penetration)
             return penetration;
@@ -185,13 +179,13 @@ namespace OpenTissue
       *
       * @param configuration
       */
-      void init(configuration_type & configuration)
+      void init(std::shared_ptr<configuration_type> configuration)
       {
         m_time_stamp = 0;
-        m_configuration = &configuration;
         m_broad_phase.init(configuration);
         m_narrow_phase.init(configuration);
         m_analyzer.init(configuration);
+        m_configuration = configuration;
       }
 
       /**
@@ -212,7 +206,7 @@ namespace OpenTissue
       * @param body
       * @return               A boolean value indicating whether the notification was succesfull or not.
       */
-      bool add(body_type * body)
+      bool add(std::shared_ptr<body_type> body)
       {
         assert(body            || !"CollisionDetection::add(): body was null");
         assert(m_configuration || !"CollisionDetection::add(): missing configuration");
@@ -229,7 +223,7 @@ namespace OpenTissue
       * @param body
       * @return               A boolean value indicating whether the notification was succesfull or not.
       */
-      bool remove(body_type * body)
+      bool remove(std::shared_ptr<body_type> body)
       {
         assert(body            || !"CollisionDetection::remove(): body was null");
         assert(m_configuration || !"CollisionDetection::remove(): missing configuration");

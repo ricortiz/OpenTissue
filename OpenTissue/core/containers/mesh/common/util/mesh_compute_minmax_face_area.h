@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
@@ -22,12 +24,8 @@ namespace OpenTissue
     * @param max_area   Upon return holds the minimum area.
     */
     template<    typename mesh_type  >
-    void compute_minmax_face_area( mesh_type const &  mesh, double & min_area, double & max_area  )
+    void compute_minmax_face_area(std::shared_ptr<mesh_type> const mesh, double & min_area, double & max_area)
     {
-      using std::max;
-      using std::min;
-      using std::fabs;
-
       typedef typename mesh_type::const_face_iterator            face_iterator;
       typedef typename mesh_type::const_face_vertex_circulator   face_vertex_circulator;
       typedef typename mesh_type::math_types                     math_types;
@@ -38,11 +36,11 @@ namespace OpenTissue
       real_type max_area_sqr = 0;
       real_type min_area_sqr = math::detail::highest<real_type>();
 
-      for(face_iterator f = mesh.face_begin();f!=mesh.face_end();++f)
+      for(auto f : mesh->faces())
       {
-        face_vertex_circulator v0(*f);
-        face_vertex_circulator v1(*f);++v1;
-        face_vertex_circulator v2(*f);--v2;
+        face_vertex_circulator v0(f);
+        face_vertex_circulator v1(f);++v1;
+        face_vertex_circulator v2(f);--v2;
 
         vector3_type const & p0 = v0->m_coord;
         vector3_type const & p1 = v1->m_coord;
@@ -51,11 +49,11 @@ namespace OpenTissue
         vector3_type u2       = p1 - p0;
         vector3_type u1xu2    = u1 % u2;
         real_type area_sqr = u1xu2*u1xu2;
-        max_area_sqr = max( max_area_sqr, area_sqr);
-        min_area_sqr = min( min_area_sqr, area_sqr);
+        max_area_sqr = std::max( max_area_sqr, area_sqr);
+        min_area_sqr = std::min( min_area_sqr, area_sqr);
       }
-      max_area = sqrt(max_area_sqr)*.5;
-      min_area = sqrt(min_area_sqr)*.5;
+      max_area = std::sqrt(max_area_sqr)*.5;
+      min_area = std::sqrt(min_area_sqr)*.5;
       //std::cout << "mesh::compute_minmax_face_area(): min = " << min_area << " max = " << max_area << std::endl;
     }
 

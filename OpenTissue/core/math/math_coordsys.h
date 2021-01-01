@@ -32,7 +32,7 @@ namespace OpenTissue
     */
     template<
       typename value_type_
-      //, typename value_traits_ = ValueTraits<value_type_> 
+      //, typename value_traits_ = ValueTraits<value_type_>
     >
     class CoordSys
     {
@@ -57,8 +57,8 @@ namespace OpenTissue
 
     public:
 
-      vector3_type       & T()       { return m_T; }
-      vector3_type const & T() const { return m_T; }
+      vector3_type          & T()       { return m_T; }
+      vector3_type    const & T() const { return m_T; }
       quaternion_type       & Q()       { return m_Q; }
       quaternion_type const & Q() const { return m_Q; }
 
@@ -69,13 +69,13 @@ namespace OpenTissue
         , m_Q(value_traits::one(),value_traits::zero(),value_traits::zero(),value_traits::zero())
       {}
 
-      explicit CoordSys(vector3_type const & T_val, quaternion_type const & Q_val) 
-      {  
+      explicit CoordSys(vector3_type const & T_val, quaternion_type const & Q_val)
+      {
         m_T = T_val;
         m_Q = unit(Q_val);
       }
 
-      explicit CoordSys(vector3_type const & T_val, matrix3x3_type const & R_val) 
+      explicit CoordSys(vector3_type const & T_val, matrix3x3_type const & R_val)
       {
         m_T = T_val;
         m_Q = R_val;

@@ -15,14 +15,14 @@ namespace OpenTissue
   {
 
     template<typename mesh_type, typename vector3_type>
-    void compute_mesh_maximum_coord(mesh_type const & mesh, vector3_type & max_coord)
+    void compute_mesh_maximum_coord(std::shared_ptr<mesh_type> const mesh, vector3_type & max_coord)
     {
-      assert(mesh.size_vertices()>0 || !"mesh did not have any vertices");
+      using value_type = typename vector3_type::value_type;
+      assert(mesh->size_vertices()>0 || !"mesh did not have any vertices");
 
-      typename mesh_type::const_vertex_iterator end    = mesh.vertex_end();
-      typename mesh_type::const_vertex_iterator v      = mesh.vertex_begin();
-      max_coord = v->m_coord;
-      for(;v!=end;++v)
+      auto constexpr inf = std::numeric_limits<value_type>::min();
+      max_coord = {inf, inf, inf};
+      for(auto v : mesh->vertices())
         max_coord = max(max_coord, v->m_coord);
     }
 

@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
 
@@ -25,7 +27,7 @@ namespace OpenTissue
 
     protected:
 
-      system_type * m_owner; ///< The particle system the costraint belong to.
+      std::shared_ptr<system_type> m_owner; ///< The particle system the costraint belong to.
 
     public:
 
@@ -41,7 +43,7 @@ namespace OpenTissue
       *
       * @param owner     A reference to the particle cluster that should own the object.
       */
-      void connect(system_type const & owner) { m_owner = const_cast<system_type*>(&owner); }
+      void connect(std::shared_ptr<system_type> owner) { m_owner = owner; }
 
       /**
       * Disconnect Object.
@@ -54,8 +56,8 @@ namespace OpenTissue
       *
       * @return   A pointer to the particle cluster owner.
       */
-      system_type       *  /* const & */ owner()       {  return m_owner; }
-      system_type const *  /* const & */ owner() const {  return m_owner; }
+      std::shared_ptr<system_type>        owner()       {  return m_owner; }
+      std::shared_ptr<system_type> const  owner() const {  return m_owner; }
 
     };
 

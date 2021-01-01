@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
@@ -24,7 +26,7 @@ namespace OpenTissue
     */
     template<typename mesh_type, typename vector3_type, typename matrix3x3_type>
     void compute_surface_covariance(
-      mesh_type const & mesh
+      std::shared_ptr<mesh_type> const mesh
       , vector3_type & mu
       , matrix3x3_type & cov
       )
@@ -50,14 +52,12 @@ namespace OpenTissue
       //
       mu.clear();
       unsigned int n=0;
-      const_face_iterator end = mesh.face_end();
-      const_face_iterator f   = mesh.face_begin();
-      for(;f!=end;++f)
+      for(auto f : mesh->faces())
       {
-        const_face_vertex_circulator  a(*f);--a;
-        const_face_vertex_circulator  b(*f);
-        const_face_vertex_circulator  c(*f);++c;
-        for(;c->get_handle()!= a->get_handle(); ++b,++c )
+        const_face_vertex_circulator  a(f);--a;
+        const_face_vertex_circulator  b(f);
+        const_face_vertex_circulator  c(f);++c;
+        for(;c->get_handle() != a->get_handle(); ++b,++c )
         {
           mu += a->m_coord + b->m_coord + c->m_coord;
           ++n;
@@ -66,11 +66,12 @@ namespace OpenTissue
       real_type factor = static_cast<real_type>(1.0/(3.0*n));
       mu *= factor;
       cov.clear();
-      for(f = mesh.face_begin();f!=end;++f)
+
+      for(auto f : mesh->faces())
       {
-        const_face_vertex_circulator  a(*f);--a;
-        const_face_vertex_circulator  b(*f);
-        const_face_vertex_circulator  c(*f);++c;
+        const_face_vertex_circulator  a(f);--a;
+        const_face_vertex_circulator  b(f);
+        const_face_vertex_circulator  c(f);++c;
         for(;c->get_handle()!= a->get_handle(); ++b,++c)
         {
           vector3_type A = a->m_coord - mu;

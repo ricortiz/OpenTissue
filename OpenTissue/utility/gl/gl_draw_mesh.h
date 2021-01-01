@@ -11,6 +11,8 @@
 
 #include <OpenTissue/utility/gl/gl_util.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
 
@@ -47,7 +49,7 @@ namespace OpenTissue
         , m_count(0)
       { }
 
-      MeshDrawArray(mesh_type const & mesh)
+      MeshDrawArray(std::shared_ptr<mesh_type> const mesh)
       {
         //--- We can not simply use the vertex iterators as points, because
         //--- we have no idea of what kind of kernel that is being used. Vertex
@@ -57,7 +59,7 @@ namespace OpenTissue
           typename mesh_type::const_vertex_iterator end  = mesh.vertex_end();
           typename mesh_type::const_vertex_iterator v    = mesh.vertex_begin();
           vertex_data * data = m_data;
-          for(;v!=end;++v,++data)
+          for(auto v : mesh->vertices())
           {
             //(*data) = *( static_cast<vertex_data>(v));
             (*data).m_coord = v->m_coord;
@@ -65,6 +67,7 @@ namespace OpenTissue
             (*data).m_u = v->m_u;
             (*data).m_v = v->m_v;
             (*data).m_color = v->m_color;
+            ++data;
             //std::cout << "mc: " << (*data).m_coord << std::endl;
           }
         }
@@ -76,25 +79,15 @@ namespace OpenTissue
         {
           m_count  = 3*mesh.size_faces();
           m_indices = new unsigned int[m_count];
-          typename mesh_type::const_face_iterator end = mesh.face_end();
-          typename mesh_type::const_face_iterator f   = mesh.face_begin();
           unsigned int * indices = m_indices;
-          for(;f!=end;++f)
+          for(auto f : mesh->faces())
           {
-            assert(valency(*f)==3 || !"Only triangles are supported");
-            typename mesh_type::const_face_vertex_circulator v( *f );
-
-            *indices = static_cast<unsigned int>( v->get_handle().get_idx() );
-            ++indices;
-            ++v;
-
-            *indices = static_cast<unsigned int>( v->get_handle().get_idx() );
-            ++indices;
-            ++v;
-
-            *indices = static_cast<unsigned int>( v->get_handle().get_idx() );
-            ++indices;
-            ++v;
+            assert(valency(f)==3 || !"Only triangles are supported");
+            for(auto v : mesh_type::const_face_vertex_circulator(f))
+            {
+              *indices = static_cast<unsigned int>( v->get_handle().get_idx() );
+              ++indices;
+            }
           }
         }
       }
@@ -168,11 +161,11 @@ namespace OpenTissue
     * @param wireframe  whether the face should be drawn in wireframe or normal (solid).
     */
     template<typename face_type>
-    inline void DrawMeshFace(face_type const & face, bool wireframe = false, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
+    inline void DrawMeshFace(std::shared_ptr<face_type> const face, bool wireframe = false, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
     {
+      using const_face_vertex_circulator = typename face_type::mesh_type::const_face_vertex_circulator;
       glBegin(wireframe ? GL_LINE_LOOP : GL_POLYGON);
-      typename face_type::mesh_type::const_face_vertex_circulator v(face), vend;
-      for(; v != vend; ++v)
+      for(auto v : const_face_vertex_circulator(face))
       {
         if(use_normals)
         {
@@ -201,35 +194,29 @@ namespace OpenTissue
     * @param mode     The mode that the polygon mesh should be drawn in (GL_POLYGON or GL_LINE_LOOP are accepted).
     */
     template<typename mesh_type>
-    inline void DrawMesh(mesh_type const & mesh, unsigned int mode = GL_POLYGON, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
+    inline void DrawMesh(std::shared_ptr<mesh_type> const mesh, unsigned int mode = GL_POLYGON, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
     {
       assert(mode==GL_POLYGON || mode==GL_LINE_LOOP || !"Illegal opengl mode");
-      typename mesh_type::const_face_iterator fend = mesh.face_end();
-      typename mesh_type::const_face_iterator f    = mesh.face_begin();
-
-      for(;f!=fend;++f)
+      for(auto f : mesh->faces())
       {
-        DrawMeshFace(*f, mode == GL_LINE_LOOP, use_colors, use_normals, use_texcoords);
+        DrawMeshFace(f, mode == GL_LINE_LOOP, use_colors, use_normals, use_texcoords);
       }
     }
 
 
     template<typename mesh_type>
-    inline void DrawSkinMesh(mesh_type const & mesh, unsigned int mode = GL_POLYGON  )
+    inline void DrawSkinMesh(std::shared_ptr<mesh_type> const mesh, unsigned int mode = GL_POLYGON  )
     {
       assert(mode==GL_POLYGON || mode==GL_LINE_LOOP || !"Illegal opengl mode");
 
       typedef typename mesh_type::math_types::real_type			real_type;
+      typedef typename mesh_type::const_face_vertex_circulator const_face_vertex_circulator;
 
-      typename mesh_type::const_face_iterator fend = mesh.face_end();
-      typename mesh_type::const_face_iterator f    = mesh.face_begin();
-
-      for(;f!=fend;++f)
+      for(auto f : mesh->faces())
       {
-        typename mesh_type::const_face_vertex_circulator v(*f),vend;
         glBegin(mode);
         //int maxi = 0;
-        for(;v!=vend;++v)
+        for(auto v : const_face_vertex_circulator(f))
         {
           //glTexCoord2f( (GLfloat) v->m_u, (GLfloat)v->m_v );
           //glColor3f( (GLfloat) v->m_color(0), (GLfloat)v->m_color(1), (GLfloat)v->m_color(2) );
@@ -292,12 +279,13 @@ namespace OpenTissue
 
     private:
 
-      void create_display_list(mesh_type const & mesh, unsigned int mode = GL_POLYGON, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
+      void create_display_list(std::shared_ptr<mesh_type> const mesh, unsigned int mode = GL_POLYGON, bool use_colors = true, bool use_normals = true, bool use_texcoords = true)
       {
+        typedef typename mesh_type::const_face_vertex_circulator const_face_vertex_circulator;
         using std::ceil;
         assert(mode==GL_POLYGON || mode==GL_LINE_LOOP || !"Illegal opengl mode");
 
-        unsigned int total_count  = static_cast<unsigned int>( mesh.size_faces() );            //--- total number of polygons in mesh
+        unsigned int total_count  = static_cast<unsigned int>( mesh->size_faces() );            //--- total number of polygons in mesh
         if(total_count == 0)
         {
           m_range = m_lists = 0u;
@@ -308,16 +296,15 @@ namespace OpenTissue
         unsigned int count_left = total_count;                                                 //--- number of polygons that still need to be added to display lists
         m_lists = glGenLists( m_range );                                                       //--- generate m_range empty display lists
 
-        typename mesh_type::const_face_iterator f = mesh.face_begin();
+        auto const f = mesh->face_begin();
         for ( GLuint number = 0; number < m_range; ++number )
         {
           glNewList( m_lists + number, GL_COMPILE );
           unsigned int count = std::min(count_left,list_count);
           for ( unsigned int i = 0; i < count; ++i, ++f )
           {
-            typename mesh_type::const_face_vertex_circulator v(*f),vend;
             glBegin(mode);
-            for(;v!=vend;++v)
+            for(auto v : const_face_vertex_circulator(*f))
             {
               if(use_normals)
                 glNormal3f  ( (GLfloat) v->m_normal(0), (GLfloat)v->m_normal(1), (GLfloat)v->m_normal(2) );

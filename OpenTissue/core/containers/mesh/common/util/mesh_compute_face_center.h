@@ -9,22 +9,23 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename face_type,typename vector3_type>
-    void compute_face_center(face_type const & f, vector3_type & center)
+    void compute_face_center(std::shared_ptr<face_type> const f, vector3_type & center)
     {
       typedef typename face_type::mesh_type                mesh_type;
       typedef typename mesh_type::face_vertex_circulator   face_vertex_circulator;
-      
+
       typedef typename mesh_type::math_types               math_types;
       typedef typename math_types::real_type               real_type;
 
       center.clear();
-      face_vertex_circulator v(f),end;
-      for(;v!=end;++v)
+      for(auto v : face_vertex_circulator(f))
         center += v->m_coord;
       center /= static_cast<real_type>(valency(f));
     }

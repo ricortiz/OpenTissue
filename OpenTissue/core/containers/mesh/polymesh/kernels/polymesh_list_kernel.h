@@ -21,6 +21,8 @@
 #include <list>
 #include <vector>
 #include <cassert>
+#include <memory>
+#include <unordered_map>
 
 namespace OpenTissue
 {
@@ -69,31 +71,16 @@ namespace OpenTissue
 
     public:
 
-      typedef std::size_t                                        index_type;
-      typedef typename std::list<vertex_type>::size_type         size_type;
-
-      typedef typename std::list<vertex_type>::iterator          vertex_iterator;
-      typedef typename std::list<halfedge_type>::iterator        halfedge_iterator;
-      typedef typename std::list<edge_type>::iterator            edge_iterator;
-      typedef typename std::list<face_type>::iterator            face_iterator;
-
-      typedef typename std::list<vertex_type>::const_iterator    const_vertex_iterator;
-      typedef typename std::list<halfedge_type>::const_iterator  const_halfedge_iterator;
-      typedef typename std::list<edge_type>::const_iterator      const_edge_iterator;
-      typedef typename std::list<face_type>::const_iterator      const_face_iterator;
-
-      // This is what we store in the lookup-tables (...lut).
-      // Allows us to model the concept of a "null"-iterator.
-      // * It is implicitly convertible to bool, so one can test for a valid iterator
-      //   simply by saying "if ( iter )".
-      // * If it does contain a valid iterator, it can be retrieved by using "iter.get()". This is used
-      //   when the iterator needs to be passed to a method.
-      // * To reset an optional iterator, use "iter = boost::none"
-      // * Otherwise, it acts just like an ordinary iterator.
-      typedef typename boost::optional<vertex_iterator>          opt_vertex_iter;
-      typedef typename boost::optional<halfedge_iterator>        opt_halfedge_iter;
-      typedef typename boost::optional<edge_iterator>            opt_edge_iter;
-      typedef typename boost::optional<face_iterator>            opt_face_iter;
+      typedef std::size_t                                                        index_type;
+      typedef typename std::list<std::shared_ptr<vertex_type>>::size_type        size_type;
+      typedef typename std::list<std::shared_ptr<vertex_type>>::iterator         vertex_iterator;
+      typedef typename std::list<std::shared_ptr<halfedge_type>>::iterator       halfedge_iterator;
+      typedef typename std::list<std::shared_ptr<edge_type>>::iterator           edge_iterator;
+      typedef typename std::list<std::shared_ptr<face_type>>::iterator           face_iterator;
+      typedef typename std::list<std::shared_ptr<vertex_type>>::const_iterator   const_vertex_iterator;
+      typedef typename std::list<std::shared_ptr<halfedge_type>>::const_iterator const_halfedge_iterator;
+      typedef typename std::list<std::shared_ptr<edge_type>>::const_iterator     const_edge_iterator;
+      typedef typename std::list<std::shared_ptr<face_type>>::const_iterator     const_face_iterator;
 
     private:
 
@@ -182,17 +169,17 @@ namespace OpenTissue
 
     private:
 
-      std::list< vertex_type   >       m_vertices;
-      std::list< halfedge_type >       m_halfedges;
-      std::list< edge_type     >       m_edges;
-      std::list< face_type     >       m_faces;
+      std::list<std::shared_ptr<vertex_type>>   m_vertices;
+      std::list<std::shared_ptr<halfedge_type>> m_halfedges;
+      std::list<std::shared_ptr<edge_type>>     m_edges;
+      std::list<std::shared_ptr<face_type>>     m_faces;
 
       // This is our iterator lookup-tables, that can contain an empty optional, corresponding to
       // a "null"-iterator
-      std::vector< opt_vertex_iter   > m_vertex_lut;
-      std::vector< opt_halfedge_iter > m_halfedge_lut;
-      std::vector< opt_edge_iter     > m_edge_lut;
-      std::vector< opt_face_iter     > m_face_lut;
+      std::unordered_map<index_type, vertex_iterator>   m_vertex_lut;
+      std::unordered_map<index_type, halfedge_iterator> m_halfedge_lut;
+      std::unordered_map<index_type, edge_iterator>     m_edge_lut;
+      std::unordered_map<index_type, face_iterator>     m_face_lut;
 
     public:
 
@@ -218,6 +205,15 @@ namespace OpenTissue
       size_type size_halfedges() const { return m_halfedges.size(); }
       size_type size_edges()     const { return m_edges.size(); }
       size_type size_vertices()  const { return m_vertices.size(); }
+
+      std::list<std::shared_ptr<halfedge_type>>       halfedges()       { return m_halfedges; }
+      std::list<std::shared_ptr<halfedge_type>> const halfedges() const { return m_halfedges; }
+      std::list<std::shared_ptr<vertex_type>>         vertices()        { return m_vertices; }
+      std::list<std::shared_ptr<vertex_type>>   const vertices()  const { return m_vertices; }
+      std::list<std::shared_ptr<edge_type>>           edges()           { return m_edges; }
+      std::list<std::shared_ptr<edge_type>>     const edges()     const { return m_edges; }
+      std::list<std::shared_ptr<face_type>>           faces()           { return m_faces; }
+      std::list<std::shared_ptr<face_type>>     const faces()     const { return m_faces; }
 
     public:
 
@@ -269,103 +265,125 @@ namespace OpenTissue
 
       vertex_handle create_vertex()
       {
-        m_vertices.push_back(vertex_type());
-        vertex_iterator last = m_vertices.end();
-        --last;
-        index_type new_idx = m_vertex_lut.size();
-        m_vertex_lut.push_back(last);
+        // Create vertex
+        auto v = std::make_shared<vertex_type>();
+        auto vertex_index = m_vertices.size();
+        m_vertices.push_back(v);
 
-        vertex_handle h(new_idx);
-        polymesh_core_access::set_self_handle( last, h);
+        // Get iterator
+        auto last = std::next(m_vertices.begin(), vertex_index);
+        auto lut_index = m_vertex_lut.size();
+        m_vertex_lut.emplace(lut_index, last);
+
+        // Set handle
+        vertex_handle h(lut_index);
+        polymesh_core_access::set_self_handle(v,h);
         return h;
       }
 
       halfedge_handle create_halfedge()
       {
-        m_halfedges.push_back(halfedge_type());
-        halfedge_iterator last = m_halfedges.end();
-        --last;
-        index_type new_idx = m_halfedge_lut.size();
-        m_halfedge_lut.push_back(last);
+        // Create edge
+        auto e = std::make_shared<halfedge_type>();
+        auto edge_index = m_halfedges.size();
+        m_halfedges.push_back(e);
 
-        halfedge_handle h(new_idx);
-        polymesh_core_access::set_self_handle( last, h);
+        // Get iterator
+        auto last = std::next(m_halfedges.begin(), edge_index);
+        auto lut_index = m_halfedge_lut.size();
+        m_halfedge_lut.emplace(lut_index, last);
+
+        // Set handle
+        halfedge_handle h(lut_index);
+        polymesh_core_access::set_self_handle(e,h);
         return h;
       }
 
       edge_handle create_edge()
       {
-        m_edges.push_back(edge_type());
-        edge_iterator last = m_edges.end();
-        --last;
-        index_type new_idx = m_edge_lut.size();
-        m_edge_lut.push_back(last);
-        edge_handle h(new_idx);
-        polymesh_core_access::set_self_handle( last, h);
+        // Create edge
+        auto e = std::make_shared<edge_type>();
+        auto edge_index = m_edges.size();
+        m_edges.push_back(e);
+
+        // Get iterator
+        auto last = std::next(m_halfedges.begin(), edge_index);
+        auto lut_index = m_edge_lut.size();
+        m_edge_lut.emplace(lut_index, last);
+
+        // Set handle
+        edge_handle h(lut_index);
+        polymesh_core_access::set_self_handle(e,h);
         return h;
       }
 
       face_handle create_face()
       {
-        m_faces.push_back(face_type());
-        face_iterator last = m_faces.end();
-        --last;
-        index_type new_idx = m_face_lut.size();
-        m_face_lut.push_back(last);
-        face_handle h(new_idx);
-        polymesh_core_access::set_self_handle( last, h);
+        // Create face
+        auto f = std::make_shared<face_type>();
+        auto face_index = m_faces.size();
+        m_faces.push_back(f);
+
+        // Get iterator
+        auto last = std::next(m_faces.begin(), face_index);
+        auto lut_index = m_face_lut.size();
+        m_face_lut.emplace(lut_index, last);
+
+        // Set handle
+        face_handle h(lut_index);
+        polymesh_core_access::set_self_handle(f,h);
         return h;
       }
 
       void erase_vertex(vertex_handle const & v)
       {
-        assert(v.get_idx()>=0);
-        assert(v.get_idx()<m_vertex_lut.size());
+        auto vertex_index = v.get_idx();
+        assert(vertex_index >= 0);
 
-        opt_vertex_iter vit = m_vertex_lut[v.get_idx()];
-        if(vit)
+        auto vit = m_vertex_lut.find(vertex_index);
+        if(vit != m_vertex_lut.end())
         {
-          m_vertices.erase(vit.get());
-          m_vertex_lut[v.get_idx()] = boost::none;
+          m_vertices.erase(vit);
+          m_vertex_lut.erase(vertex_index);
         }
       }
 
       void erase_halfedge(halfedge_handle const & h)
       {
-        assert(h.get_idx()>=0);
-        assert(h.get_idx()<m_halfedge_lut.size());
+        auto edge_index = h.get_idx();
+        assert(edge_index>=0);
 
-        opt_halfedge_iter hit = m_halfedge_lut[h.get_idx()];
-        if(hit)
+        auto hit = m_halfedge_lut.find(edge_index);
+        if(hit != m_halfedge_lut.end())
         {
-          m_halfedges.erase(hit.get());
-          m_halfedge_lut[h.get_idx()] = boost::none;
+          m_halfedges.erase(hit);
+          m_halfedge_lut.erase(edge_index);
         }
       }
 
       void erase_edge(edge_handle const & e)
       {
+        auto edge_index = e.get_idx();
         assert(e.get_idx()>=0);
-        assert(e.get_idx()<m_edge_lut.size());
 
-        opt_edge_iter eit = m_edge_lut[e.get_idx()];
-        if(eit)
+        auto eit = m_edge_lut.find(e.get_idx());
+        if(eit != m_edge_lut.end())
         {
-          m_edges.erase(eit.get());
-          m_edge_lut[e.get_idx()] = boost::none;
+          m_edges.erase(eit);
+          m_edge_luterase(e.get_idx());
         }
       }
 
       void erase_face(face_handle const & f)
       {
+        auto face_index = f.get_idx();
         assert(f.get_idx()>=0);
-        assert(f.get_idx()<m_face_lut.size());
 
-        opt_face_iter fit = m_face_lut[f.get_idx()];
-        if(fit)
+        auto fit = m_face_lut.find(f.get_idx());
+        if(fit != m_face_lut.end())
         {
-          m_faces.erase(fit.get());
-          m_face_lut[f.get_idx()] = boost::none;
+          m_faces.erase(fit);
+          m_face_lut.erase(f.get_idx());
         }
       }
 
@@ -374,92 +392,89 @@ namespace OpenTissue
       vertex_handle get_vertex_handle(index_type idx) const
       {
         assert(idx>=0);
-        assert(idx<m_vertex_lut.size());
 
-        opt_vertex_iter lut = m_vertex_lut[idx];
-        return lut ? lut.get()->get_handle() : null_vertex_handle();
+        bool exists = m_vertex_lut.find(idx) != m_vertex_lut.end();
+        std::shared_ptr<vertex_type> vertex_ptr = exists ? *m_vertex_lut[idx] : nullptr;
+        return vertex_ptr ? vertex_ptr->get_handle() : this->null_vertex_handle();
       }
 
       halfedge_handle get_halfedge_handle(index_type idx) const
       {
         assert(idx>=0);
-        assert(idx<m_halfedge_lut.size());
 
-        opt_halfedge_iter lut = m_halfedge_lut[idx];
-        return lut ? lut.get()->get_handle() : null_halfedge_handle();
+        bool exists = m_halfedge_lut.find(idx) != m_halfedge_lut.end();
+        std::shared_ptr<halfedge_type> edge_ptr = exists ? *m_halfedge_lut[idx] : nullptr;
+        return edge_ptr ? edge_ptr->get_handle() : this->null_halfedge_handle();
       }
 
       edge_handle get_edge_handle(index_type idx) const
       {
         assert(idx>=0);
-        assert(idx<m_edge_lut.size());
 
-        opt_edge_iter lut = m_edge_lut[idx];
-        return lut ? lut.get()->get_handle() : null_edge_handle();
+        bool exists = m_edge_lut.find(idx) != m_edge_lut.end();
+        std::shared_ptr<edge_type> edge_ptr = exists ? *m_edge_lut[idx] : nullptr;
+        return edge_ptr ? edge_ptr->get_handle() : this->null_halfedge_handle();
       }
 
       face_handle get_face_handle(index_type idx) const
       {
         assert(idx>=0);
-        assert(idx<m_face_lut.size());
 
-        opt_face_iter lut = m_face_lut[idx];
-        return lut ? lut.get()->get_handle() : null_face_handle();
+        bool exists = m_face_lut.find(idx) != m_face_lut.end();
+        std::shared_ptr<face_type> face_ptr = exists ? *m_face_lut[idx] : nullptr;
+        return face_ptr ? face_ptr->get_handle() : this->null_halfedge_handle();
       }
 
       vertex_iterator get_vertex_iterator(vertex_handle const & v) /*const*/
       {
-        if( v == null_vertex_handle() )
+        if( v == this->null_vertex_handle() )
           return vertex_end();
 
         assert(v.get_idx()>=0);
-        assert(v.get_idx()<m_vertex_lut.size());
 
-        return m_vertex_lut[v.get_idx()].get();
-        // TODO: henrikd 20060323
-        //   Is it possible for a valid handle to point at a "null"-iterator?
-        //   If yes, then we should perhaps do this instead:
-        //   opt_vertex_iter lut = m_vertex_lut[v.get_idx()];
-        //   return lut ? lut.get() : vertex_end();
-        // 
-        // Ahh, the user should first call is_valid_vertex_handle(v), right?
-        // If yes, then the above sketched construct could be used instead,
-        // eliminating the need for is_valid_vertex_handle(v).
-        // Then the user should instead check if get_vertex_iterator(v) returns
-        // the end-iterator. Ain't that pretty? :-)
+        if( m_vertex_lut.find(v.get_idx()) == m_vertex_lut.end())
+          return vertex_end();
+
+        return m_vertex_lut[v.get_idx()];
       }
 
       halfedge_iterator get_halfedge_iterator(halfedge_handle const & h) /*const*/
       {
-        if( h == null_halfedge_handle() )
+        if( h == this->null_halfedge_handle() )
           return halfedge_end();
 
         assert(h.get_idx()>=0);
-        assert(h.get_idx()<m_halfedge_lut.size());
 
-        return  m_halfedge_lut[h.get_idx()].get();
+        if( m_halfedge_lut.find(h.get_idx()) == m_halfedge_lut.end())
+          return halfedge_end();
+
+        return  m_halfedge_lut[h.get_idx()];
       }
 
       edge_iterator get_edge_iterator(edge_handle const & e) /*const*/
       {
-        if( e == null_edge_handle() )
+        if( e == this->null_edge_handle() )
           return edge_end();
 
         assert(e.get_idx()>=0);
-        assert(e.get_idx()<m_edge_lut.size());
 
-        return  m_edge_lut[e.get_idx()].get();
+        if( m_edge_lut.find(e.get_idx()) == m_edge_lut.end())
+          return edge_end();
+
+        return  m_edge_lut[e.get_idx()];
       }
 
       face_iterator get_face_iterator(face_handle const & f) /*const*/
       {
-        if( f == null_face_handle() )
+        if( f == this->null_face_handle() )
           return face_end();
 
         assert(f.get_idx()>=0);
-        assert(f.get_idx()<m_face_lut.size());
 
-        return  m_face_lut[f.get_idx()].get();
+        if( m_face_lut.find(f.get_idx()) == m_face_lut.end())
+          return face_end();
+
+        return  m_face_lut[f.get_idx()];
       }
 
       void clear()
@@ -478,46 +493,42 @@ namespace OpenTissue
 
       bool is_valid_vertex_handle(vertex_handle const & v) const
       {
-        if(v == null_vertex_handle())
+        if(v == this->null_vertex_handle())
           return false;
 
         assert(v.get_idx()>=0);
-        assert(v.get_idx()<m_vertex_lut.size());
 
-        return m_vertex_lut[v.get_idx()] != boost::none;
+        return m_vertex_lut.find(v.get_idx()) != m_vertex_lut.end();
       }
 
       bool is_valid_halfedge_handle(halfedge_handle const & h) const
       {
-        if(h == null_halfedge_handle())
+        if(h == this->null_halfedge_handle())
           return false;
 
         assert(h.get_idx()>=0);
-        assert(h.get_idx()<m_halfedge_lut.size());
 
-        return m_halfedge_lut[h.get_idx()] != boost::none;
+        return m_halfedge_lut.find(h.get_idx()) != m_halfedge_lut.end();
       }
 
       bool is_valid_edge_handle(edge_handle const & e) const
       {
-        if(e == null_edge_handle())
+        if(e == this->null_edge_handle())
           return false;
 
         assert(e.get_idx()>=0);
-        assert(e.get_idx()<m_edge_lut.size());
 
-        return m_edge_lut[e.get_idx()] != boost::none;
+        return m_edge_lut.find(e.get_idx()) != m_edge_lut.end();
       }
 
       bool is_valid_face_handle(face_handle const & f) const
       {
-        if(f == null_face_handle())
+        if(f == this->null_face_handle())
           return false;
 
         assert(f.get_idx()>=0);
-        assert(f.get_idx()<m_face_lut.size());
 
-        return m_face_lut[f.get_idx()] != boost::none;
+        return m_face_lut.find(f.get_idx()) != m_face_lut.end();
       }
 
     };

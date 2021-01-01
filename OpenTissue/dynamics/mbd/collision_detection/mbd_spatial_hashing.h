@@ -13,6 +13,8 @@
 #include <OpenTissue/collision/intersect/intersect_aabb_aabb.h>
 #include <OpenTissue/collision/spatial_hashing/spatial_hashing.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -56,7 +58,7 @@ namespace OpenTissue
       public:
 
         size_type m_policy_time_stamp;
-        configuration_type * m_configuration;
+        std::shared_ptr<configuration_type> m_configuration;
 
       public:
 
@@ -64,8 +66,8 @@ namespace OpenTissue
           : m_policy_time_stamp(0)
         {}
 
-        vector3_type min_coord(body_type const & body) const {   return body.min();};
-        vector3_type max_coord(body_type const & body) const {   return body.max();};
+        vector3_type min_coord(std::shared_ptr<body_type> const body) const { return body->min(); };
+        vector3_type max_coord(std::shared_ptr<body_type> const body) const { return body->max(); };
 
         void reset(result_container & results)
         {
@@ -73,25 +75,22 @@ namespace OpenTissue
           ++m_policy_time_stamp;
         };
 
-        void report(data_type const & data, query_type const & query,result_container & results)
+        void report(std::shared_ptr<body_type> data,std::shared_ptr<body_type> query,result_container & results)
         {
-          body_type * body1 = const_cast<body_type*>(&data);
-          body_type * body2 = const_cast<body_type*>(&query);
-
-          if(body1==body2)
+          if(data==query)
             return;
 
-          if(body1->get_index() > body2->get_index())
+          if(data->get_index() > query->get_index())
             return;
 
-          edge_type * edge = m_configuration->get_edge( body1, body2 );
+          auto edge = m_configuration->get_edge( data, query );
           if ( edge && edge->m_sh_time_stamp == m_policy_time_stamp )
             return;
 
-          if(OpenTissue::intersect::aabb_aabb(body1->m_aabb,body2->m_aabb))
+          if(OpenTissue::intersect::aabb_aabb(data->m_aabb,query->m_aabb))
           {
             if ( !edge )
-              edge = m_configuration->add( body1, body2 );
+              edge = m_configuration->add( data, query );
             edge->m_sh_time_stamp = m_policy_time_stamp;
             results.push_back( edge );
           }
@@ -111,7 +110,7 @@ namespace OpenTissue
         vector3_type min(void) const {  return m_aabb.min();};
         vector3_type max(void) const {  return m_aabb.max();};
 
-        void updateAABB( body_type * self, real_type const & envelope )
+        void updateAABB( std::shared_ptr<body_type> self, real_type const & envelope )
         {
           vector3_type r;
           self->get_position( r );
@@ -143,28 +142,30 @@ namespace OpenTissue
       void clear()
       {
         this->m_query.m_policy_time_stamp = 0;
-        this->m_query.m_configuration = 0;
+        this->m_query.m_configuration = nullptr;
       }
 
-      void add( body_type * /*body*/ )    { };
-      void remove( body_type * /*body*/ )    {};
+      void add( std::shared_ptr<body_type> /*body*/ )    { };
+      void remove( std::shared_ptr<body_type> /*body*/ )    {};
 
-      void init( configuration_type & configuration )
+      void init( std::shared_ptr<configuration_type> configuration )
       {
         clear();
         m_query.m_policy_time_stamp = 0;
-        m_query.m_configuration = &configuration;
 
-        real_type envelope =  m_query.m_configuration->get_collision_envelope();
+        real_type envelope =  configuration->get_collision_envelope();
 
-        typename configuration_type::body_iterator begin(  m_query.m_configuration->body_begin() );
-        typename configuration_type::body_iterator end(  m_query.m_configuration->body_end() );
-        typename configuration_type::body_iterator body;
+        for(auto body : configuration->bodies())
+        {
+          body->updateAABB( body, envelope );
+        }
 
-        for ( body = begin; body != end; ++body )
-          body->updateAABB( &( *body ), envelope );
+        auto begin = configuration->body_begin();
+        auto end = configuration->body_end();
 
         m_query.auto_init_settings(begin,end);
+
+        m_query.m_configuration = configuration;
 
         std::cout << "SpatialHashing::init():  |dx| = " << m_query.get_spacing() << std::endl;
         std::cout << "SpatialHashing::init():   |S| = " << m_query.size() << std::endl;
@@ -174,37 +175,14 @@ namespace OpenTissue
       {
         real_type envelope = m_query.m_configuration->get_collision_envelope();
 
-        typename configuration_type::body_iterator begin( m_query.m_configuration->body_begin() );
-        typename configuration_type::body_iterator end( m_query.m_configuration->body_end() );
-        typename configuration_type::body_iterator body;
+        for(auto body : m_query.m_configuration->bodies())
+        {
+          body->updateAABB( body, envelope );
+        }
 
-        for ( body = begin; body!=end; ++body )
-          body->updateAABB( &( *body ), envelope );
-
-        //m_query(begin, end, begin, end, edges, query_algorithm::no_collisions_tag() );
+        auto begin = m_query.m_configuration->body_begin();
+        auto end = m_query.m_configuration->body_end();
         m_query(begin, end, begin, end, edges, typename query_algorithm::all_tag() );
-
-
-        //{
-        //  typename configuration_type::indirect_joint_iterator begin( m_query.m_configuration->joint_begin() );
-        //  typename configuration_type::indirect_joint_iterator end( m_query.m_configuration->joint_end() );
-        //  typename configuration_type::indirect_joint_iterator joint;
-        //  for ( joint = begin; joint!=end; ++joint )
-        //  {
-
-        //    body_type * body1 = joint->get_socket_A()->get_body();
-        //    body_type * body2 = joint->get_socket_B()->get_body();
-
-        //    edge_type * edge = m_query.m_configuration->get_edge( body1, body2 );
-        //    //if ( edge && edge->m_sh_time_stamp == m_query.m_policy_time_stamp )
-        //    //  continue;
-        //    if ( !edge )
-        //      edge = m_query.m_configuration->add( body1, body2 );
-        //    //edge->m_sh_time_stamp = m_query.m_policy_time_stamp;
-        //    //edges.push_back( edge );
-        //  }
-        //}
-
       };
 
     };

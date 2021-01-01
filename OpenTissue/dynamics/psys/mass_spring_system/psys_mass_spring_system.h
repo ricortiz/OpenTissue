@@ -13,6 +13,7 @@
 #include <boost/bind.hpp>
 
 #include <list>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -24,7 +25,7 @@ namespace OpenTissue
       typename types
       , typename integrator_policy
     >
-    class MassSpringSystem : public System<types>, public integrator_policy
+    class MassSpringSystem : public System<types>, public integrator_policy, std::enable_shared_from_this<MassSpringSystem<types,integrator_policy>>
     {
     public:
 
@@ -58,16 +59,10 @@ namespace OpenTissue
 
     protected:
 
-      typedef std::list<force_type *>         force_ptr_container;
-      typedef std::list<geometry_holder_type> geometry_container;
-      typedef std::list<constraint_type *>    constraint_ptr_container;
-
-    public:
-
-      typedef boost::indirect_iterator< typename force_ptr_container::iterator, force_type>           force_iterator;
-      typedef boost::indirect_iterator< typename constraint_ptr_container::iterator, constraint_type> constraint_iterator;
-
-      typedef typename geometry_container::iterator                                                   geometry_iterator;
+      typedef std::list<contact_point_type>               contact_point_container;
+      typedef std::list<std::shared_ptr<force_type>>      force_ptr_container;
+      typedef std::list<geometry_holder_type>             geometry_container;
+      typedef std::list<std::shared_ptr<constraint_type>> constraint_ptr_container;
 
     protected:
 
@@ -77,12 +72,12 @@ namespace OpenTissue
                                                  ///< should perform collision detection against.
     public:
 
-      force_iterator      force_begin()      { return force_iterator(m_forces.begin());           }
-      force_iterator      force_end()        { return force_iterator(m_forces.end());             }
-      constraint_iterator constraint_begin() { return constraint_iterator(m_constraints.begin());}
-      constraint_iterator constraint_end()   { return constraint_iterator(m_constraints.end());  }
-      geometry_iterator   geometry_begin()   { return geometry_iterator(m_geometries.begin());   }
-      geometry_iterator   geometry_end()     { return geometry_iterator(m_geometries.end());     }
+      force_ptr_container            get_forces()            { return m_forces;      }
+      const force_ptr_container      get_forces()      const { return m_forces;      }
+      constraint_ptr_container       get_constraints()       { return m_constraints; }
+      const constraint_ptr_container get_constraints() const { return m_constraints; }
+      geometry_container             get_geometries()        { return m_geometries;  }
+      const geometry_container       get_geometries()  const { return m_geometries;  }
 
       void clear(void)
       {
@@ -92,23 +87,23 @@ namespace OpenTissue
         system_type::clear();
       };
 
-      void add_force(force_type * F)              { F->connect(*this); m_forces.push_back(F);      }
-      void remove_force(force_type * F)           { m_forces.remove(F); F->disconnect();           }
+      void add_force(std::shared_ptr<force_type> F)              { F->connect(this->shared_from_this()); m_forces.push_back(F); }
+      void remove_force(std::shared_ptr<force_type> F)           { m_forces.remove(F); F->disconnect();      }
 
-      void add_constraint(constraint_type * C)    { C->connect(*this); m_constraints.push_back(C); }
-      void remove_constraint(constraint_type * C) { m_constraints.remove(C); C->disconnect();      }
+      void add_constraint(std::shared_ptr<constraint_type> C)    { C->connect(this->shared_from_this()); m_constraints.push_back(C); }
+      void remove_constraint(std::shared_ptr<constraint_type> C) { m_constraints.remove(C); C->disconnect();      }
 
       template<typename geometry_type>
-      void add_geometry(geometry_type * G)
+      void add_geometry(std::shared_ptr<geometry_type> G)
       {
         geometry_holder_type holder;
         holder.set(G);
-        holder.connect(*this);
+        holder.connect(this->shared_from_this());
         m_geometries.push_back(holder);
       }
 
       template<typename geometry_type>
-      void remove_geometry(geometry_type * G)
+      void remove_geometry(std::shared_ptr<geometry_type> G)
       {
         geometry_holder_type holder;
         holder.set(G);
@@ -123,7 +118,7 @@ namespace OpenTissue
         , m_projection(true)
       {}
 
-      ~MassSpringSystem(){  clear(); }
+      ~MassSpringSystem(){ clear(); }
 
     public:
 
@@ -144,9 +139,7 @@ namespace OpenTissue
 
         for(unsigned int i=0;i<m_iterations;++i)
         {
-          constraint_iterator c   = constraint_begin();
-          constraint_iterator end = constraint_end();
-          for(;c!=end;++c)
+          for(auto c : m_constraints)
             c->satisfy();
 
           do_projection();
@@ -155,59 +148,39 @@ namespace OpenTissue
 
       void do_projection()
       {
-        typedef std::list<contact_point_type> contact_point_container;
-
         if(!m_projection)
           return;
 
         contact_point_container contacts;
 
+        for(auto &g : m_geometries)
+          g.dispatch( *this, contacts );
 
+        for(auto &cp : contacts)
         {
-          geometry_iterator g = geometry_begin();
-          geometry_iterator end = geometry_end();
-          for(;g!=end;++g)
-            g->dispatch( *this, contacts );
-          //        std::for_each(
-          //            geometry_begin()
-          //          , geometry_end()
-          ////          ,  boost::bind( &geometry_type::dispatch , _1, *this , contacts )  // do not works?
-          ////          ,  boost::bind( &geometry_type::test, _1, 2, 3)  // works
-          ////          ,  boost::bind( &geometry_type::type, _1)        // works
-          //          );
-        }
-
-        {
-          typename std::list<contact_point_type>::iterator cp = contacts.begin();
-          typename std::list<contact_point_type>::iterator end = contacts.end();
-          for(;cp!=end;++cp)
+          if(cp.m_A0 && !cp.m_A1 && !cp.m_A2 && !cp.m_B0 && !cp.m_B1 && !cp.m_B2)
           {
-            if(cp->m_A0 && !cp->m_A1 && !cp->m_A2 && !cp->m_B0 && !cp->m_B1 && !cp->m_B2)
-            {
-              cp->m_A0->position() +=   cp->m_n*cp->m_distance;
-            }
-
-
-            if(cp->m_A0 && cp->m_A1 && !cp->m_A2 && cp->m_B0 && cp->m_B1 && cp->m_B2)
-            {
-              //--- Hack, I have not really thought about what to do?
-              cp->m_A0->position() = cp->m_A0->old_position();
-              cp->m_A1->position() = cp->m_A1->old_position();
-
-              cp->m_A0->velocity().clear();
-              cp->m_A1->velocity().clear();
-
-              cp->m_B0->position() = cp->m_B0->old_position();
-              cp->m_B1->position() = cp->m_B1->old_position();
-              cp->m_B2->position() = cp->m_B2->old_position();
-
-              cp->m_B0->velocity().clear();
-              cp->m_B1->velocity().clear();
-              cp->m_B2->velocity().clear();
-
-            }
-
+            cp.m_A0->position() += cp.m_n*cp.m_distance;
           }
+
+          if(cp.m_A0 && cp.m_A1 && !cp.m_A2 && cp.m_B0 && cp.m_B1 && cp.m_B2)
+          {
+            //--- Hack, I have not really thought about what to do?
+            cp.m_A0->position() = cp.m_A0->old_position();
+            cp.m_A1->position() = cp.m_A1->old_position();
+
+            cp.m_A0->velocity().clear();
+            cp.m_A1->velocity().clear();
+
+            cp.m_B0->position() = cp.m_B0->old_position();
+            cp.m_B1->position() = cp.m_B1->old_position();
+            cp.m_B2->position() = cp.m_B2->old_position();
+
+            cp.m_B0->velocity().clear();
+            cp.m_B1->velocity().clear();
+            cp.m_B2->velocity().clear();
+          }
+
         }
       }
 
@@ -215,20 +188,19 @@ namespace OpenTissue
 
       void compute_accelerations()
       {
-        particle_iterator p   = this->particle_begin();
-        particle_iterator end = this->particle_end();
-        for(;p!=end;++p)
+        for(auto &p : this->m_particles)
           p->acceleration() = p->force() * p->inv_mass();
       }
 
       void compute_forces()
       {
-        particle_iterator p   = this->particle_begin();
-        particle_iterator end = this->particle_end();
-        for(;p!=end;++p)
+        for(auto &p : this->m_particles)
           p->force().clear();
 
-        std::for_each( force_begin(), force_end(), boost::bind( &force_type::apply, _1 ));
+        for(auto f : m_forces)
+        {
+          f->apply();
+        }
       }
 
     };

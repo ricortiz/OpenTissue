@@ -11,6 +11,8 @@
 
 #include <OpenTissue/dynamics/mbd/interfaces/mbd_core_constraint_interface.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -38,9 +40,9 @@ namespace OpenTissue
 
     protected:
 
-      body_type   * m_bodyA;             ///< A pointer to the first body.
-      body_type   * m_bodyB;             ///< A pointer to the second body.
-      size_type     m_jacobian_idx;      ///< Starting row index if jacobian data in system jacobian (note that column indices are determined by bodies).
+      std::shared_ptr<body_type> m_bodyA;             ///< A pointer to the first body.
+      std::shared_ptr<body_type> m_bodyB;             ///< A pointer to the second body.
+      size_type                  m_jacobian_idx;      ///< Starting row index if jacobian data in system jacobian (note that column indices are determined by bodies).
 
     public:
 
@@ -49,9 +51,9 @@ namespace OpenTissue
         , m_bodyB(0)
         , m_jacobian_idx(0u)
       {}
-      
+
       virtual ~ConstraintInterface(){}
-      
+
     public:
 
       /**
@@ -59,14 +61,14 @@ namespace OpenTissue
       *
       * @return    A pointer to the first body.
       */
-      body_type * get_body_A() const {  return m_bodyA; }
+      std::shared_ptr<body_type> get_body_A() const {  return m_bodyA; }
 
       /**
       * Get body_type B.
       *
       * @return    A pointer to the second body.
       */
-      body_type * get_body_B() const {  return m_bodyB; }
+      std::shared_ptr<body_type> get_body_B() const {  return m_bodyB; }
 
       /**
       * Set Starting Index of Jacobian Data.

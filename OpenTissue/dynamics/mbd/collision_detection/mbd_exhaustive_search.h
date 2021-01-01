@@ -10,6 +10,7 @@
 #include <OpenTissue/configuration.h>
 
 #include <list>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -42,7 +43,7 @@ namespace OpenTissue
       ///< intended to work on.
     public:
 
-      class node_traits  
+      class node_traits
       {
       public:
         vector3_type m_es_pmin;  ///< Minimum corner of enclosing AABB
@@ -54,7 +55,7 @@ namespace OpenTissue
     public:
 
       ExhaustiveSearch()
-        : m_configuration(0) 
+        : m_configuration(0)
       {}
 
     public:
@@ -65,8 +66,9 @@ namespace OpenTissue
       }
 
       void init(configuration_type & configuration) {  m_configuration = &configuration;  };
-      void add(body_type * /*body*/)  {  };
-      void remove(body_type * /*body*/)  {    };
+
+      void add( std::shared_ptr<body_type> /*body*/ )    { };
+      void remove( std::shared_ptr<body_type> /*body*/ )    {};
 
       /**
       * Run Exhaustive Search.

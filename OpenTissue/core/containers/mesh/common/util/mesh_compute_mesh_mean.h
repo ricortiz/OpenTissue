@@ -9,13 +9,15 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
 
     template<typename mesh_type, typename vector3_type>
-    void compute_mesh_mean(mesh_type const & mesh, vector3_type & mean)
+    void compute_mesh_mean(std::shared_ptr<mesh_type> const mesh, vector3_type & mean)
     {
       typedef typename mesh_type::math_types                        math_types;
       typedef typename math_types::value_traits                     value_traits;
@@ -23,10 +25,8 @@ namespace OpenTissue
 
       assert(mesh.size_vertices()>0 || !"mesh did not have any vertices");
 
-      typename mesh_type::const_vertex_iterator end    = mesh.vertex_end();
-      typename mesh_type::const_vertex_iterator v      = mesh.vertex_begin();
       mean.clear();
-      for(;v!=end;++v)
+      for(auto v : mesh->vertices())
         mean +=  v->m_coord;
 
       mean /=  static_cast<real_type>(mesh.size_vertices());

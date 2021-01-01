@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -45,13 +47,12 @@ namespace OpenTissue
       typedef typename mbd_types::contact_type              contact_type;
       typedef typename mbd_types::material_type             material_type;
       typedef typename mbd_types::edge_ptr_container        edge_ptr_container;
-      typedef typename mbd_types::indirect_edge_iterator             indirect_edge_iterator;
-      typedef typename mbd_types::group_container           group_container;
+      typedef typename mbd_types::group_ptr_container       group_ptr_container;
 
     protected:
 
-      typedef typename std::vector<contact_type*>             contact_ptr_heap;
-      typedef typename std::list<body_type*>                  body_ptr_queue;
+      typedef typename std::vector<std::shared_ptr<contact_type>>             contact_ptr_heap;
+      typedef typename std::list<std::shared_ptr<body_type>>                  body_ptr_queue;
 
     public:
 
@@ -62,7 +63,7 @@ namespace OpenTissue
         bool      m_sa_queue_tag;      ///< Boolean flag set to true if node when node have been  pushed into queue.
 
         node_traits()
-          : m_sa_stack_height(0) 
+          : m_sa_stack_height(0)
         {}
 
       };
@@ -73,8 +74,8 @@ namespace OpenTissue
         size_type m_sa_stack_layer;       ///< Equal to the minimum stack height of incident nodes.
         size_type m_sa_visit_time_stamp;  ///< Time stamp indicating last time the edge was traversed.
 
-        edge_traits() 
-          : m_sa_visit_time_stamp(0) 
+        edge_traits()
+          : m_sa_visit_time_stamp(0)
         {}
       };
 
@@ -86,8 +87,8 @@ namespace OpenTissue
 
     public:
 
-      StackAnalysis() 
-        : m_time_stamp(0) 
+      StackAnalysis()
+        : m_time_stamp(0)
       {}
 
     public:
@@ -100,29 +101,23 @@ namespace OpenTissue
       *
       * @return         The number of stack layers, this is equal to the maximum height of the stack.
       */
-      size_type analyze(group_type & group,group_container & layers)
+      size_type analyze(std::shared_ptr<group_type> group,group_ptr_container & layers)
       {
-        using std::min;
-        using std::max;
-
         layers.clear();
 
-        size_type N = group.size_bodies();
+        size_type N = group->size_bodies();
         if(N==0)
           return 0;
 
         ++m_time_stamp;
         body_ptr_queue Q;
         {
-          typename group_type::indirect_body_iterator begin = group.body_begin();
-          typename group_type::indirect_body_iterator end = group.body_end();
-          typename group_type::indirect_body_iterator body;
-          for( body=begin; body!=end; ++body )
+          for(auto body : group->bodies())
           {
             if(body->is_fixed() || body->is_scripted())
             {
               body->m_sa_stack_height = 0;
-              Q.push_back(&(*body));
+              Q.push_back(body);
               body->m_sa_queue_tag = true;
             }
             else
@@ -132,7 +127,7 @@ namespace OpenTissue
             }
           }
         }
-        if(Q.empty() || (group.size_contacts()==0))
+        if(Q.empty() || (group->size_contacts()==0))
         {
           //--- No fixed objects, just return the original contact group as result...
           layers.resize(1);
@@ -144,18 +139,16 @@ namespace OpenTissue
         size_type height = 0; //--- Used to figure out how many layers there is in the stack
         while(!Q.empty())
         {
-          body_type * body = Q.front();
+          auto body = Q.front();
           Q.pop_front();
-          typename body_type::indirect_edge_iterator begin = body->edge_begin();
-          typename body_type::indirect_edge_iterator end = body->edge_end();
-          for(typename body_type::indirect_edge_iterator edge = begin;edge!=end;++edge)
+          for(auto edge : body->edges())
           {
             if(!edge->is_up_to_date())//--- Make sure we only process edges that contain valid cached information.
               continue;
 
-            body_type * next = (body==edge->get_body_A())? edge->get_body_B(): edge->get_body_A();
+            auto next = (body==edge->get_body_A())? edge->get_body_B(): edge->get_body_A();
             bool has_joint = body->has_joint_to(next);
-            if(edge->size_contacts()==0 && !has_joint)//--- Make usre we only process edges that contain contact information
+            if(edge->size_contacts()==0 && !has_joint)//--- Make sure we only process edges that contain contact information
               continue;
 
             if(!next->m_sa_queue_tag)
@@ -164,19 +157,19 @@ namespace OpenTissue
               next->m_sa_queue_tag = true;
             }
 
-            next->m_sa_stack_height = min(next->m_sa_stack_height,body->m_sa_stack_height + 1);
+            next->m_sa_stack_height = std::min(next->m_sa_stack_height,body->m_sa_stack_height + 1);
 
             if(next->m_sa_stack_height == body->m_sa_stack_height && next->m_sa_stack_height!=0)
               edge->m_sa_stack_layer = next->m_sa_stack_height-1;
             else
-              edge->m_sa_stack_layer = min(next->m_sa_stack_height,body->m_sa_stack_height);
+              edge->m_sa_stack_layer = std::min(next->m_sa_stack_height,body->m_sa_stack_height);
 
-            height = max(height,edge->m_sa_stack_layer);
+            height = std::max(height,edge->m_sa_stack_layer);
 
             if(edge->m_sa_visit_time_stamp!=m_time_stamp)
             {
               edge->m_sa_visit_time_stamp=m_time_stamp;
-              edges.push_back(&(*edge));
+              edges.push_back(edge);
             }
           }
         }
@@ -190,24 +183,22 @@ namespace OpenTissue
         //--- Now simply traverse edges and build stack layers
         {
           layers.resize(height+1);
-          indirect_edge_iterator begin = edges.begin();
-          indirect_edge_iterator end = edges.end();
-          for(indirect_edge_iterator edge = begin;edge!=end;++edge)
+          for(auto edge : edges)
           {
             size_type layer = edge->m_sa_stack_layer;
 
-            for(typename edge_type::contact_iterator contact = edge->contact_begin();contact!=edge->contact_end();++contact)
+            for(auto contact : edge->get_contacts())
             {
-              layers[layer].m_contacts.push_back( &(*contact) );
+              layers[layer].m_contacts.push_back(contact);
             }
 
             if(edge->get_body_A()->has_joint_to(edge->get_body_B()))
             {
-              for(typename body_type::indirect_joint_iterator joint = edge->get_body_A()->joint_begin();joint!=edge->get_body_A()->joint_end();++joint)
+              for(auto joint : edge->get_body_A()->joints())
               {
                 if(joint->get_socket_A()->get_body()==edge->get_body_B() || joint->get_socket_B()->get_body()==edge->get_body_B())
                 {
-                  layers[layer].m_constraints.push_back(&(*joint));
+                  layers[layer].m_constraints.push_back(joint);
                 }
               }
             }
@@ -215,9 +206,7 @@ namespace OpenTissue
         }
         //--- Now traverse bodies and add them to the layers
         {
-          typename group_type::indirect_body_iterator begin = group.body_begin();
-          typename group_type::indirect_body_iterator end = group.body_end();
-          for(typename group_type::indirect_body_iterator body=begin;body!=end;++body)
+          for(auto body : group->bodies())
           {
             if(body->m_sa_stack_height==N)
             {
@@ -227,13 +216,11 @@ namespace OpenTissue
             }
             bool in_lower = false;
             bool in_upper = false;
-            typename body_type::indirect_edge_iterator begin = body->edge_begin();
-            typename body_type::indirect_edge_iterator end = body->edge_end();
-            for(typename body_type::indirect_edge_iterator edge = begin;edge!=end;++edge)
+            for(auto edge : body->edges())
             {
               if(!edge->is_up_to_date())//--- Make sure we only process edges that contain valid cached information.
                 continue;
-              body_type * other = (edge->get_body_A()==&(*body))?edge->get_body_B():edge->get_body_A();
+              auto other = edge->get_body_A()==body?edge->get_body_B():edge->get_body_A();
               if(other->m_sa_stack_height==N)//--- Bodies are not in contact, so ignore this edge
                 continue;
               if(other->m_sa_stack_height > body->m_sa_stack_height)
@@ -244,9 +231,9 @@ namespace OpenTissue
                 break;
             }
             if(in_upper)
-              layers[body->m_sa_stack_height].m_bodies.push_back(&(*body));
+              layers[body->m_sa_stack_height].m_bodies.push_back(body);
             if(in_lower)
-              layers[body->m_sa_stack_height - 1].m_bodies.push_back(&(*body));
+              layers[body->m_sa_stack_height - 1].m_bodies.push_back(body);
           }
         }
         return height+1;

@@ -12,6 +12,7 @@
 #include <OpenTissue/core/math/math_is_number.h>
 #include <OpenTissue/core/math/math_constants.h>
 
+#include <memory>
 
 namespace OpenTissue
 {
@@ -44,7 +45,7 @@ namespace OpenTissue
       bool m_use_friction;            ///< Boolean value indicating whether firctional constaints should be ignored.
       bool m_use_bounce;              ///< Boolean value indicating whether newtons collision law should included in the error terms..
 
-      material_type * m_material;     ///< The material properties, such as coefficient of friction.
+      std::shared_ptr<material_type> m_material;     ///< The material properties, such as coefficient of friction.
 
       vector3_type m_n;               ///< The contact normal in WCS. Always pointing from A towards B (i.e. from lower index to higher index).
       vector3_type m_p;               ///< The contact point in WCS.
@@ -92,12 +93,12 @@ namespace OpenTissue
       * @param material      A pointer to the material properties of the contact point.
       */
       void init(
-        body_type * bodyA
-        , body_type * bodyB
+        std::shared_ptr<body_type> bodyA
+        , std::shared_ptr<body_type> bodyB
         , vector3_type const & p
         , vector3_type const & n
         , real_type const & distance
-        , material_type * material
+        , std::shared_ptr<material_type> material
         )
       {
         assert(bodyA  || !"ContactPoint::init() body A was null");
@@ -197,7 +198,7 @@ namespace OpenTissue
             // Intuitively this will help reduce the error in the friction
             // approximation.
             vector3_type un = m_n * m_un;  //--- normal relative velocity
-            vector3_type ut = u - un;      //--- tangential relative velocity            
+            vector3_type ut = u - un;      //--- tangential relative velocity
             if( !is_zero(ut) )
             {
               x = unit(ut);
@@ -234,7 +235,7 @@ namespace OpenTissue
             // Now we rotate the prefixed direction into the world frame
             vector3_type w = unit( Q.rotate(v) );
             // Next we project w onto the tangent plane to get the x-direction
-            x = w - (w*m_n)*m_n;      
+            x = w - (w*m_n)*m_n;
             if( !is_zero(x) )
             {
               y = unit( cross(m_n , x));
@@ -479,7 +480,7 @@ namespace OpenTissue
       void get_regularization(vector_range & gamma) const
       {
         assert(m_material || !"ContactPoint::get_regularization(): Material was null");
-        assert(gamma.size()==get_number_of_jacobian_rows() || !"ContactPoint::get_regularization(): incorrect dimension");      
+        assert(gamma.size()==get_number_of_jacobian_rows() || !"ContactPoint::get_regularization(): incorrect dimension");
 
         gamma(0) = m_material->get_normal_regularization();
         // Todo Refactor into using iterators

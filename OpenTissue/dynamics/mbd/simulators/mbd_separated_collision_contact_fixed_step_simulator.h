@@ -54,7 +54,7 @@ namespace OpenTissue
     *
     */
     template< typename mbd_types  >
-    class SeparatedCollisionContactFixedStepSimulator  
+    class SeparatedCollisionContactFixedStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -67,7 +67,7 @@ namespace OpenTissue
       typedef typename math_policy::matrix_type          matrix_type;
       typedef typename math_policy::vector_type          vector_type;
       typedef typename math_policy::value_traits         value_traits;
-      
+
       typedef typename mbd_types::group_type                       group_type;
       typedef typename mbd_types::group_ptr_container              group_ptr_container;
       typedef typename mbd_types::stepper_policy                   stepper_policy;
@@ -77,16 +77,16 @@ namespace OpenTissue
 
     public:
 
-      class node_traits 
-        : public propagation_algorithm::node_traits 
+      class node_traits
+        : public propagation_algorithm::node_traits
       {};
 
-      class edge_traits 
-        : public propagation_algorithm::edge_traits 
+      class edge_traits
+        : public propagation_algorithm::edge_traits
       {};
 
-      class constraint_traits 
-        : public propagation_algorithm::constraint_traits 
+      class constraint_traits
+        : public propagation_algorithm::constraint_traits
       {};
 
     protected:
@@ -118,9 +118,8 @@ namespace OpenTissue
       vector_type                m_F;                    ///< Generalized force vector of all bodies.
       matrix_type                m_invM;                 ///< Generalized inverse mass matrix of all bodies.
       vector_type                m_restitution;          ///< Temporary storage for keeping restitution values.
-      group_type *               m_all;                  ///< A pointer to a group containing all bodies in the configuration.
       group_ptr_container        m_groups;               ///< Temporary Storage, used to hold results from the collision
-                                                         ///< detection engine. 
+                                                         ///< detection engine.
     public:
 
       SeparatedCollisionContactFixedStepSimulator(){}
@@ -133,19 +132,19 @@ namespace OpenTissue
       {
         assert(time_step>0 || !"SeparatedCollisionContactFixedStepSimulator::run(): time step must be positive");
 
-        m_all = this->get_configuration()->get_all_body_group();
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
 
-        size_type n = m_all->size_bodies();
-        
+        size_type n = all_body_groups->size_bodies();
+
         math_policy::resize( m_s_cur, 7*n);
         math_policy::resize( m_s_predicted, 7*n);
         math_policy::resize( m_u, 6*n);
         math_policy::resize( m_F, 6*n);
 
-        mbd::get_position_vector(*m_all, m_s_cur);
-        mbd::get_inverse_mass_matrix(*m_all,m_invM);
+        mbd::get_position_vector(all_body_groups, m_s_cur);
+        mbd::get_inverse_mass_matrix(all_body_groups,m_invM);
 
-        mbd::compute_scripted_motions(*m_all, this->time() + time_step);
+        mbd::compute_scripted_motions(all_body_groups, this->time() + time_step);
 
         m_stepper_functor.m_stepper = this->get_stepper();
         m_stepper_functor.m_h = time_step;
@@ -176,79 +175,81 @@ namespace OpenTissue
 
       void velocity_update(real_type const & h)
       {
-        assert(m_all || !"SeparatedCollisionContactFixedStepSimulator::velocity_update(): missing all group");
-        mbd::get_external_force_vector(*m_all,m_F,true);
-        mbd::get_velocity_vector(*m_all, m_u);
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        assert(all_body_groups || !"SeparatedCollisionContactFixedStepSimulator::velocity_update(): missing all group");
+        mbd::get_external_force_vector(all_body_groups,m_F,true);
+        mbd::get_velocity_vector(all_body_groups, m_u);
 
         //m_u += ublas::prod(m_invM, m_F)*h;
         math_policy::prod_add(m_invM, m_F,m_u,h);
-        
-        mbd::set_velocity_vector(*m_all,m_u);
+
+        mbd::set_velocity_vector(all_body_groups,m_u);
       }
 
       void position_update(real_type const & h)
       {
-        assert(m_all || !"SeparatedCollisionContactFixedStepSimulator::position_update(): missing all group");
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::compute_position_update(*m_all,m_s_cur,m_u,h,m_s_cur);
-        mbd::set_position_vector(*m_all,m_s_cur);
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        assert(all_body_groups || !"SeparatedCollisionContactFixedStepSimulator::position_update(): missing all group");
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::compute_position_update(all_body_groups,m_s_cur,m_u,h,m_s_cur);
+        mbd::set_position_vector(all_body_groups,m_s_cur);
       }
 
       void resolve_collisions(real_type const & h)
       {
-        assert(m_all || !"SeparatedCollisionContactFixedStepSimulator::resolve_collisions(): missing all group");
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        assert(all_body_groups || !"SeparatedCollisionContactFixedStepSimulator::resolve_collisions(): missing all group");
 
         //--- use predicted postion x' = x + h*(v+h*F)
-        mbd::get_external_force_vector(*m_all,m_F, true);
-        mbd::get_velocity_vector(*m_all, m_u);
+        mbd::get_external_force_vector(all_body_groups,m_F, true);
+        mbd::get_velocity_vector(all_body_groups, m_u);
 
         m_u += prod(m_invM, m_F)*h;
 
-        mbd::compute_position_update(*m_all,m_s_cur,m_u,h,m_s_predicted);
-        mbd::set_position_vector(*m_all,m_s_predicted);
+        mbd::compute_position_update(all_body_groups,m_s_cur,m_u,h,m_s_predicted);
+        mbd::set_position_vector(all_body_groups,m_s_predicted);
 
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for( auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_stepper()->resolve_collisions(*group);
+          this->get_stepper()->resolve_collisions(group);
         }
       }
 
       void contact_handling(real_type const & h)
       {
-        assert(m_all || !"SeparatedCollisionContactFixedStepSimulator::contact_handling(): missing all group");
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        assert(all_body_groups || !"SeparatedCollisionContactFixedStepSimulator::contact_handling(): missing all group");
         //--- use predicted postion x' = x + h*v'
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::compute_position_update(*m_all,m_s_cur,m_u,h,m_s_predicted);
-        mbd::set_position_vector(*m_all,m_s_predicted);
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::compute_position_update(all_body_groups,m_s_cur,m_u,h,m_s_predicted);
+        mbd::set_position_vector(all_body_groups,m_s_predicted);
 
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for( auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_stepper()->resolve_collisions(*group);
+          this->get_stepper()->resolve_collisions(group);
         }
       }
 
       void shock_propagation(real_type const & h)
       {
-        assert(m_all || !"SeparatedCollisionContactFixedStepSimulator::shock_propagation(): missing all group");
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        assert(all_body_groups || !"SeparatedCollisionContactFixedStepSimulator::shock_propagation(): missing all group");
 
         //--- use predicted postion x' = x + h*v'
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::compute_position_update(*m_all,m_s_cur,m_u,h,m_s_predicted);
-        mbd::set_position_vector(*m_all,m_s_predicted);
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::compute_position_update(all_body_groups,m_s_cur,m_u,h,m_s_predicted);
+        mbd::set_position_vector(all_body_groups,m_s_predicted);
 
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for( auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          m_propagation.run( 
-              *group
+          m_propagation.run(
+            group
             , m_stepper_functor
             , typename propagation_algorithm::fixate_tag()
-            , typename propagation_algorithm::upward_tag()  
+            , typename propagation_algorithm::upward_tag()
           );
         }
       }
@@ -258,31 +259,22 @@ namespace OpenTissue
         size_type N = this->get_configuration()->get_material_library()->size_materials();
 
         math_policy::resize( m_restitution, N);
-        
-        typename vector_type::iterator e_n = m_restitution.begin();
 
-        material_iterator material = this->get_configuration()->get_material_library()->material_begin();
-        material_iterator end      = this->get_configuration()->get_material_library()->material_end();
-      
-        for(;material!=end;++material)
+        typename vector_type::iterator e_n = m_restitution.begin();
+        for(auto material : *(this->get_configuration()->get_material_library()))
         {
-          *e_n++ = material->normal_restitution();
-          material->normal_restitution() = -1.;
+          *e_n++ = material.second->normal_restitution();
+          material.second->normal_restitution() = -1.;
         }
       }
 
       void increase_restitution(real_type const & amount)
       {
-        using std::min;
-
-        material_iterator material = this->get_configuration()->get_material_library()->material_begin();
-        material_iterator end      = this->get_configuration()->get_material_library()->material_end();
-
-        for(;material!=end;++material)
+        for(auto material : *(this->get_configuration()->get_material_library()))
         {
-          real_type e_n = material->normal_restitution() + amount;
-          e_n = min(value_traits::zero(),e_n);
-          material->normal_restitution() = e_n;
+          real_type e_n = material.second->normal_restitution() + amount;
+          e_n = std::min(value_traits::zero(),e_n);
+          material.second->normal_restitution() = e_n;
         }
       }
 
@@ -290,12 +282,9 @@ namespace OpenTissue
       {
         typename vector_type::iterator e_n = m_restitution.begin();
 
-        material_iterator material = this->get_configuration()->get_material_library()->material_begin();
-        material_iterator end      = this->get_configuration()->get_material_library()->material_end();
-
-        for(;material!=end;++material)
+        for(auto material : *(this->get_configuration()->get_material_library()))
         {
-          material->normal_restitution() = (*e_n++);
+          material.second->normal_restitution() = (*e_n++);
         }
       }
 

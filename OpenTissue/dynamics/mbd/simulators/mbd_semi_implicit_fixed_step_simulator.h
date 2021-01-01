@@ -21,7 +21,7 @@ namespace OpenTissue
     * Do not work with First Order Physics!!!
     */
     template< typename mbd_types  >
-    class SemiImplicitFixedStepSimulator  
+    class SemiImplicitFixedStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -44,7 +44,6 @@ namespace OpenTissue
       vector_type                m_u;                    ///< Generalized velocity vector of all bodies.
       vector_type                m_uu;                   ///< Generalized velocity vector of all bodies.
       vector_type                m_F;                    ///< Generalized force vector of all bodies.
-      group_type *               m_all;                  ///< body_type group, used to handle the state of all bodies at once
       group_ptr_container        m_groups;               ///< Temporary Storage, used to hold results from the collision
                                                          ///< detection engine.
     public:
@@ -57,28 +56,27 @@ namespace OpenTissue
 
       void run(real_type const & time_step)
       {
-        m_all = this->get_configuration()->get_all_body_group();
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
 
-        mbd::compute_scripted_motions(*m_all,this->time());
-        mbd::get_position_vector(*m_all, m_s);
-        mbd::get_velocity_vector(*m_all, m_u);
+        mbd::compute_scripted_motions(all_body_groups,this->time());
+        mbd::get_position_vector(all_body_groups, m_s);
+        mbd::get_velocity_vector(all_body_groups, m_u);
 
         //--- position update
-        mbd::compute_position_update(*m_all,m_s,m_u,time_step,m_ss);
-        mbd::set_position_vector(*m_all,m_ss);
+        mbd::compute_position_update(all_body_groups,m_s,m_u,time_step,m_ss);
+        mbd::set_position_vector(all_body_groups,m_ss);
 
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for(auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
-          if(!mbd::is_all_bodies_sleepy(*group))
+          this->get_sleepy()->evaluate(group->bodies());
+          if(!mbd::all_bodies_sleepy(*group))
             this->get_stepper()->run(*group,time_step);
         }
-        mbd::get_velocity_vector(*m_all, m_u);
-        mbd::compute_position_update(*m_all,m_s,m_u,time_step,m_ss);
-        mbd::set_position_vector(*m_all,m_ss);
-        mbd::compute_scripted_motions(*m_all,this->time() + time_step);
+        mbd::get_velocity_vector(all_body_groups, m_u);
+        mbd::compute_position_update(all_body_groups,m_s,m_u,time_step,m_ss);
+        mbd::set_position_vector(all_body_groups,m_ss);
+        mbd::compute_scripted_motions(all_body_groups,this->time() + time_step);
 
         SimulatorInterface<mbd_types>::update_time(time_step);
       }

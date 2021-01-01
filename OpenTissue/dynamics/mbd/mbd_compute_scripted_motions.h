@@ -21,25 +21,20 @@ namespace OpenTissue
     * invoking the run method on the attached scripted motion.
     *
     *
-    * @param begin   An iterator to the first body in the sequence.
-    * @param end     An iterator to the one past the last body in the sequence.
+    * @param group
     * @param time       The time at which the scripted motion should be evaluated.
     */
-    template<typename indirect_body_iterator,typename real_type>
-    void compute_scripted_motions(indirect_body_iterator begin, indirect_body_iterator end, real_type const & time)
+    template<typename group_type,typename real_type>
+    void compute_scripted_motions(std::shared_ptr<group_type> group, real_type const & time)
     {
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies())
       {
         assert(body->is_active() || !"get_position_vector(): body was not active");
         if(body->is_scripted())
+        {
           body->compute_scripted_motion(time);
+        }
       }
-    }
-
-    template<typename group_type,typename real_type>
-    void compute_scripted_motions(group_type const & group, real_type const & time)
-    {
-      compute_scripted_motions(group.body_begin(),group.body_end(),time);
     }
 
   } //--- End of namespace mbd

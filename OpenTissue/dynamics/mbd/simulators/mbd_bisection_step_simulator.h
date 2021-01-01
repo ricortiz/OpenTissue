@@ -31,7 +31,7 @@ namespace OpenTissue
     *
     */
     template< typename mbd_types >
-    class BisectionStepSimulator  
+    class BisectionStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -50,16 +50,14 @@ namespace OpenTissue
 
     protected:
 
-      vector_type                m_s;                    ///< Generalized position vector of all bodies.
-      vector_type                m_u;                    ///< Generalized velocity vector of all bodies.
-      group_type *               m_all;                  ///< body_type group, used to handle the state of all bodies at once, see
-                                                         ///< record_state() and rewind_state() methods
-      group_ptr_container        m_groups;               ///< Temporary Storage, used to hold results from the collision detection engine.
+      vector_type                 m_s;                    ///< Generalized position vector of all bodies.
+      vector_type                 m_u;                    ///< Generalized velocity vector of all bodies.
+                                                          ///< record_state() and rewind_state() methods
+      group_ptr_container         m_groups;               ///< Temporary Storage, used to hold results from the collision detection engine.
 
     public:
 
       BisectionStepSimulator()
-        : m_all(0)
       {}
 
       virtual ~BisectionStepSimulator() {}
@@ -78,34 +76,35 @@ namespace OpenTissue
         real_type cur           = 0;          //--- The current simulation time we are at.
         real_type next          = time_step;  //--- The simulation time that we hope to be able to simulate forward to.
 
-        mbd::compute_scripted_motions(*m_all,this->time());
-        
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        mbd::compute_scripted_motions(all_body_groups,this->time());
+
         this->get_collision_detection()->run(m_groups);
 
-        resolve_collisions(m_groups);        
+        resolve_collisions(m_groups);
         do
         {
-          record_state();
-          run(m_groups,next-cur);
+          this->record_state();
+          this->run(m_groups,next-cur);
           bool penetration = this->get_collision_detection()->run(m_groups);
           if(penetration)
           {
             if(iteration>max_iteration)
             {
               next = final;
-              resolve_collisions(m_groups);
-              error_correction(m_groups);
+              this->resolve_collisions(m_groups);
+              this->error_correction(m_groups);
             }
             else
             {
-              rewind_state();
+              this->rewind_state();
               real_type tmp = next;
               next = cur + ((next - cur)/2.0f);
               if(std::fabs(tmp-next)<tst_underflow)
               {
                 cur = next;
                 next = final;
-                resolve_collisions(m_groups);
+                this->resolve_collisions(m_groups);
               }
               ++iteration;
             }
@@ -114,7 +113,7 @@ namespace OpenTissue
           {
             cur  = next;
             next = final;
-            resolve_collisions(m_groups);
+            this->resolve_collisions(m_groups);
           }
         }
         while(cur<final);
@@ -125,49 +124,47 @@ namespace OpenTissue
 
       void error_correction(group_ptr_container & groups)
       {
-        for(typename group_ptr_container::iterator tmp=groups.begin();tmp!=groups.end();++tmp)
+        for(auto group : groups)
         {
-          group_type * group = (*tmp);
-          this->get_stepper()->error_correction(*group);
+          this->get_stepper()->error_correction(group);
         }
       }
 
       void resolve_collisions(group_ptr_container & groups)
       {
-        for(typename group_ptr_container::iterator tmp=groups.begin();tmp!=groups.end();++tmp)
+        for(auto group : groups)
         {
-          group_type * group = (*tmp);
-          this->get_stepper()->resolve_collisions(*group);
+          this->get_stepper()->resolve_collisions(group);
         }
       }
 
       void run(group_ptr_container & groups,real_type const & time_step)
       {
-        m_all = this->get_configuration()->get_all_body_group();
-        mbd::compute_scripted_motions(*m_all, this->time()+time_step);
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        mbd::compute_scripted_motions(all_body_groups, this->time()+time_step);
 
-        for(typename group_ptr_container::iterator tmp=groups.begin();tmp!=groups.end();++tmp)
+        for(auto group : groups)
         {
-          group_type * group = (*tmp);
-          this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
-          if(!mbd::is_all_bodies_sleepy(*group))
-            this->get_stepper()->run(*group,time_step);
+          this->get_sleepy()->evaluate(group->bodies());
+          if(!mbd::all_bodies_sleepy(group))
+            this->get_stepper()->run(group,time_step);
         }
       }
 
       void record_state()
       {
-        m_all = this->get_configuration()->get_all_body_group();
-        mbd::get_position_vector(*m_all, m_s);
-        mbd::get_velocity_vector(*m_all, m_u);
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        mbd::get_position_vector(all_body_groups, m_s);
+        mbd::get_velocity_vector(all_body_groups, m_u);
       }
 
       void rewind_state()
       {
-        if(m_all)
+        auto all_body_groups = this->get_configuration()->get_all_body_group();
+        if(all_body_groups)
         {
-          mbd::set_position_vector(*m_all,m_s);
-          mbd::set_velocity_vector(*m_all,m_u);
+          mbd::set_position_vector(all_body_groups,m_s);
+          mbd::set_velocity_vector(all_body_groups,m_u);
         }
       }
 

@@ -16,7 +16,7 @@ namespace OpenTissue
 
 
     template<typename types>
-    class Gravity 
+    class Gravity
       : public types::force_type
     {
     public:
@@ -41,26 +41,26 @@ namespace OpenTissue
         : m_gravity(9.81)
       {}
 
+      Gravity(real_type const g)
+        : m_gravity(g)
+      {}
+
       ~Gravity(){}
 
     public:
 
       void apply()
       {
-        typedef typename system_type::particle_iterator   particle_iterator;
         using std::fabs;
 
         if(!(fabs(m_gravity) > 0))
           return;
 
-        particle_iterator p   = this->owner()->particle_begin();
-        particle_iterator end = this->owner()->particle_end();
-
-        for(;p!=end;++p)
+        for(auto p : this->owner()->particles())
         {
           if( p->inv_mass() <= 0 )
             continue;
-          p->force() += vector3_type(0,0, -m_gravity*p->mass());
+          p->force() += {0, 0, -m_gravity*p->mass()};
         }
       }
 

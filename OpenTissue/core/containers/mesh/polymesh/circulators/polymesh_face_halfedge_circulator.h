@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
@@ -19,9 +21,9 @@ namespace OpenTissue
     {
     private:
 
-      typedef typename PolyMesh::opt_halfedge_iter iterator_t;
+      typedef typename PolyMesh::halfedge_iterator iterator_t;
 
-      typename PolyMesh::kernel_type * m_kernel;
+      std::shared_ptr<typename PolyMesh::kernel_type> m_kernel;
       iterator_t              m_first;
       iterator_t              m_cur;
       bool                             m_active;
@@ -40,25 +42,25 @@ namespace OpenTissue
       * @param f  The face to create a circulator for.
       * @return   A border_halfedge_iterator if the corresponding handle is valid, or an optional.
       */
-      static iterator_t init(typename PolyMesh::face_type const & f)
+      static iterator_t init(std::shared_ptr<typename PolyMesh::face_type> f)
       {
-        if ( f.get_border_halfedge_handle().is_null() )
+        if ( f->get_border_halfedge_handle().is_null() )
           return iterator_t();
         else
-          return f.get_border_halfedge_iterator();
+          return f->get_border_halfedge_iterator();
       }
 
     public:
 
       PolyMeshFaceHalfedgeCirculator()
-        : m_kernel(0)
+        : m_kernel(nullptr)
         , m_first ()
         , m_cur   ()
         , m_active(false)
       {}
 
-      explicit PolyMeshFaceHalfedgeCirculator(  typename PolyMesh::face_type const & f)
-        : m_kernel( f.get_owner() )
+      explicit PolyMeshFaceHalfedgeCirculator(std::shared_ptr<typename PolyMesh::face_type> f)
+        : m_kernel( f->get_owner() )
         , m_first ( init(f)       )
         , m_cur   ( init(f)       )
         , m_active( false         )
@@ -103,22 +105,25 @@ namespace OpenTissue
       {
         m_active = true;
 
-        if(!m_kernel || !m_cur)
+        if(!m_kernel || !*m_cur)
           return *this;
 
-        m_cur = m_cur.get()->get_prev_iterator();
+        m_cur = (*m_cur)->get_prev_iterator();
         return *this;
       }
 
-      Value & operator*() const
+      std::shared_ptr<Value> operator*() const
       {
-        return *( m_cur.get() );
-      }
-      Value * operator->() const
-      {
-        return &( *( m_cur.get() ) );
+        return *m_cur;
       }
 
+      Value * operator->() const
+      {
+        return (*m_cur).get();
+      }
+
+      PolyMeshFaceHalfedgeCirculator begin() { return *this; }
+      PolyMeshFaceHalfedgeCirculator end()   { return PolyMeshFaceHalfedgeCirculator(); }
     };
 
   } // namespace polymesh

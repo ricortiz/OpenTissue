@@ -11,6 +11,8 @@
 
 #include <OpenTissue/collision/collision_box_sphere.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -63,13 +65,13 @@ namespace OpenTissue
           real_type distance;
 
           info.get_contacts()->clear();
-          
+
           if(OpenTissue::collision::box_sphere(BtoWCS,AtoWCS,box,sphere,info.get_envelope(),p,n,distance) )
           {
-            contact_type contact;
-            contact.init( info.get_body_B(), info.get_body_A(), p, n, distance, info.get_material() );
+            auto contact = std::make_shared<contact_type>();
+            contact->init( info.get_body_B(), info.get_body_A(), p, n, distance, info.get_material() );
             info.get_contacts()->push_back(contact);
-            return (  distance  <  -info.get_envelope() );
+            return ( distance  <  -info.get_envelope() );
           }
           return false;
         }

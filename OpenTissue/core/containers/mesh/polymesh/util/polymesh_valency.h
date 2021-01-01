@@ -12,13 +12,14 @@
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh_vertex.h>
 #include <OpenTissue/core/containers/mesh/polymesh/polymesh_face.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace polymesh
   {
-
     template<typename mesh_type>
-    unsigned int valency(PolyMeshVertex<mesh_type> const & v)
+    unsigned int valency(std::shared_ptr<PolyMeshVertex<mesh_type>> const v)
     {
       typedef typename mesh_type::vertex_halfedge_circulator   vertex_halfedge_circulator;
       unsigned int valency = 0;
@@ -28,7 +29,7 @@ namespace OpenTissue
     }
 
     template<typename mesh_type>
-    unsigned int valency(PolyMeshFace<mesh_type> const & f)
+    unsigned int valency(std::shared_ptr<PolyMeshFace<mesh_type>> const f)
     {
       typedef typename mesh_type::face_halfedge_circulator   face_halfedge_circulator;
       unsigned int valency = 0;

@@ -18,14 +18,16 @@
 #include <OpenTissue/dynamics/mbd/mbd_get_stabilization_vector.h>
 #include <OpenTissue/dynamics/mbd/mbd_get_inverse_mass_matrix.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
   {
     template<typename group_type, typename real_type, typename matrix_type, typename vector_type, typename idx_vector_type>
     void get_ncp_formulation(
-        group_type & group
-      , real_type const & fps 
+        std::shared_ptr<group_type> group
+      , real_type const & fps
       , matrix_type & J
       , matrix_type & invM
       , vector_type & lo
@@ -35,7 +37,7 @@ namespace OpenTissue
       , vector_type & gamma
       , vector_type & b
       , bool const & use_stabilization
-      , bool const & use_friction     
+      , bool const & use_friction
       , bool const & use_bounce
       , bool const & use_erp
       )

@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <cassert>
+#include <memory>
 
 namespace OpenTissue
 {
@@ -64,7 +65,7 @@ namespace OpenTissue
 
     protected:
 
-      typedef std::vector<data_type*>                               data_ptr_container;
+      typedef std::vector<std::shared_ptr<data_type>>               data_ptr_container;
       typedef typename data_ptr_container::iterator                 data_iterator;
       typedef typename data_ptr_container::const_iterator           const_data_iterator;
 
@@ -130,13 +131,11 @@ namespace OpenTissue
         }
 
       public:
-
-        void add(data_type const & data)
+        void add(std::shared_ptr<data_type> data)
         {
           assert(m_owner);
           if( m_owner->m_time_stamp != m_time_stamp )
           {
-            //m_data.clear();
             m_next = 0;
             m_time_stamp = m_owner->m_time_stamp;
           }
@@ -147,15 +146,12 @@ namespace OpenTissue
             m_data.resize(2*m_next);
             std::copy(tmp.begin(),tmp.end(),m_data.begin());
           }
-          m_data[m_next] = const_cast<data_type*>(&data);
+          m_data[m_next] = data;
           ++m_next;
-
-          //m_data.push_back( &data );
         }
 
-        bool remove(data_type & data)
+        bool remove(std::shared_ptr<data_type> data)
         {
-          data_type * tmp = const_cast<data_type*>(&data);
           assert(m_owner || !"Cell::remove(): owner was null");
 
           if( m_owner->m_time_stamp != m_time_stamp )//--- cell is (logically) empty!
@@ -170,7 +166,7 @@ namespace OpenTissue
           size_t target = 0;
           for(size_t i=0;i<m_next;++i)
           {
-            if( m_data[i] == tmp )
+            if( m_data[i] == data )
             {
               found = true;
               target = i;

@@ -19,7 +19,6 @@ namespace utility {
 template<typename destination_type, typename source_type>
 inline destination_type numeric_cast(source_type const value)
 {
-#ifndef NDEBUG
     using destination_limit = std::numeric_limits<destination_type>;
     using source_limit = std::numeric_limits<source_type>;
 
@@ -73,7 +72,6 @@ inline destination_type numeric_cast(source_type const value)
                                       std::string(": negative overflow"));
         }
     }
-#endif
 
     // limits have been checked, therefore safe to cast
     return static_cast<destination_type>(value);

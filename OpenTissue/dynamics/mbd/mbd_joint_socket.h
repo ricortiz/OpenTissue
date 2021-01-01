@@ -9,6 +9,8 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -32,25 +34,25 @@ namespace OpenTissue
 
     protected:
 
-      body_type     * m_body;           ///< A pointer to the body on which the joint coordinate frame is placed.
-      coordsys_type   m_joint_frame;    ///< Placement of joint frame in the body frame.
+      std::shared_ptr<body_type> m_body;           ///< A pointer to the body on which the joint coordinate frame is placed.
+      coordsys_type              m_joint_frame;    ///< Placement of joint frame in the body frame.
 
     public:
 
       JointSocket()
-        : m_body(0)
+        : m_body(nullptr)
       {}
 
     public:
 
-      void init(body_type const & body, coordsys_type const & joint_frame)
+      void init(std::shared_ptr<body_type> body, coordsys_type const & joint_frame)
       {
-        m_body = const_cast<body_type*>(&body);
+        m_body        = body;
         m_joint_frame = joint_frame;
       }
 
-      body_type       * get_body()       { return m_body; }
-      body_type const * get_body() const { return m_body; }
+      std::shared_ptr<body_type>       get_body()       { return m_body; }
+      std::shared_ptr<body_type> const get_body() const { return m_body; }
 
       vector3_type get_anchor_local()     const { return m_joint_frame.T();                             }
       vector3_type get_axis1_local()      const { return m_joint_frame.Q().rotate(vector3_type(1,0,0)); }

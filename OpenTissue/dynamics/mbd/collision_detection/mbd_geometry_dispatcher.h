@@ -10,8 +10,9 @@
 #include <OpenTissue/configuration.h>
 
 #include <OpenTissue/core/math/math_constants.h>
-
 #include <OpenTissue/utility/dispatchers/dispatchers_dynamic_table_dispatcher.h>
+
+#include <memory>
 
 namespace OpenTissue
 {
@@ -53,11 +54,11 @@ namespace OpenTissue
     protected:
 
       dispatcher_type      m_dispatcher;               ///< The dispatcher
-      configuration_type * m_configuration;            ///< A pointer to the configuration.
+      std::shared_ptr<configuration_type> m_configuration;            ///< A pointer to the configuration.
 
     public:
 
-      GeometryDispatcher() 
+      GeometryDispatcher()
         : m_configuration(0)
       {}
 
@@ -83,12 +84,16 @@ namespace OpenTissue
       *
       * @return                    If a penetration was detected the return value is true otherwise it is false.
       */
-      bool run( edge_type * edge )
+      bool run( std::shared_ptr<edge_type> edge )
       {
         assert(m_configuration || !"GeometryDispatcher::run(): configuration was NULL");
         assert(edge            || !"GeometryDispatcher::run(): edge was NULL");
 
-        collision_info_type info( edge->get_body_A(), edge->get_body_B(), m_configuration->get_collision_envelope(), edge->get_material(), edge->get_contacts() );
+        collision_info_type info( edge->get_body_A()
+          , edge->get_body_B()
+          , m_configuration->get_collision_envelope()
+          , edge->get_material()
+          , &edge->get_contacts() );
 
         geometry_type & geometry_A = *(edge->get_body_A()->get_geometry());
         geometry_type & geometry_B = *(edge->get_body_B()->get_geometry());
@@ -98,19 +103,19 @@ namespace OpenTissue
 
     public:
 
-      void add(body_type * /*body*/){}
-      void remove(body_type * /*body*/){}
-      
+      void add( std::shared_ptr<body_type> /*body*/ )    { };
+      void remove( std::shared_ptr<body_type> /*body*/ )    {};
+
       void clear()
       {
         //this->m_dispatcher.clear();  //2008-05-15 kenny: Hmm, should we do something about this?
-        this->m_configuration = 0;
+        this->m_configuration = nullptr;
       }
 
-      void init( configuration_type & configuration )
+      void init( std::shared_ptr<configuration_type> configuration )
       {
         clear();
-        m_configuration = &configuration;
+        m_configuration = configuration;
       }
 
     };

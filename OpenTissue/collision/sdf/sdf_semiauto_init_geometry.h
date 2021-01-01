@@ -12,6 +12,8 @@
 #include <OpenTissue/collision/sdf/sdf_init_geometry.h>
 #include <OpenTissue/core/containers/grid/util/grid_mesh2phi.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
 
@@ -40,10 +42,10 @@ namespace OpenTissue
     */
     template<typename mesh_type,typename sdf_geometry_type>
     void semiauto_init_geometry(
-      mesh_type /*const*/ & mesh
+      std::shared_ptr<mesh_type> mesh
       , double edge_resolution
       , bool face_sampling
-      , sdf_geometry_type & geometry
+      , std::shared_ptr<sdf_geometry_type> geometry
       , unsigned int max_resolution = 64
       , bool use_gpu = true
       )
@@ -78,10 +80,10 @@ namespace OpenTissue
     */
     template<typename mesh_type,typename sdf_geometry_type>
     void semiauto_init_geometry(
-      mesh_type /*const*/ & mesh
+      std::shared_ptr<mesh_type> mesh
       , double edge_resolution
       , bool face_sampling
-      , sdf_geometry_type & geometry
+      , std::shared_ptr<sdf_geometry_type> geometry
       , double bandsize
       , unsigned int resolution
       , bool use_gpu = true

@@ -11,13 +11,15 @@
 
 #include <OpenTissue/utility/gl/gl_util.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
   {
 
     template<typename joint_type>
-    void draw_joint(joint_type const & joint)
+    void draw_joint(std::shared_ptr<joint_type> const joint)
     {
       typedef typename joint_type::socket_type                socket_type;
       typedef typename joint_type::body_type                  body_type;
@@ -30,17 +32,17 @@ namespace OpenTissue
       quaternion_type Q;
 
       glPushMatrix();
-      joint.get_socket_A()->get_body()->get_position(r);
-      joint.get_socket_A()->get_body()->get_orientation(Q);
+      joint->get_socket_A()->get_body()->get_position(r);
+      joint->get_socket_A()->get_body()->get_orientation(Q);
       gl::Transform(r,Q);
-      gl::DrawFrame(joint.get_socket_A()->get_joint_frame());
+      gl::DrawFrame(joint->get_socket_A()->get_joint_frame());
       glPopMatrix();
 
       glPushMatrix();
-      joint.get_socket_B()->get_body()->get_position(r);
-      joint.get_socket_B()->get_body()->get_orientation(Q);
+      joint->get_socket_B()->get_body()->get_position(r);
+      joint->get_socket_B()->get_body()->get_orientation(Q);
       gl::Transform(r,Q);
-      gl::DrawFrame(joint.get_socket_B()->get_joint_frame());
+      gl::DrawFrame(joint->get_socket_B()->get_joint_frame());
       glPopMatrix();
     }
 
@@ -48,7 +50,7 @@ namespace OpenTissue
     {
     public:
       template<typename joint_type>
-      void operator()(joint_type const & joint) const
+      void operator()(std::shared_ptr<joint_type> const joint) const
       {
         draw_joint(joint);
       }
@@ -57,4 +59,4 @@ namespace OpenTissue
   } //End of namespace mbd
 } //End of namespace OpenTissue
 // OPENTISSUE_DYNAMICS_MBD_UTIL_MBD_DRAW_JOINT_H
-#endif 
+#endif

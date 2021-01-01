@@ -153,9 +153,9 @@ namespace OpenTissue
         self.first_pass(d0,d1);
 
         collision_policy::reset(results);
-        init_query();
+        this->init_query();
         for(query_iterator q=q0;q!=q1;++q)
-          query( (*q), results, type);
+          this->query( (*q), results, type);
       }
 
       /**
@@ -270,11 +270,8 @@ namespace OpenTissue
       * @param end      Iterator to position one past last query object.
       */
       template<typename iterator  >
-      void auto_init_settings ( iterator begin, iterator end)
+      void auto_init_settings (iterator begin, iterator end)
       {
-        using std::max;
-        using std::min;
-
         size_t cnt = 0;
         point_type mean;
         mean.clear();
@@ -286,7 +283,7 @@ namespace OpenTissue
         }
         mean /= OpenTissue::utility::numeric_cast<typename point_type::value_type>( cnt );
         size_t size = cnt;//--- KE 06-05-2005: Hmmm, cnt , appears to be a better value than  cnt/ 4?
-        real_type spacing =  max (mean(0),  max( mean(1), mean(2) ) );
+        real_type spacing =  std::max(mean(0),  std::max( mean(1), mean(2) ) );
         this->resize( size );
         hash_grid::set_spacing( spacing  );
       }
@@ -309,10 +306,10 @@ namespace OpenTissue
 
         ++m_query_stamp;
 
-        point_type       min_corner = min_coord(query); //--- by collision_policy
-        point_type       max_corner = max_coord(query); //--- by collision_policy
-        triplet_type     m          = get_triplet(min_corner);
-        triplet_type     M          = get_triplet(max_corner);
+        point_type       min_corner = collision_policy::min_coord(query); //--- by collision_policy
+        point_type       max_corner = collision_policy::max_coord(query); //--- by collision_policy
+        triplet_type     m          = hash_grid::get_triplet(min_corner);
+        triplet_type     M          = hash_grid::get_triplet(max_corner);
 
         assert( m(0) <= M(0) || !"Minimum was larger than maximum");
         assert( m(1) <= M(1) || !"Minimum was larger than maximum");
@@ -342,7 +339,7 @@ namespace OpenTissue
                   continue;
                 seen_before = true;
 
-                collision_policy::report( (*data), query, results);
+                collision_policy::report(data, query, results);
               }
             }
       }
@@ -379,7 +376,7 @@ namespace OpenTissue
 
               for(auto &data : cell)
               {
-                collision_policy::report(*data, query, results);
+                collision_policy::report(data, query, results);
               }
             }
       }

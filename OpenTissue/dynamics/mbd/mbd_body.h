@@ -11,6 +11,8 @@
 
 #include <OpenTissue/dynamics/mbd/mbd_update_inertia_tensor.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -20,6 +22,7 @@ namespace OpenTissue
     class Body
       : public mbd_types::identifier_type
       , public mbd_types::node_traits
+      , public std::enable_shared_from_this<Body<mbd_types>>
     {
     public:
 
@@ -44,11 +47,6 @@ namespace OpenTissue
       typedef typename mbd_types::edge_ptr_container            edge_ptr_container;
       typedef typename mbd_types::force_ptr_container           force_ptr_container;
 
-      typedef typename edge_ptr_container::iterator         edge_ptr_iterator;
-      typedef typename edge_ptr_container::const_iterator   const_edge_ptr_iterator;
-      typedef typename joint_ptr_container::iterator        joint_ptr_iterator;
-      typedef typename joint_ptr_container::const_iterator  const_joint_ptr_iterator;
-
     public:
 
       joint_ptr_container    m_joints;           ///< A list containing pointers to all joints this body is part of.
@@ -62,22 +60,12 @@ namespace OpenTissue
 
     public:
 
-      typedef typename mbd_types::indirect_joint_iterator          indirect_joint_iterator;
-      typedef typename mbd_types::const_indirect_joint_iterator    const_indirect_joint_iterator;
-      typedef typename mbd_types::indirect_edge_iterator           indirect_edge_iterator;
-      typedef typename mbd_types::indirect_force_iterator          indirect_force_iterator;
-      typedef typename mbd_types::const_indirect_force_iterator    const_indirect_force_iterator;
-
-      indirect_joint_iterator         joint_begin()       { return indirect_joint_iterator(m_joints.begin());        }
-      indirect_joint_iterator         joint_end()         { return indirect_joint_iterator(m_joints.end());          }
-      const_indirect_joint_iterator   joint_begin() const { return const_indirect_joint_iterator(m_joints.begin());  }
-      const_indirect_joint_iterator   joint_end()   const { return const_indirect_joint_iterator(m_joints.end());    }
-      indirect_edge_iterator          edge_begin()        { return indirect_edge_iterator(m_edges.begin()); }
-      indirect_edge_iterator          edge_end()          { return indirect_edge_iterator(m_edges.end());   }
-      indirect_force_iterator         force_begin()       { return indirect_force_iterator(m_forces.begin());        }
-      indirect_force_iterator         force_end()         { return indirect_force_iterator(m_forces.end());          }
-      const_indirect_force_iterator   force_begin() const { return const_indirect_force_iterator(m_forces.begin());  }
-      const_indirect_force_iterator   force_end()   const { return const_indirect_force_iterator(m_forces.end());    }
+      joint_ptr_container       &joints()       { return m_joints; }
+      joint_ptr_container const &joints() const { return m_joints; }
+      edge_ptr_container        &edges()        { return m_edges; }
+      edge_ptr_container  const &edges() const  { return m_edges; }
+      force_ptr_container       &forces()       { return m_forces; }
+      force_ptr_container const &forces() const { return m_forces; }
 
     protected:
 
@@ -207,7 +195,7 @@ namespace OpenTissue
 
         vector3_type f,t;
         //--- Compute effects of all external forces
-        for(const_indirect_force_iterator force = force_begin();force!=force_end();++force)
+        for(auto force : m_forces)
         {
           force->compute(*this,f,t);
           F += f;
@@ -223,10 +211,10 @@ namespace OpenTissue
       *
       * @param force   A pointer to the force that should be attached to this body. There is no test for multiple attachments.
       */
-      void attach(force_type * force)
+      void attach(std::shared_ptr<force_type> force)
       {
         assert(force || !"Body::detach(): force_type pointer was null");
-        if  ( find( m_forces.begin( ), m_forces.end( ), force ) == m_forces.end( ) )
+        if  ( std::find( m_forces.begin( ), m_forces.end( ), force ) == m_forces.end( ) )
         {
           m_forces.push_back(force);
         }
@@ -245,7 +233,7 @@ namespace OpenTissue
       {
         assert(force || !"Body::detach(): force_type pointer was null");
 
-        if  ( find( m_forces.begin( ), m_forces.end( ), force ) == m_forces.end( ) )
+        if  ( std::find( m_forces.begin( ), m_forces.end( ), force ) == m_forces.end( ) )
         {
           std::cout << "Body::detach(): Sorry, the force wer not attached to this body!" << std::endl;
         }
@@ -649,7 +637,7 @@ namespace OpenTissue
       */
       bool has_active_joints() const
       {
-        for(const_indirect_joint_iterator joint = joint_begin();joint!=joint_end();++joint)
+        for(auto joint : m_joints)
         {
           if(joint->is_active())
             return true;
@@ -664,11 +652,11 @@ namespace OpenTissue
       * @return         If body has a joint to the specified body
       *                 then the return value is true otherwise it is false.
       */
-      bool has_joint_to(body_type const * body) const
+      bool has_joint_to(std::shared_ptr<body_type> body) const
       {
         assert(body       || !"Body::has_joint_to(): body was null");
-        assert(this!=body || !"Body::has_joint_to(): body was the same as this body");
-        for(const_indirect_joint_iterator joint = joint_begin();joint!=joint_end();++joint)
+        assert(this->shared_from_this()!=body || !"Body::has_joint_to(): body was the same as this body");
+        for(auto joint : m_joints)
         {
           if(joint->get_socket_A()->get_body()==body || joint->get_socket_B()->get_body()==body)
             return true;

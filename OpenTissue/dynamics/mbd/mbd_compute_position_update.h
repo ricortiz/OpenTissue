@@ -12,13 +12,15 @@
 #include <OpenTissue/core/math/math_is_number.h>
 #include <OpenTissue/core/math/math_functions.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
   {
     /**
     * Position Update Method.
-    * This method implements a modified position update, ie. 
+    * This method implements a modified position update, ie.
     *
     *        $\vec s = \vec s + \Delta t \mat S \vec u$
     *
@@ -31,32 +33,28 @@ namespace OpenTissue
     * infinite update.
     *
     *
-    * @param begin   An iterator to the first body in the sequence.
-    * @param end     An iterator to the one past the last body in the sequence.
+    * @param group   Group configuration
     * @param s       Must have 7*n entries is the current position - probably rcm + quaternion
     * @param u       Must have 6*n entries velocity - linear and angular
     * @param h       Timestep size
     * @param snew    Must be of same size as s - new position - we call with the same vector as s
     *
     */
-    template<typename indirect_body_iterator,typename vector_type,typename real_type>
+    template<typename group_type,typename vector_type,typename real_type>
     void compute_position_update(
-      indirect_body_iterator begin
-      , indirect_body_iterator end
+      std::shared_ptr<group_type> const group
       , vector_type const & s
       , vector_type const & u
       , real_type const & h
-      , vector_type & snew      
+      , vector_type & snew
       )
     {
-      typedef typename indirect_body_iterator::value_type     body_type;
-      typedef typename body_type::math_policy                 math_policy;
-      typedef typename body_type::value_traits                value_traits;
-      typedef typename body_type::vector3_type                vector3_type;
-      typedef typename body_type::quaternion_type             quaternion_type;
-      typedef typename vector_type::size_type                 size_type;
-
-      using std::cos;
+      typedef typename group_type::body_type      body_type;
+      typedef typename body_type::math_policy     math_policy;
+      typedef typename body_type::value_traits    value_traits;
+      typedef typename body_type::vector3_type    vector3_type;
+      typedef typename body_type::quaternion_type quaternion_type;
+      typedef typename vector_type::size_type     size_type;
 
       vector3_type W;
       vector3_type r_axis;
@@ -67,7 +65,7 @@ namespace OpenTissue
       quaternion_type Qtmp;
       quaternion_type Qdot;
 
-      size_type n = std::distance(begin,end);      
+      size_type n = group->size_bodies();
 
       if(s.size()!=7*n)
         throw std::logic_error("compute_position_update(): s has incorrect dimension");
@@ -83,7 +81,7 @@ namespace OpenTissue
 
       real_type h_half = h / value_traits::two();
 
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies() )
       {
         if(body->is_active())
         {
@@ -125,7 +123,7 @@ namespace OpenTissue
               //--- Apply finite rotation around axe
               real_type theta = tmp*h_half;
               real_type tmp2 = OpenTissue::math::sinc(theta)*h_half;
-              Qtmp.s() = cos(theta);
+              Qtmp.s() = std::cos(theta);
               Qtmp.v() = W_finite;
               Qtmp.v() *= tmp2;
               Q = Qtmp % Q;
@@ -138,7 +136,7 @@ namespace OpenTissue
               //--- Act like we do a finite rotation of angle = |W|*h
               real_type theta = length(W)*h_half;
               real_type tmp2 = OpenTissue::math::sinc(theta)*h_half;
-              Qtmp.s() = cos(theta);
+              Qtmp.s() = std::cos(theta);
               Qtmp.v() = W*tmp2;
               Q = Qtmp%Q;
             }
@@ -155,18 +153,6 @@ namespace OpenTissue
           *snewval++ = Q.v()(2);
         }
       }
-    }
-
-    template<typename group_type,typename vector_type,typename real_type>
-    void compute_position_update(
-      group_type const & group
-      , vector_type const & s
-      , vector_type const & u
-      , real_type const & h
-      , vector_type & snew      
-      )
-    {
-      compute_position_update(group.body_begin(),group.body_end(),s,u,h,snew);
     }
 
   } //--- End of namespace mbd

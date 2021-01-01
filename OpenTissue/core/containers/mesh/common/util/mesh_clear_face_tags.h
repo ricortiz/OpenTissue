@@ -9,19 +9,18 @@
 //
 #include <OpenTissue/configuration.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
     template<typename mesh_type>
-    void clear_face_tags(mesh_type & mesh, int tag_value = 0)
+    void clear_face_tags(std::shared_ptr<mesh_type> mesh, int tag_value = 0)
     {
-      typename mesh_type::face_iterator fend   = mesh.face_end();
-      typename mesh_type::face_iterator f      = mesh.face_begin();
-      for(;f!=fend;++f)
+      for(auto f : mesh->faces())
         f->m_tag = tag_value;
     }
-
   } // namespace mesh
 } // namespace OpenTissue
 

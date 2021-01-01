@@ -27,8 +27,6 @@ namespace OpenTissue
       , vector3_type & mean, matrix3x3_type & C
       )
     {
-      typedef typename vector3_type::value_traits   value_traits;
-
       unsigned int N = 0;
 
       mean.clear();

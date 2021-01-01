@@ -63,11 +63,11 @@ namespace OpenTissue
         return *this;
       }
 
-      value_type& operator*() const { return m_iterator->m_coord; }
-      value_type * operator->() const { return &(m_iterator->m_coord); }
+      value_type& operator*() const { return (*m_iterator)->m_coord; }
+      value_type * operator->() const { return &(*m_iterator)->m_coord; }
 
     };
-    
+
   } // namespace mesh
 } // namespace OpenTissue
 

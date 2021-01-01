@@ -11,6 +11,8 @@
 
 #include <OpenTissue/dynamics/mbd/mbd_stack_analysis.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -48,30 +50,30 @@ namespace OpenTissue
       typedef typename mbd_types::contact_type             contact_type;
       typedef typename mbd_types::material_type            material_type;
       typedef typename mbd_types::edge_ptr_container       edge_ptr_container;
-      typedef typename mbd_types::indirect_edge_iterator            indirect_edge_iterator;
-      typedef typename mbd_types::group_container          group_container;
+      typedef typename mbd_types::indirect_edge_iterator   indirect_edge_iterator;
+      typedef typename mbd_types::group_ptr_container      group_ptr_container;
 
     public:
 
-      class node_traits 
+      class node_traits
         : public analysis_type::node_traits
       {
       public:
         bool m_sp_fixiated;   ///< Boolean flag used to remember if a body was temporarily turned fixed.
       };
 
-      class edge_traits 
+      class edge_traits
         : public analysis_type::edge_traits
       {};
 
-      class constraint_traits 
+      class constraint_traits
         : public analysis_type::constraint_traits
       {};
 
     protected:
 
-      group_container m_layers;     ///< Storage for keeping stack layers.
-      size_type       m_cnt;        ///< Number of layers in stack.
+      group_ptr_container m_layers;     ///< Storage for keeping stack layers.
+      size_type           m_cnt;        ///< Number of layers in stack.
 
     public:
 
@@ -103,7 +105,7 @@ namespace OpenTissue
       * @param upward_tag   Tag dispacthing, indicating that shock moves from bottom to top.
       */
       template <typename algorithm_type>
-      void run(group_type & group, algorithm_type & algorithm, fixate_tag, upward_tag )
+      void run(std::shared_ptr<group_type> group, algorithm_type & algorithm, fixate_tag, upward_tag )
       {
         m_cnt = StackAnalysis<mbd_types>::analyze(group,m_layers);
         for(index_type height=0;height<m_cnt;++height)
@@ -119,7 +121,7 @@ namespace OpenTissue
       * @param upward_tag   Tag dispacthing, indicating that shock moves from bottom to top.
       */
       template <typename algorithm_type>
-      void rerun(group_type & /*group*/, algorithm_type & algorithm,  fixate_tag, upward_tag)
+      void rerun(std::shared_ptr<group_type> /*group*/, algorithm_type & algorithm,  fixate_tag, upward_tag)
       {
         for(index_type height=0;height<m_cnt;++height)
         {
@@ -132,22 +134,22 @@ namespace OpenTissue
     public:
 
       template <typename algorithm_type>
-      void run(group_type & group, algorithm_type & algorithm, upward_tag)
+      void run(std::shared_ptr<group_type> group, algorithm_type & algorithm, upward_tag)
       {
-        m_cnt = analyze(group,m_layers);
+        m_cnt = StackAnalysis<mbd_types>::analyze(group,m_layers);
         for(index_type height=0;height<m_cnt;++height)
           algorithm(m_layers[height]);
       }
 
       template <typename algorithm_type>
-      void rerun(group_type & group, algorithm_type & algorithm, upward_tag)
+      void rerun(std::shared_ptr<group_type> group, algorithm_type & algorithm, upward_tag)
       {
         for(index_type height=0;height<m_cnt;++height)
           algorithm(m_layers[height]);
       }
 
       template <typename algorithm_type>
-      void run(group_type & group, algorithm_type & algorithm, downward_tag )
+      void run(std::shared_ptr<group_type> group, algorithm_type & algorithm, downward_tag )
       {
         assert(m_cnt >= 1 || !"StackPropagation::run(...,downward): Need at least one layer");
 
@@ -160,7 +162,7 @@ namespace OpenTissue
       }
 
       template <typename algorithm_type>
-      void rerun(group_type & group, algorithm_type & algorithm, downward_tag)
+      void rerun(std::shared_ptr<group_type> group, algorithm_type & algorithm, downward_tag)
       {
         assert(m_cnt >= 1 || !"StackPropagation::rerun(...,downward): Need at least one layer");
 
@@ -177,11 +179,9 @@ namespace OpenTissue
       * @param height   The height of the layer.
       * @param layer    The stack layer.
       */
-      void fixiate(index_type height, group_type & layer)
+      void fixiate(index_type height, std::shared_ptr<group_type> layer)
       {
-        typename group_type::indirect_body_iterator begin = layer.body_begin();
-        typename group_type::indirect_body_iterator end = layer.body_end();
-        for(typename group_type::indirect_body_iterator body = begin;body!=end;++body)
+        for(auto body : layer->bodies())
         {
           if(body->m_sa_stack_height==height && !body->is_fixed())
           {
@@ -204,9 +204,7 @@ namespace OpenTissue
       */
       void unfixiate(group_type & layer)
       {
-        typename group_type::indirect_body_iterator begin = layer.body_begin();
-        typename group_type::indirect_body_iterator end = layer.body_end();
-        for(typename group_type::indirect_body_iterator body = begin;body!=end;++body)
+        for(auto body : layer->bodies())
         {
           if(body->m_sp_fixiated)
             body->set_fixed(false);

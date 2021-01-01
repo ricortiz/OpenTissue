@@ -13,6 +13,8 @@
 #include <OpenTissue/dynamics/mbd/steppers/mbd_dynamics_stepper.h>
 #include <OpenTissue/dynamics/mbd/steppers/mbd_first_order_stepper.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
 
@@ -40,12 +42,12 @@ namespace OpenTissue
 
     protected:
 
-      dynamics_algorithm          m_dynamics;      
-      error_correction_algorithm m_correction;     
+      dynamics_algorithm          m_dynamics;
+      error_correction_algorithm m_correction;
 
     public:
 
-      class node_traits 
+      class node_traits
         : public dynamics_algorithm::node_traits
         , public error_correction_algorithm::node_traits
       {};
@@ -82,18 +84,18 @@ namespace OpenTissue
 
     public:
 
-      void run(group_type & group,real_type const & time_step)
+      void run(std::shared_ptr<group_type> group,real_type const & time_step)
       {
         m_dynamics.run(group,time_step);
         m_correction.error_correction(group);
       }
 
-      void error_correction(group_type & group)
-      { 
+      void error_correction(std::shared_ptr<group_type> group)
+      {
         m_correction.error_correction(group);
       }
 
-      void resolve_collisions(group_type & group)
+      void resolve_collisions(std::shared_ptr<group_type> group)
       {
         m_dynamics.resolve_collisions(group);
       }

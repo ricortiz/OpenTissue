@@ -24,12 +24,12 @@ namespace OpenTissue
     * Also works with First Order Physics.
     */
     template< typename mbd_types >
-    class ExplicitFixedStepSimulator 
+    class ExplicitFixedStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
 
-      typedef typename mbd_types::math_policy::real_type         real_type;    
+      typedef typename mbd_types::math_policy::real_type         real_type;
       typedef typename mbd_types::group_type                     group_type;
       typedef typename mbd_types::group_ptr_container            group_ptr_container;
 
@@ -53,18 +53,16 @@ namespace OpenTissue
 
       void run(real_type const & time_step)
       {
-        mbd::compute_scripted_motions(*(this->get_configuration()->get_all_body_group()),this->time());
+        mbd::compute_scripted_motions(this->get_configuration()->get_all_body_group(),this->time());
 
         this->get_collision_detection()->run( m_groups );
 
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for(auto group : m_groups)
         {
-          group_type * group = (*tmp);
+          this->get_sleepy()->evaluate(group->bodies());
 
-          this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
-
-          if(!mbd::is_all_bodies_sleepy(*group))
-            this->get_stepper()->run(*group,time_step);
+          if(!mbd::all_bodies_sleepy(group->bodies()))
+            this->get_stepper()->run(group,time_step);
         }
         SimulatorInterface<mbd_types>::update_time(time_step);
       }

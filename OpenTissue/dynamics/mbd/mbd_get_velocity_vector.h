@@ -11,6 +11,8 @@
 
 #include <OpenTissue/core/math/math_is_number.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mbd
@@ -23,21 +25,21 @@ namespace OpenTissue
     * @param u       Upon return this vector holds the extracted
     *                generalized velocity vector.
     */
-    template<typename indirect_body_iterator,typename vector_type>
-    void get_velocity_vector(indirect_body_iterator begin, indirect_body_iterator end, vector_type & u)
+    template<typename group_type,typename vector_type>
+    void get_velocity_vector(std::shared_ptr<group_type> group, vector_type & u)
     {
-      typedef typename indirect_body_iterator::value_type  body_type;
+      typedef typename group_type::body_type               body_type;
       typedef typename body_type::math_policy              math_policy;
       typedef typename body_type::vector3_type             vector3_type;
       typedef typename vector_type::size_type              size_type;
 
       vector3_type V,W;
-      size_type n = std::distance(begin,end);
-      
-      math_policy::resize( u, 6*n);      
+      size_type n = group->size_bodies();
+
+      math_policy::resize( u, 6*n);
 
       typename vector_type::iterator uval = u.begin();
-      for(indirect_body_iterator body = begin;body!=end;++body)
+      for(auto body : group->bodies())
       {
         assert(body->is_active() || !"get_velocity_vector(): body was not active");
 
@@ -59,13 +61,6 @@ namespace OpenTissue
         *uval++ = W(2);
       }
     }
-
-    template<typename group_type,typename vector_type>
-    void get_velocity_vector(group_type const & group, vector_type & u)
-    {
-      get_velocity_vector(group.body_begin(),group.body_end(),u);
-    }
-
   } //--- End of namespace mbd
 } //--- End of namespace OpenTissue
 // OPENTISSUE_DYNAMICS_MBD_UTIL_MBD_GET_VELOCITY_VECTOR_H

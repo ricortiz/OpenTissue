@@ -79,9 +79,8 @@ BOOST_AUTO_TEST_CASE(simple_test)
   // If k-means gets caught by a local minima then all the following
   // unit-tests is likely to fail!
   //
-  OpenTissue::math::kmeans( 
-    features.begin()
-    , features.end()
+  OpenTissue::math::kmeans(
+    features
     , cluster_centers
     , cluster_indexes
     , K

@@ -32,7 +32,7 @@ namespace OpenTissue
       *
       * Further it is assumed that the vector library used provides a vector
       * proxy function called subrange, which is capable of returning a
-      * vector range. (see for instance in Boost uBLAS for an example). 
+      * vector range. (see for instance in Boost uBLAS for an example).
       *
       * @param group        The group corresponding to the A-matrix.
       *
@@ -42,31 +42,30 @@ namespace OpenTissue
       * @param mu   Upon return this vectors holds the values of the linear scaling factor of the dependent constraints.
       */
       template<typename group_type, typename vector_type>
-      void get_factors_vector(  
-        group_type const & group  
-        , size_t const & m  
+      void get_factors_vector(
+        std::shared_ptr<group_type> const group
+        , size_t const & m
         , vector_type & mu
         )
       {
-        typedef typename group_type::math_policy                                math_policy;
-        typedef typename group_type::const_indirect_constraint_iterator         const_indirect_constraint_iterator;
-        typedef typename group_type::const_indirect_contact_iterator            const_indirect_contact_iterator;
-        typedef typename vector_type::size_type                                 size_type;
-        typedef typename math_policy::vector_range                              vector_range;
+        typedef typename group_type::math_policy   math_policy;
+        typedef typename vector_type::size_type    size_type;
+        typedef typename math_policy::vector_range vector_range;
 
         math_policy::resize( mu, m);
 
-        for(const_indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+        for(auto constraint : group->constraints())
         {
           if(constraint->is_active())
           {
             size_type const start = constraint->get_jacobian_index();
-            size_type const end = start + constraint->get_number_of_jacobian_rows();            
+            size_type const end = start + constraint->get_number_of_jacobian_rows();
             vector_range tmp_vector_range = math_policy::subrange(mu,start,end);
             constraint->get_dependency_factors( tmp_vector_range );
           }
         }
-        for(const_indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+
+        for(auto contact : group->contacts())
         {
           if(contact->is_active())
           {

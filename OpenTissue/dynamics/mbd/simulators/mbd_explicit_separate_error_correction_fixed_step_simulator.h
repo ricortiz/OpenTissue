@@ -23,7 +23,7 @@ namespace OpenTissue
     * Thus two collision detection queries are performed for each time-step.
     */
     template< typename mbd_types >
-    class ExplicitSeparateErrorCorrectionFixedStepSimulator 
+    class ExplicitSeparateErrorCorrectionFixedStepSimulator
       : public SimulatorInterface<mbd_types>
     {
     protected:
@@ -53,23 +53,21 @@ namespace OpenTissue
 
       void run(real_type const & time_step)
       {
-        mbd::compute_scripted_motions(*(this->get_configuration()->get_all_body_group()),this->time());
+        mbd::compute_scripted_motions(this->get_configuration()->get_all_body_group(),this->time());
 
         this->get_collision_detection()->run( m_groups );
 
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for(auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_sleepy()->evaluate(group->body_begin(),group->body_end());
-          if(!mbd::is_all_bodies_sleepy(*group))
-            this->get_stepper()->run(*group,time_step);
+          this->get_sleepy()->evaluate(group->bodies());
+          if(!mbd::all_bodies_sleepy(group))
+            this->get_stepper()->run(group,time_step);
         }
         //--- Anti rippling...!
         this->get_collision_detection()->run( m_groups );
-        for(typename group_ptr_container::iterator tmp=m_groups.begin();tmp!=m_groups.end();++tmp)
+        for(auto group : m_groups)
         {
-          group_type * group = (*tmp);
-          this->get_stepper()->error_correction(*group);
+          this->get_stepper()->error_correction(group);
         }
         SimulatorInterface<mbd_types>::update_time(time_step);
       }

@@ -12,14 +12,14 @@
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_mesh_minimum_coord.h>
 #include <OpenTissue/core/containers/mesh/common/util/mesh_compute_mesh_maximum_coord.h>
 
+#include <memory>
+
 namespace OpenTissue
 {
   namespace mesh
   {
-
-    //    template<typename mesh_type, typename vector3_type>
     template<typename mesh_type>
-      void compute_mesh_center(mesh_type const & mesh 
+      void compute_mesh_center(std::shared_ptr<mesh_type> const mesh
                                , typename mesh_type::math_types::vector3_type & center)
     {
       typedef typename mesh_type::math_types                        math_types;

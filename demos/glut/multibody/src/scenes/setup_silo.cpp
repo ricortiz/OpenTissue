@@ -15,55 +15,50 @@ void setup_silo(Data & data)
   real_type const  friction = 0.25;
   real_type const  restitution = 0.15;
 
-  data.m_configuration.clear();
-  data.m_library.clear();
-  data.m_simulator.clear();
-
-  data.m_bodies.resize(5000);
-
   matrix3x3_type R;
   R = OpenTissue::math::diag(value_traits::one());
   data.m_box.set(vector3_type(value_traits::zero(),value_traits::zero(),value_traits::zero()),R,vector3_type(15,15,.5));
 
-  int i = 0;
-  data.m_bodies[i].set_fixed(true);
-  data.m_bodies[i].set_geometry(&data.m_box);
-  data.m_configuration.add(&data.m_bodies[i]);
-  ++i;
+  std::shared_ptr<body_type> body;
+
+  body = std::make_shared<body_type>();
+  body->set_fixed(true);
+  body->set_geometry(&data.m_box);
+  data.m_bodies.push_back(body);
 
   quaternion_type q;
 
-  data.m_bodies[i].set_fixed(true);
-  data.m_bodies[i].set_position(vector3_type(20,0,25));
+  body = std::make_shared<body_type>();
+  body->set_fixed(true);
+  body->set_position(vector3_type(20,0,25));
   q.Ry(-5.0*value_traits::pi()/180.0);
-  data.m_bodies[i].set_orientation(q);
-  data.m_bodies[i].set_geometry(&data.m_box);
-  data.m_configuration.add(&data.m_bodies[i]);
-  ++i;
+  body->set_orientation(q);
+  body->set_geometry(&data.m_box);
+  data.m_bodies.push_back(body);
 
-  data.m_bodies[i].set_fixed(true);
-  data.m_bodies[i].set_position(vector3_type(-20,0,25));
+  body = std::make_shared<body_type>();
+  body->set_fixed(true);
+  body->set_position(vector3_type(-20,0,25));
   q.Ry(5.0*value_traits::pi()/180.0);
-  data.m_bodies[i].set_orientation(q);
-  data.m_bodies[i].set_geometry(&data.m_box);
-  data.m_configuration.add(&data.m_bodies[i]);
-  ++i;
+  body->set_orientation(q);
+  body->set_geometry(&data.m_box);
+  data.m_bodies.push_back(body);
 
-  data.m_bodies[i].set_fixed(true);
+  body = std::make_shared<body_type>();
+  body->set_fixed(true);
   q.Rx(5.0*value_traits::pi()/180.0);
-  data.m_bodies[i].set_orientation(q);
-  data.m_bodies[i].set_position(vector3_type(0,20,25));
-  data.m_bodies[i].set_geometry(&data.m_box);
-  data.m_configuration.add(&data.m_bodies[i]);
-  ++i;
+  body->set_orientation(q);
+  body->set_position(vector3_type(0,20,25));
+  body->set_geometry(&data.m_box);
+  data.m_bodies.push_back(body);
 
-  data.m_bodies[i].set_fixed(true);
+  body = std::make_shared<body_type>();
+  body->set_fixed(true);
   q.Rx(-5.0*value_traits::pi()/180.0);
-  data.m_bodies[i].set_orientation(q);
-  data.m_bodies[i].set_position(vector3_type(0,-20,25));
-  data.m_bodies[i].set_geometry(&data.m_box);
-  data.m_configuration.add(&data.m_bodies[i]);
-  ++i;
+  body->set_orientation(q);
+  body->set_position(vector3_type(0,-20,25));
+  body->set_geometry(&data.m_box);
+  data.m_bodies.push_back(body);
 
   quaternion_type Q;
   vector3_type r;
@@ -93,14 +88,14 @@ void setup_silo(Data & data)
       real_type y_val  = radius*std::sin(angle);
       r = vector3_type(x_val, y_val, z*box_height + value_traits::one());
       Q.Rz((angle+value_traits::pi()/2.));
-      data.m_bodies[i].set_position(r);
-      data.m_bodies[i].set_orientation(Q);
-      data.m_bodies[i].attach(&data.m_gravity);
-      data.m_bodies[i].set_geometry(&data.m_small_box);
-      data.m_bodies[i].set_inertia_bf(I);
-      data.m_bodies[i].set_mass(mass);
-      data.m_configuration.add(&data.m_bodies[i]);
-      ++i;
+      body = std::make_shared<body_type>();
+      body->set_position(r);
+      body->set_orientation(Q);
+      body->attach(data.m_gravity);
+      body->set_geometry(&data.m_small_box);
+      body->set_inertia_bf(I);
+      body->set_mass(mass);
+      data.m_bodies.push_back(body);
     }
   }
 
@@ -108,32 +103,37 @@ void setup_silo(Data & data)
   data.m_sphere[1].set(vector3_type(value_traits::zero(),value_traits::zero(),value_traits::zero()),0.2);
   data.m_sphere[2].set(vector3_type(value_traits::zero(),value_traits::zero(),value_traits::zero()),0.3);
   density = 120;  // wood thingy
-  //while(i<10000)
-  while(i<5000)
+  const size_t body_count = 5000;
+  for(size_t i = data.m_bodies.size(); i < body_count; ++i)
   {
     OpenTissue::geometry::compute_sphere_mass_properties(data.m_sphere[i%3].radius(),density,mass,diag_inertia);
     I= OpenTissue::math::diag(diag_inertia(0),diag_inertia(1),diag_inertia(2));
     random(r,-12.0,12.0);
     r(2) *= 2;
     r(2) += 53;
-    data.m_bodies[i].set_position(r);
-    data.m_bodies[i].attach(&data.m_gravity);
-    data.m_bodies[i].set_geometry(&data.m_sphere[i%3]);
-    data.m_bodies[i].set_mass(mass);
-    data.m_bodies[i].set_inertia_bf(I);
-    data.m_configuration.add(&data.m_bodies[i]);
-    ++i;
+    body = std::make_shared<body_type>();
+    body->set_position(r);
+    body->attach(data.m_gravity);
+    body->set_geometry(&data.m_sphere[i%3]);
+    body->set_mass(mass);
+    body->set_inertia_bf(I);
+    data.m_bodies.push_back(body);
   }
-  data.m_gravity.set_acceleration(vector3_type(0,0,-9.81));
 
-  material_type * default_material = data.m_library.default_material();
+  for(auto body : data.m_bodies)
+  {
+    data.m_configuration->add(body);
+  }
+
+  data.m_gravity->set_acceleration(vector3_type(0,0,-9.81));
+
+  auto default_material = data.m_library->default_material();
 
   default_material->set_friction_coefficient(friction);
   default_material->normal_restitution() = (restitution);
 
-  data.m_simulator.init(data.m_configuration);
+  data.m_configuration->set_material_library(data.m_library);
+  data.m_simulator->init(data.m_configuration);
 
-  data.m_configuration.set_material_library(data.m_library);
-
-  data.m_simulator.get_stepper()->get_solver()->set_max_iterations(10);
+  data.m_simulator->get_stepper()->get_solver()->set_max_iterations(10);
 }

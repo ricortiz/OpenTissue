@@ -20,7 +20,7 @@ namespace OpenTissue
       *
       * Further it is assumed that the vector library used provides a vector
       * proxy function called subrange, which is capable of returning a
-      * vector range. (see for instance in Boost uBLAS for an example). 
+      * vector range. (see for instance in Boost uBLAS for an example).
       *
       * @param group        The group corresponding to the A-matrix.
       *
@@ -33,23 +33,21 @@ namespace OpenTissue
       *                     have size m, where m is total number of jacobian rows.
       */
       template<typename group_type,typename vector_type>
-      void get_limit_vectors(  
-          group_type const & group  
-        , size_t const & m  
+      void get_limit_vectors(
+          std::shared_ptr<group_type> const group
+        , size_t const & m
         , vector_type & lo
-        , vector_type & hi  
+        , vector_type & hi
         )
       {
-        typedef typename group_type::math_policy                                math_policy;
-        typedef typename group_type::const_indirect_constraint_iterator         const_indirect_constraint_iterator;
-        typedef typename group_type::const_indirect_contact_iterator            const_indirect_contact_iterator;
-        typedef typename vector_type::size_type                                 size_type;
-        typedef typename math_policy::vector_range                              vector_range;
+        typedef typename group_type::math_policy   math_policy;
+        typedef typename vector_type::size_type    size_type;
+        typedef typename math_policy::vector_range vector_range;
 
         math_policy::resize( lo, m);
         math_policy::resize( hi, m);
 
-        for(const_indirect_constraint_iterator constraint = group.constraint_begin();constraint!=group.constraint_end();++constraint)
+        for(auto constraint : group->constraints())
         {
           if(constraint->is_active())
           {
@@ -61,7 +59,8 @@ namespace OpenTissue
             constraint->get_high_limits( high_vector_range );
           }
         }
-        for(const_indirect_contact_iterator contact = group.contact_begin();contact!=group.contact_end();++contact)
+
+        for(auto contact : group->contacts())
         {
           if(contact->is_active())
           {
